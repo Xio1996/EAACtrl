@@ -153,13 +153,14 @@ namespace EAACtrl
             return result;
         }
 
+        // Connects to Rotator. Calculates the PA and sets rotator angle to PA. This is reflected in TheSky FOVI as long as the FOVI is set as linked to the camera's rotator.
         private void AltAzFOVICorrection()
         {
             try
             {
-                string sAltAzFOVICorr = "/* Java Script */\r\n/* Socket Start Packet */\r\nvar Out = \"-1\";\r\ntry {\r\n\tif (ccdsoftCamera.rotatorIsConnected() > 0)\t{\r\n\t\tsky6Utils.ConvertRADecToAzAlt(sky6StarChart.RightAscension, sky6StarChart.Declination)\r\n\t\tsky6Utils.ConvertAzAltToRADec(sky6Utils.dOut0 + 0.0, sky6Utils.dOut1-0.25)\r\n\t\tsky6Utils.ComputePositionAngle(sky6StarChart.RightAscension, sky6StarChart.Declination, sky6Utils.dOut0, sky6Utils.dOut1)\r\n\t\tccdsoftCamera.rotatorGotoPositionAngle(sky6Utils.dOut0);\r\n\t\tOut = sky6Utils.dOut0;\r\n\t}\r\n\telse {\r\n\t\tOut = \"Rotator NOT connected!\";\r\n\t}\r\n} catch (err) { Out = \"-1\"; }\r\n/* Socket End Packet */";
+                string sAltAzFOVICorr = "/* Java Script */\r\n/* Socket Start Packet */\r\nvar Out;\r\n/* Find centre of chart and calculate PA for rotator */\r\ntry\r\n{\r\n\tif (ccdsoftCamera.rotatorIsConnected() == 0)\r\n\t{\r\n\t\tccdsoftCamera.rotatorConnect();\r\n\t\tOut = \"Rotator Connected,\"\r\n\t}\r\n\r\n\tif (ccdsoftCamera.rotatorIsConnected() > 0)\r\n\t{\r\n\t\tvar cRA = sky6StarChart.RightAscension;\r\n\t\tvar cDec = sky6StarChart.Declination;\r\n\r\n\t\tsky6Utils.ConvertRADecToAzAlt(cRA, cDec)\r\n\t\tsky6Utils.ConvertAzAltToRADec(sky6Utils.dOut0, sky6Utils.dOut1 - 0.25)\r\n\r\n\t\tsky6Utils.ComputePositionAngle(cRA, cDec, sky6Utils.dOut0, sky6Utils.dOut1)\r\n\r\n\t\tccdsoftCamera.rotatorGotoPositionAngle(sky6Utils.dOut0);\r\n\r\n\t\tOut = \" RA:\" + cRA.toFixed(3) + \" Dec:\" + cDec.toFixed(3) + \" PA:\" + sky6Utils.dOut0.toFixed(3);\r\n\t}\r\n\telse {\r\n\t\tOut = \"-2\";\r\n\t}\r\n}\r\ncatch (err) { Out = \"-1\"; }\r\n/* Socket End Packet */\r\n";
                 string sPA = TCPMessage("127.0.0.1", 3040, sAltAzFOVICorr);
-                WriteMessage("TS AltAzFOVI PA=" + sPA.Substring(0, sPA.LastIndexOf("|")) + "\r\n");
+                WriteMessage("TS AltAzFOVI" + sPA.Substring(0, sPA.LastIndexOf("|")) + "\r\n");
             }
             catch(Exception) { WriteMessage("TS AltAzFOVI failed!\r\n"); }
         }

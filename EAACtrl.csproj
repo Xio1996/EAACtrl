@@ -163,6 +163,8 @@
   <ItemGroup>
     <Content Include="EAACP.ico" />
     <Content Include="Scripts\AstroPlanner - EAAControl.txt" />
+    <Content Include="Scripts\FindandCentre .js" />
+    <Content Include="Scripts\FOVI Rotator.js" />
     <Content Include="Scripts\SharpCap - EAA.py" />
   </ItemGroup>
   <ItemGroup />
