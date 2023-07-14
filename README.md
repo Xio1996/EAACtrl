@@ -1,4 +1,4 @@
-#EAACtrl - EAA Workflow App and Scripts
+# EAACtrl - EAA Workflow App and Scripts
 EAACtrl is my personalised c# app and associated scripts that orchestrates my EAA workflow with AstroPlanner, SharpCap and TheSky Professional. It was never intended for public consumption, but upon a request it is made available here. I hope it helps (and not hinders) any app or scripts you might be producing. <b>There is no support or warranty and it is definitely not fit for any purpose!</b>
 
 My EAA configuration is a desktop running EAACtrl, AstroPlanner and TheSky Professional. A laptop connected to the scope running SharpCap. The laptop has a network drive that exposes the SharpCap Captures folder. This folder is also used to communicate with SharpCap (more later).
