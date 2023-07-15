@@ -1,7 +1,6 @@
 /* Java Script */
 /* Socket Start Packet */
 var Out;
-/* Find centre of chart and calculate PA for rotator */
 try {
 	if (ccdsoftCamera.rotatorIsConnected() == 0) {
 		ccdsoftCamera.rotatorConnect();
