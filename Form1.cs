@@ -338,7 +338,7 @@ namespace EAACtrl
             string sCaptureInfoFile = csSharpCapPath + @"CaptureInfo.txt";
             int iTimeCount = 0;
 
-            while (!File.Exists(sCaptureInfoFile) && iTimeCount <=6)
+            while (!File.Exists(sCaptureInfoFile) && iTimeCount <=10)
             {
                 WriteMessage("(" + iTimeCount.ToString() + ") Waiting for capture...\r\n");
                 Thread.Sleep(1000);
@@ -355,39 +355,64 @@ namespace EAACtrl
                 
                 sr.Close();
 
-                // Copy image and settings file to desktop SharpCap folder
-                string sDestImagePath = sImagePath.Replace(@"C:\", @"D:\");
-                string sDestSettingsPath = sImageSettingsPath.Replace(@"C:\", @"D:\");
-
-                string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
-                string sSrcSettingsPath = sImageSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
-
-                Directory.CreateDirectory(sDestImagePath.Substring(0, sDestImagePath.LastIndexOf(@"\")));
-                Directory.CreateDirectory(sDestSettingsPath.Substring(0, sDestSettingsPath.LastIndexOf(@"\")));
-
-                File.Copy(sSrcImagePath, sDestImagePath, true);
-                File.Copy(sSrcSettingsPath, sDestSettingsPath, true);
-
-                File.Delete(sCaptureInfoFile);
-
-                Root oAPCmd = new Root();
-                oAPCmd.script = "EAAControl";
-                oAPCmd.parameters = new Parameters();
-                oAPCmd.parameters.param1 = Uri.EscapeDataString(sObjectInfo);
-                oAPCmd.parameters.param2 = Uri.EscapeDataString(sDestSettingsPath);
-                oAPCmd.parameters.param3 = Uri.EscapeDataString(sDestImagePath);
-
-                if (bCreate)
+                //Get the objects ID
+                if (sObjectInfo != null)
                 {
-                    // AstroPlanner add observation and attach image.
-                    oAPCmd.parameters.cmd = "6";
-                    string sRes = SendAPCmd("Log", oAPCmd);
+                    string sID = sObjectInfo.Substring(0, sObjectInfo.IndexOf(","));
+                    WriteMessage("Logging: " + sObjectInfo);
+                    
+                    if (sImagePath != null)
+                    {
+                        // Copy image file to desktop PC SharpCap folder
+                        string sDestImagePath = sImagePath.Replace(@"C:\", @"D:\");
+                        string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
+                        Directory.CreateDirectory(sDestImagePath.Substring(0, sDestImagePath.LastIndexOf(@"\")));
+                        File.Copy(sSrcImagePath, sDestImagePath, true);
+                        
+                        if (sImageSettingsPath != null)
+                        {
+                            // Copy image settings file to desktop PC SharpCap folder
+                            string sDestSettingsPath = sImageSettingsPath.Replace(@"C:\", @"D:\");
+                            string sSrcSettingsPath = sImageSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
+                            Directory.CreateDirectory(sDestSettingsPath.Substring(0, sDestSettingsPath.LastIndexOf(@"\")));
+                            File.Copy(sSrcSettingsPath, sDestSettingsPath, true);
+                            
+                            File.Delete(sCaptureInfoFile);
+
+                            // Create or append an observation in AstroPlanner
+                            Root oAPCmd = new Root();
+                            oAPCmd.script = "EAAControl";
+                            oAPCmd.parameters = new Parameters();
+                            oAPCmd.parameters.param1 = Uri.EscapeDataString(sID);
+                            oAPCmd.parameters.param2 = Uri.EscapeDataString(sDestSettingsPath);
+                            oAPCmd.parameters.param3 = Uri.EscapeDataString(sDestImagePath);
+
+                            if (bCreate)
+                            {
+                                // AstroPlanner add observation and attach image.
+                                oAPCmd.parameters.cmd = "6";
+                                string sRes = SendAPCmd("Log", oAPCmd);
+                            }
+                            else
+                            {
+                                // AstroPlanner append observation and attach image to current observation.
+                                oAPCmd.parameters.cmd = "7";
+                                string sRes = SendAPCmd("LogAppend", oAPCmd);
+                            }
+                        }
+                        else
+                        {
+                            WriteMessage("ImageSettingsPath is NULL!");
+                        }
+                    }
+                    else
+                    {
+                        WriteMessage("ImagePath is NULL!");
+                    }
                 }
                 else
                 {
-                    // AstroPlanner append observation and attach image to current observation.
-                    oAPCmd.parameters.cmd = "7";
-                    string sRes = SendAPCmd("LogAppend", oAPCmd);
+                    WriteMessage("ObjectInfo is NULL!");
                 }
             }
             else 
