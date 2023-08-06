@@ -20,6 +20,9 @@ using System.Text.Json.Serialization;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using CefSharp.DevTools.Network;
+using System.Security.Policy;
 
 namespace EAACtrl
 {
@@ -35,7 +38,7 @@ namespace EAACtrl
         //Path to Laptop SharpCap Captures folder
         private string csSharpCapPath = @"\\TERRANOVA\SharpCap Captures\";
 
-        private  void OnTimedEvent(Object source, ElapsedEventArgs e)
+            private  void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             aTimer.Enabled = false;
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",e.SignalTime);
@@ -60,12 +63,42 @@ namespace EAACtrl
         public frmEAACP()
         {
             InitializeComponent();
-            
-            cbCaptureProfile.SelectedIndex = 0;
+
+            cbCaptureProfile.SelectedIndex = Properties.Settings.Default.CaptureMode;
+            cbPlanetarium.SelectedIndex = Properties.Settings.Default.Planatarium;
+            cbTextOverlay.Checked = Properties.Settings.Default.TextOverlay;
+            cbSlewOnTarget.Checked = Properties.Settings.Default.SlewOnTarget;
+            cbLogFind.Checked = Properties.Settings.Default.LogFind;
+            cbImagerZoom.Checked = Properties.Settings.Default.ImagerFOV;
+            cbFOVICorr.Checked = Properties.Settings.Default.FOVICorr;
+
+            PlanetariumUI(cbPlanetarium.SelectedIndex);
+
+            if (Properties.Settings.Default.YPos==-1)
+            {
+                this.CenterToScreen();
+            }
+            else 
+            {
+                if (System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width > Properties.Settings.Default.XPos + this.Width) 
+                {
+                    this.Left = Properties.Settings.Default.XPos;
+                    if (System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height > Properties.Settings.Default.YPos + this.Height) 
+                    {
+                        this.Top = Properties.Settings.Default.YPos;
+                    }
+                    else 
+                    {
+                        this.CenterToScreen();
+                    }
+                }
+                else 
+                {
+                    this.CenterToScreen();
+                }
+            }
 
             SetTimer();
-
-           // SendAPCmdAsync("0", "", "KeepAlive");
         }
 
         private string sTSScriptHeader = "/* Java Script */\r\n/* Socket Start Packet */\r\n";
@@ -109,6 +142,144 @@ namespace EAACtrl
 
             return responseData;
         }
+
+        private string SetStelProperty(string sName, string sValue)
+        {
+            string result = "";
+
+            string sWebServiceURL = @"http://localhost:8090/api/stelproperty/set";
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                               
+                result = webClient.UploadString(sWebServiceURL, "POST", "id=" + sName + "&value=" + sValue);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+                WriteMessage("SetStProp: " + sName + "=" + sValue + "\r\n");
+            }
+            catch (Exception e)
+            {
+                WriteMessage("SetStelProperty ERROR \r\n");
+                result = "exception";
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string SetStellariumFOV(int iFOV)
+        {
+            string result = "";
+
+            string sWebServiceURL = "http://localhost:8090/api/main/fov";
+
+            NameValueCollection nvcParams = new NameValueCollection();
+            nvcParams.Add("fov", iFOV.ToString());
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = Encoding.UTF8.GetString(webClient.UploadValues(sWebServiceURL, nvcParams));
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            }
+            catch (Exception)
+            {
+                WriteMessage("SetStellariumFOV ERROR \r\n");
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string SyncStellariumToPosition(double RA, double Dec)
+        {
+            string result = "";
+            string sWebServiceURL = "http://localhost:8090/api/main/focus";
+
+            // Convert selected object's RA to degrees and then both RA and Dec to radians
+            RA = RA * 15 * Math.PI / 180;
+            Dec = Dec * Math.PI / 180;
+
+            // Calculate 3D vector for Stellarium
+            double dblX = Math.Cos(Dec)*Math.Cos(RA);
+            double dblY = Math.Cos (Dec)*Math.Sin(RA);
+            double dblZ = Math.Sin(Dec);
+
+            NameValueCollection nvcParams = new NameValueCollection();
+            nvcParams.Add("position", "[" + dblX.ToString() + "," + dblY.ToString() + "," + dblZ.ToString() + "]");
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = Encoding.UTF8.GetString(webClient.UploadValues(sWebServiceURL, nvcParams));
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            }
+            catch (Exception)
+            {
+                WriteMessage("SyncStellariumToPos ERROR \r\n");
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string SyncStellariumToID(string sID)
+        {
+            string result = "";
+
+            string sWebServiceURL = "http://localhost:8090/api/main/focus";
+
+            NameValueCollection nvcParams = new NameValueCollection();
+            nvcParams.Add("target", sID);
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = Encoding.UTF8.GetString(webClient.UploadValues(sWebServiceURL, nvcParams));
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            }
+            catch (Exception)
+            {
+                   WriteMessage("SyncStellariumToID ERROR \r\n");
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+         }
 
         private string SendAPCmd(string sCmdName, Root APCmd)
         {
@@ -203,6 +374,7 @@ namespace EAACtrl
         {
             string result = "";
             double dblFOV = -1.0;
+            bool bOK = false;
 
             // Get current AP object name and RA/DEC
             Root oAPCmd = new Root();
@@ -221,17 +393,51 @@ namespace EAACtrl
                         dblFOV = 1.05;
                     }
 
-                    // Minor planets need the MPL prefix to be found as a target in TS
-                    if (oSelectedObject.results.Type == "Minor")
+                    if (cbPlanetarium.SelectedIndex == 0)
                     {
-                        oSelectedObject.results.id = "MPL " + oSelectedObject.results.id;
+
+                        // Minor planets need the MPL prefix to be found as a target in TS
+                        if (oSelectedObject.results.Type == "Minor")
+                        {
+                            oSelectedObject.results.id = "MPL " + oSelectedObject.results.id;
+                        }
+
+                        SetTSTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
+
+                        if (cbFOVICorr.Checked)
+                        {
+                            AltAzFOVICorrection();
+                        }
                     }
-
-                    SetTSTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
-
-                    if (cbFOVICorr.Checked)
+                    else
                     {
-                        AltAzFOVICorrection();
+                        string sResult = SyncStellariumToID(oSelectedObject.results.id);
+                        if (sResult == "true")
+                        {
+                            WriteMessage("SyncByID AP-ST done.\r\n");
+                            bOK = true;
+                        }
+                        else 
+                        {                        
+                            sResult = SyncStellariumToPosition(Convert.ToDouble(oSelectedObject.results.RA), Convert.ToDouble(oSelectedObject.results.Dec));
+                            if (sResult=="ok")
+                            {
+                                WriteMessage("SyncByPos AP-ST done.\r\n");
+                                bOK =true;
+                            }
+                            else 
+                            {
+                                WriteMessage("SyncByPos AP-ST ERROR.\r\n");
+                            }
+                        }
+
+                        if (bOK) 
+                        {
+                            if (cbImagerZoom.Checked)
+                            {
+                                SetStellariumFOV(1);
+                            }
+                        }
                     }
                 }
                 else
@@ -445,7 +651,7 @@ namespace EAACtrl
             }
             else
             {
-                frmEAACP.ActiveForm.Width = 545;
+                frmEAACP.ActiveForm.Width = 595;
                 btnExpand.Text = "<<";
             }
 
@@ -459,6 +665,8 @@ namespace EAACtrl
             {
                 frmTextOverlay.Show();
             }
+
+            SetStelProperty("NebulaMgr.catalogFilters", "7");
         }
 
         private void btnSCDSA_Click(object sender, EventArgs e)
@@ -518,6 +726,74 @@ namespace EAACtrl
 
             // Read CaptureInfo.txt file
             ProcessCaptureInfo(false);
+        }
+
+        private void frmEAACP_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.CaptureMode = cbCaptureProfile.SelectedIndex;
+            Properties.Settings.Default.Planatarium = cbPlanetarium.SelectedIndex;
+            Properties.Settings.Default.TextOverlay = cbTextOverlay.Checked;
+            Properties.Settings.Default.SlewOnTarget = cbSlewOnTarget.Checked;
+            Properties.Settings.Default.LogFind = cbLogFind.Checked;
+            Properties.Settings.Default.ImagerFOV = cbImagerZoom.Checked;
+            Properties.Settings.Default.FOVICorr = cbFOVICorr.Checked;
+            Properties.Settings.Default.YPos = this.Top;
+            Properties.Settings.Default.XPos = this.Left;
+            Properties.Settings.Default.Save();
+        }
+
+        private void btnAllCats_Click(object sender, EventArgs e)
+        {
+            switch (btnAllCats.Text)
+            {
+                case "Def Cats":
+                    if (SetStelProperty("NebulaMgr.catalogFilters", "255852135") != "exception")
+                    {
+                        btnAllCats.Text = "All Cats";
+                    }
+                    break;
+                case "All Cats":
+                    if (SetStelProperty("NebulaMgr.catalogFilters", "255852279") != "exception")
+                    {
+                        btnAllCats.Text = "All+D Cats";
+                    }
+                    break;
+                case "All+D Cats":
+                    if (SetStelProperty("NebulaMgr.catalogFilters", "7") != "exception")
+                    {
+                        btnAllCats.Text = "Def Cats";
+                    }
+                    break;
+            }
+        }
+
+        private void btnOverlayText_Click(object sender, EventArgs e)
+        {
+            bOverlayVisible = true;
+            frmTextOverlay.Show();
+
+            frmTextOverlay.Controls["lblText"].Text = txtOverlay.Text;
+
+        }
+
+        private void PlanetariumUI(int iSelectedIndex)
+        {
+            switch (iSelectedIndex)
+            {
+                case 0:
+                    btnAzAltFOVI.Enabled = true;
+                    btnAllCats.Enabled = false;
+                    break;
+                case 1:
+                    btnAzAltFOVI.Enabled = false;
+                    btnAllCats.Enabled = true;
+                    break;
+            }
+        }
+
+        private void cbPlanetarium_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PlanetariumUI(cbPlanetarium.SelectedIndex);
         }
     }
 

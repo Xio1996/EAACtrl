@@ -22,5 +22,113 @@ namespace EAACtrl.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Planatarium {
+            get {
+                return ((int)(this["Planatarium"]));
+            }
+            set {
+                this["Planatarium"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CaptureMode {
+            get {
+                return ((int)(this["CaptureMode"]));
+            }
+            set {
+                this["CaptureMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TextOverlay {
+            get {
+                return ((bool)(this["TextOverlay"]));
+            }
+            set {
+                this["TextOverlay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ImagerFOV {
+            get {
+                return ((bool)(this["ImagerFOV"]));
+            }
+            set {
+                this["ImagerFOV"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool FOVICorr {
+            get {
+                return ((bool)(this["FOVICorr"]));
+            }
+            set {
+                this["FOVICorr"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogFind {
+            get {
+                return ((bool)(this["LogFind"]));
+            }
+            set {
+                this["LogFind"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SlewOnTarget {
+            get {
+                return ((bool)(this["SlewOnTarget"]));
+            }
+            set {
+                this["SlewOnTarget"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int XPos {
+            get {
+                return ((int)(this["XPos"]));
+            }
+            set {
+                this["XPos"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int YPos {
+            get {
+                return ((int)(this["YPos"]));
+            }
+            set {
+                this["YPos"] = value;
+            }
+        }
     }
 }
