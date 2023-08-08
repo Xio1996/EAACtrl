@@ -9,6 +9,8 @@ The EAACtrl C# app communicates with the apps using the following methods.
 
 <b>TheSky Professional</b> - Must be the Professional version as that allows scripting. The script is passed via TCP. Make sure that TheSky's TCP Server is enabled, Tools->TCP Server
 
+<b>Stellarium</b> - Uses the Remote Control plugin on port 8090. The plugin must be enabled and 'Enabled automatically on startup' must be checked. The Remote Control Plugin uses HTTP get and post commands to expose the  Stellarium object model as a web service.
+
 <b>SharpCap</b> - Unfortunately, SharpCap has no interface that allows external control. Talking to the author (Robin Glover), there is an interface but its not available currently. I did try and implement a web server in Sharpcap but that seemed to intefere with SharpCap and would never shutdown cleanly (big badda boom). So, the code uses a couple of files for the purpose of inter-process (machine) communication, via the exposed network drive.
 
 The Scripts folder contains the AstroPlanner and SharpCap scripts. The SharpCap script is executed at startup and waits until EAACtrl issues a command by creating a file in the SharpCap Captures folder. TheSky Professional script is held in a string in the EAACtrl app itself.
