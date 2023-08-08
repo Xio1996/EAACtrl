@@ -68,6 +68,7 @@ namespace EAACtrl
             cbPlanetarium.SelectedIndex = Properties.Settings.Default.Planatarium;
             cbTextOverlay.Checked = Properties.Settings.Default.TextOverlay;
             cbSlewOnTarget.Checked = Properties.Settings.Default.SlewOnTarget;
+            cbFindProfileonTarget.Checked = Properties.Settings.Default.FindProfileOnTarget;
             cbLogFind.Checked = Properties.Settings.Default.LogFind;
             cbImagerZoom.Checked = Properties.Settings.Default.ImagerFOV;
             cbFOVICorr.Checked = Properties.Settings.Default.FOVICorr;
@@ -141,6 +142,39 @@ namespace EAACtrl
             }
 
             return responseData;
+        }
+
+        private string SetStelAction(string sName)
+        {
+            string result = "";
+
+            string sWebServiceURL = @"http://localhost:8090/api/stelaction/do";
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = webClient.UploadString(sWebServiceURL, "POST", "id=" + sName);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+                WriteMessage("SetStProp: " + sName + "\r\n");
+            }
+            catch (Exception e)
+            {
+                WriteMessage("SetAction ERROR \r\n");
+                result = "exception";
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
         }
 
         private string SetStelProperty(string sName, string sValue)
@@ -303,15 +337,18 @@ namespace EAACtrl
                 string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
                     ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
 
-                txtStatusMsg.Text = iCmdCount.ToString() + " " + APCmd.parameters.cmd + "-" + result + " Runtime: " + elapsedTime;
                 iCmdCount++;
 
                 if (APCmd.parameters.cmd != "0")
                 {
                     WriteMessage("APCmd=" + sCmdName + " " + elapsedTime + "\r\n");
                 }
+                else 
+                {
+                    txtStatusMsg.Text = iCmdCount.ToString() + " " + APCmd.parameters.cmd + "-" + result + " Runtime: " + elapsedTime;
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 if (APCmd.parameters.cmd != "0")
                 {
@@ -453,15 +490,16 @@ namespace EAACtrl
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
-
+            string sResult = "";
+            bool bSlew = false;
+            bool bSuccess = false;
             string sObjectInfoPath = csSharpCapPath + @"ObjectInfo.txt";
             Root oAPCmd = new Root();
-            oAPCmd.script = "EAAControl";
-            oAPCmd.parameters = new Parameters();
-            oAPCmd.parameters.cmd = "2";
+
+            WriteMessage("Target start.\r\n");
             try
             {
-                // Remove the old target
+                // Remove the old target file
                 if (File.Exists(sObjectInfoPath))
                 {
                     File.Delete(sObjectInfoPath);
@@ -470,29 +508,103 @@ namespace EAACtrl
             catch(Exception ex)
             {
                 WriteMessage ($"Target file delete err: {ex.Message}");
+                return;
             }
 
-            string result = SendAPCmd("SetTarget", oAPCmd);
-            
-            SetOverlayText();
+            // Set SharpCap to Find Profile
+            if (cbFindProfileonTarget.Checked)
+            {
+                SharpCapMsg("Find");
+            }
 
             if (cbSlewOnTarget.Checked)
             {
-                // Get current AP object name and RA/DEC
+                DialogResult dialogResult = MessageBox.Show(this, "Confirm telescope SLEW?", "Telescope Slew", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    WriteMessage("Slew confirmed by user.\r\n");
+                    bSlew = true;
+                }
+                else
+                {
+                    WriteMessage("Slew - cancelled by user.\r\n");
+                    bSlew = false;
+                }
+            }
+
+            if (bSlew)
+            {
+                // Set the target for SharpCap and slew to the object (if possible)
                 oAPCmd = new Root();
+                oAPCmd.script = "EAAControl";
+                oAPCmd.parameters = new Parameters();
+                oAPCmd.parameters.cmd = "8";
+
+                sResult = SendAPCmd("TargetAndSlew", oAPCmd);
+                if (sResult != "")
+                {
+                    SelectedObject oSelectedObject = JsonSerializer.Deserialize<SelectedObject>(sResult);
+                    if (oSelectedObject.error == 0 && oSelectedObject.results != null)
+                    {
+                        string sStatus = "";
+                        // Check for status return
+                        switch (oSelectedObject.results.Status)
+                        {
+                            case "ok":
+                                SetOverlayText();
+                                sStatus = "Slew - Telescope slew completed.";
+                                break;
+                            case "notel":
+                                sStatus = "Slew - Telescope is not connected!";
+                                break;
+                            case "hor":
+                                sStatus = "Slew - Obj below horizon!";
+                                break;
+                            case "slew":
+                                sStatus = "Slew - Outside telescope limits!";
+                                break;
+                            case "uhor":
+                                sStatus = "Slew - Obj below user horizon!";
+                                break;
+                            default:
+                                sStatus = "Slew - Unknow result!!";
+                                break;
+                        }
+
+                        bSuccess = true;
+                        WriteMessage(sStatus + "\r\n");
+                    }
+                    else
+                    {
+                        WriteMessage("Slew - FAILED, Results object!\r\n");
+                    }
+                }
+                else
+                {
+                    WriteMessage("Slew - FAILED, Command failure!\r\n");
+                }
+            }
+            else
+            {
                 oAPCmd.script = "EAAControl";
                 oAPCmd.parameters = new Parameters();
                 oAPCmd.parameters.cmd = "2";
 
-                result = SendAPCmd("GetSelectedObjects", oAPCmd);
-                if (result != "")
+                sResult = SendAPCmd("SetTarget", oAPCmd);
+                if (sResult !="")
                 {
-                    SelectedObject oSelectedObject = JsonSerializer.Deserialize<SelectedObject>(result);
-                    if (oSelectedObject.error == 0 && oSelectedObject.results != null)
-                    {
-                        SlewToTarget(oSelectedObject.results.RA, oSelectedObject.results.Dec);
-                    }
+                    bSuccess = true;
                 }
+                else 
+                {
+                    WriteMessage("SetTarget - FAILED!\r\n");
+                }
+            }
+
+            // Update the object details in the overlay text window.
+            if (bSuccess)
+            {
+                SetOverlayText();
             }
         }
 
@@ -646,7 +758,7 @@ namespace EAACtrl
         {
             if (bExpanded)
             {
-                frmEAACP.ActiveForm.Width = 206;
+                frmEAACP.ActiveForm.Width = 210;
                 btnExpand.Text = ">>";
             }
             else
@@ -660,7 +772,7 @@ namespace EAACtrl
 
         private void frmEAACP_Load(object sender, EventArgs e)
         {
-            this.Width = 206;
+            this.Width = 210;
             if (bOverlayVisible)
             {
                 frmTextOverlay.Show();
@@ -734,6 +846,7 @@ namespace EAACtrl
             Properties.Settings.Default.Planatarium = cbPlanetarium.SelectedIndex;
             Properties.Settings.Default.TextOverlay = cbTextOverlay.Checked;
             Properties.Settings.Default.SlewOnTarget = cbSlewOnTarget.Checked;
+            Properties.Settings.Default.FindProfileOnTarget = cbFindProfileonTarget.Checked;
             Properties.Settings.Default.LogFind = cbLogFind.Checked;
             Properties.Settings.Default.ImagerFOV = cbImagerZoom.Checked;
             Properties.Settings.Default.FOVICorr = cbFOVICorr.Checked;
@@ -783,10 +896,22 @@ namespace EAACtrl
                 case 0:
                     btnAzAltFOVI.Enabled = true;
                     btnAllCats.Enabled = false;
+                    btnN.Enabled = false;
+                    btnW.Enabled = false;
+                    btnS.Enabled = false;
+                    btnE.Enabled = false;
+                    btnNV.Enabled = false;
+                    btnCV.Enabled = false;
                     break;
                 case 1:
                     btnAzAltFOVI.Enabled = false;
                     btnAllCats.Enabled = true;
+                    btnN.Enabled = true;
+                    btnW.Enabled = true;
+                    btnS.Enabled = true;
+                    btnE.Enabled = true;
+                    btnNV.Enabled = true;
+                    btnCV.Enabled = true;
                     break;
             }
         }
@@ -795,10 +920,55 @@ namespace EAACtrl
         {
             PlanetariumUI(cbPlanetarium.SelectedIndex);
         }
+
+        private void btnN_Click(object sender, EventArgs e)
+        {
+            SetStelAction("actionLook_Towards_North");
+        }
+
+        private void btnNV_Click(object sender, EventArgs e)
+        {
+            switch (cbPlanetarium.SelectedIndex) 
+            { 
+                case 0:
+                    break;
+                case 1:
+                    SetStellariumFOV(72);
+                    break;
+            }
+        }
+
+        private void btnCV_Click(object sender, EventArgs e)
+        {
+            switch (cbPlanetarium.SelectedIndex)
+            {
+                case 0:
+                    break;
+                case 1:
+                    SetStellariumFOV(36);
+                    break;
+            }
+        }
+
+        private void btnW_Click(object sender, EventArgs e)
+        {
+            SetStelAction("actionLook_Towards_West");
+        }
+
+        private void btnS_Click(object sender, EventArgs e)
+        {
+            SetStelAction("actionLook_Towards_South");
+        }
+
+        private void btnE_Click(object sender, EventArgs e)
+        {
+            SetStelAction("actionLook_Towards_East");
+        }
     }
 
     public class Results
     {
+        public string Status { get; set; }
         public string RA { get; set; }
         public string id { get; set; }
         public string Dec { get; set; }

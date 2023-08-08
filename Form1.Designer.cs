@@ -61,6 +61,14 @@
             this.tpDev = new System.Windows.Forms.TabPage();
             this.tbMessages = new System.Windows.Forms.TextBox();
             this.btnAllCats = new System.Windows.Forms.Button();
+            this.btnN = new System.Windows.Forms.Button();
+            this.btnW = new System.Windows.Forms.Button();
+            this.btnE = new System.Windows.Forms.Button();
+            this.btnS = new System.Windows.Forms.Button();
+            this.btnNV = new System.Windows.Forms.Button();
+            this.btnCV = new System.Windows.Forms.Button();
+            this.cbFindProfileonTarget = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.grpbMBDS.SuspendLayout();
@@ -75,7 +83,7 @@
             this.btnTarget.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnTarget.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnTarget.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnTarget.Location = new System.Drawing.Point(96, 4);
+            this.btnTarget.Location = new System.Drawing.Point(3, 4);
             this.btnTarget.Name = "btnTarget";
             this.btnTarget.Size = new System.Drawing.Size(88, 25);
             this.btnTarget.TabIndex = 2;
@@ -90,11 +98,11 @@
             this.btnView.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnView.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnView.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnView.Location = new System.Drawing.Point(4, 4);
+            this.btnView.Location = new System.Drawing.Point(3, 99);
             this.btnView.Name = "btnView";
-            this.btnView.Size = new System.Drawing.Size(88, 25);
+            this.btnView.Size = new System.Drawing.Size(119, 25);
             this.btnView.TabIndex = 1;
-            this.btnView.Text = "Sync";
+            this.btnView.Text = "Sync Planetarium";
             this.btnView.UseVisualStyleBackColor = false;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -103,7 +111,7 @@
             this.cbImagerZoom.AutoSize = true;
             this.cbImagerZoom.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbImagerZoom.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbImagerZoom.Location = new System.Drawing.Point(10, 158);
+            this.cbImagerZoom.Location = new System.Drawing.Point(9, 186);
             this.cbImagerZoom.Name = "cbImagerZoom";
             this.cbImagerZoom.Size = new System.Drawing.Size(85, 19);
             this.cbImagerZoom.TabIndex = 3;
@@ -117,7 +125,7 @@
             this.btnAzAltFOVI.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnAzAltFOVI.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAzAltFOVI.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnAzAltFOVI.Location = new System.Drawing.Point(5, 118);
+            this.btnAzAltFOVI.Location = new System.Drawing.Point(4, 127);
             this.btnAzAltFOVI.Name = "btnAzAltFOVI";
             this.btnAzAltFOVI.Size = new System.Drawing.Size(58, 25);
             this.btnAzAltFOVI.TabIndex = 5;
@@ -132,9 +140,9 @@
             this.btnFind.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnFind.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFind.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFind.Location = new System.Drawing.Point(4, 32);
+            this.btnFind.Location = new System.Drawing.Point(3, 33);
             this.btnFind.Name = "btnFind";
-            this.btnFind.Size = new System.Drawing.Size(88, 25);
+            this.btnFind.Size = new System.Drawing.Size(46, 25);
             this.btnFind.TabIndex = 7;
             this.btnFind.Text = "Find";
             this.btnFind.UseVisualStyleBackColor = false;
@@ -147,7 +155,7 @@
             this.btnCapture.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnCapture.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCapture.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnCapture.Location = new System.Drawing.Point(96, 32);
+            this.btnCapture.Location = new System.Drawing.Point(96, 4);
             this.btnCapture.Name = "btnCapture";
             this.btnCapture.Size = new System.Drawing.Size(88, 25);
             this.btnCapture.TabIndex = 8;
@@ -162,7 +170,7 @@
             this.btnLog.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLog.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLog.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLog.Location = new System.Drawing.Point(4, 90);
+            this.btnLog.Location = new System.Drawing.Point(3, 62);
             this.btnLog.Name = "btnLog";
             this.btnLog.Size = new System.Drawing.Size(88, 25);
             this.btnLog.TabIndex = 9;
@@ -176,7 +184,7 @@
             this.cbLogFind.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveBorder;
             this.cbLogFind.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbLogFind.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbLogFind.Location = new System.Drawing.Point(98, 157);
+            this.cbLogFind.Location = new System.Drawing.Point(97, 186);
             this.cbLogFind.Name = "cbLogFind";
             this.cbLogFind.Size = new System.Drawing.Size(81, 19);
             this.cbLogFind.TabIndex = 13;
@@ -190,7 +198,7 @@
             this.btnLogPlus.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLogPlus.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogPlus.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLogPlus.Location = new System.Drawing.Point(96, 89);
+            this.btnLogPlus.Location = new System.Drawing.Point(95, 62);
             this.btnLogPlus.Name = "btnLogPlus";
             this.btnLogPlus.Size = new System.Drawing.Size(88, 25);
             this.btnLogPlus.TabIndex = 15;
@@ -205,7 +213,7 @@
             this.btnExpand.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnExpand.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnExpand.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnExpand.Location = new System.Drawing.Point(156, 116);
+            this.btnExpand.Location = new System.Drawing.Point(163, 99);
             this.btnExpand.Name = "btnExpand";
             this.btnExpand.Size = new System.Drawing.Size(28, 25);
             this.btnExpand.TabIndex = 18;
@@ -216,7 +224,7 @@
             // txtStatusMsg
             // 
             this.txtStatusMsg.Font = new System.Drawing.Font("Arial Nova", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtStatusMsg.Location = new System.Drawing.Point(190, 154);
+            this.txtStatusMsg.Location = new System.Drawing.Point(197, 182);
             this.txtStatusMsg.Name = "txtStatusMsg";
             this.txtStatusMsg.Size = new System.Drawing.Size(377, 22);
             this.txtStatusMsg.TabIndex = 19;
@@ -230,7 +238,7 @@
             "CaptureMode1",
             "CaptureMode2",
             "CaptureMode3"});
-            this.cbCaptureProfile.Location = new System.Drawing.Point(86, 62);
+            this.cbCaptureProfile.Location = new System.Drawing.Point(92, 35);
             this.cbCaptureProfile.Name = "cbCaptureProfile";
             this.cbCaptureProfile.Size = new System.Drawing.Size(98, 22);
             this.cbCaptureProfile.TabIndex = 20;
@@ -239,7 +247,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 8F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(42, 66);
+            this.label1.Location = new System.Drawing.Point(49, 39);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(40, 15);
             this.label1.TabIndex = 21;
@@ -251,10 +259,10 @@
             this.tcExtra.Controls.Add(this.tpConfig);
             this.tcExtra.Controls.Add(this.tpDev);
             this.tcExtra.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.tcExtra.Location = new System.Drawing.Point(190, 4);
+            this.tcExtra.Location = new System.Drawing.Point(196, 4);
             this.tcExtra.Name = "tcExtra";
             this.tcExtra.SelectedIndex = 0;
-            this.tcExtra.Size = new System.Drawing.Size(377, 147);
+            this.tcExtra.Size = new System.Drawing.Size(377, 170);
             this.tcExtra.TabIndex = 22;
             // 
             // tpTools
@@ -266,7 +274,7 @@
             this.tpTools.Location = new System.Drawing.Point(4, 26);
             this.tpTools.Name = "tpTools";
             this.tpTools.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTools.Size = new System.Drawing.Size(369, 117);
+            this.tpTools.Size = new System.Drawing.Size(369, 140);
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
@@ -352,6 +360,8 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.label3);
+            this.tpConfig.Controls.Add(this.cbFindProfileonTarget);
             this.tpConfig.Controls.Add(this.btnOverlayText);
             this.tpConfig.Controls.Add(this.txtOverlay);
             this.tpConfig.Controls.Add(this.cbSlewOnTarget);
@@ -362,7 +372,7 @@
             this.tpConfig.Location = new System.Drawing.Point(4, 26);
             this.tpConfig.Name = "tpConfig";
             this.tpConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tpConfig.Size = new System.Drawing.Size(369, 117);
+            this.tpConfig.Size = new System.Drawing.Size(369, 140);
             this.tpConfig.TabIndex = 2;
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
@@ -388,14 +398,13 @@
             // cbSlewOnTarget
             // 
             this.cbSlewOnTarget.AutoSize = true;
-            this.cbSlewOnTarget.Enabled = false;
             this.cbSlewOnTarget.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbSlewOnTarget.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbSlewOnTarget.Location = new System.Drawing.Point(8, 91);
+            this.cbSlewOnTarget.Location = new System.Drawing.Point(58, 92);
             this.cbSlewOnTarget.Name = "cbSlewOnTarget";
-            this.cbSlewOnTarget.Size = new System.Drawing.Size(100, 19);
+            this.cbSlewOnTarget.Size = new System.Drawing.Size(97, 19);
             this.cbSlewOnTarget.TabIndex = 25;
-            this.cbSlewOnTarget.Text = "Slew on Target";
+            this.cbSlewOnTarget.Text = "Slew to target";
             this.cbSlewOnTarget.UseVisualStyleBackColor = true;
             // 
             // cbTextOverlay
@@ -455,7 +464,7 @@
             this.tpDev.Location = new System.Drawing.Point(4, 26);
             this.tpDev.Name = "tpDev";
             this.tpDev.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDev.Size = new System.Drawing.Size(369, 117);
+            this.tpDev.Size = new System.Drawing.Size(369, 140);
             this.tpDev.TabIndex = 1;
             this.tpDev.Text = "Log";
             this.tpDev.UseVisualStyleBackColor = true;
@@ -467,7 +476,7 @@
             this.tbMessages.Multiline = true;
             this.tbMessages.Name = "tbMessages";
             this.tbMessages.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbMessages.Size = new System.Drawing.Size(366, 107);
+            this.tbMessages.Size = new System.Drawing.Size(366, 128);
             this.tbMessages.TabIndex = 20;
             // 
             // btnAllCats
@@ -477,7 +486,7 @@
             this.btnAllCats.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnAllCats.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAllCats.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnAllCats.Location = new System.Drawing.Point(68, 117);
+            this.btnAllCats.Location = new System.Drawing.Point(66, 127);
             this.btnAllCats.Name = "btnAllCats";
             this.btnAllCats.Size = new System.Drawing.Size(82, 25);
             this.btnAllCats.TabIndex = 23;
@@ -485,12 +494,129 @@
             this.btnAllCats.UseVisualStyleBackColor = false;
             this.btnAllCats.Click += new System.EventHandler(this.btnAllCats_Click);
             // 
+            // btnN
+            // 
+            this.btnN.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnN.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnN.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnN.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnN.Location = new System.Drawing.Point(4, 158);
+            this.btnN.Name = "btnN";
+            this.btnN.Size = new System.Drawing.Size(28, 25);
+            this.btnN.TabIndex = 24;
+            this.btnN.Text = "N";
+            this.btnN.UseVisualStyleBackColor = false;
+            this.btnN.Click += new System.EventHandler(this.btnN_Click);
+            // 
+            // btnW
+            // 
+            this.btnW.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnW.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnW.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnW.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnW.Location = new System.Drawing.Point(34, 158);
+            this.btnW.Name = "btnW";
+            this.btnW.Size = new System.Drawing.Size(28, 25);
+            this.btnW.TabIndex = 25;
+            this.btnW.Text = "W";
+            this.btnW.UseVisualStyleBackColor = false;
+            this.btnW.Click += new System.EventHandler(this.btnW_Click);
+            // 
+            // btnE
+            // 
+            this.btnE.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnE.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnE.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnE.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnE.Location = new System.Drawing.Point(94, 158);
+            this.btnE.Name = "btnE";
+            this.btnE.Size = new System.Drawing.Size(28, 25);
+            this.btnE.TabIndex = 26;
+            this.btnE.Text = "E";
+            this.btnE.UseVisualStyleBackColor = false;
+            this.btnE.Click += new System.EventHandler(this.btnE_Click);
+            // 
+            // btnS
+            // 
+            this.btnS.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnS.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnS.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnS.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnS.Location = new System.Drawing.Point(64, 158);
+            this.btnS.Name = "btnS";
+            this.btnS.Size = new System.Drawing.Size(28, 25);
+            this.btnS.TabIndex = 27;
+            this.btnS.Text = "S";
+            this.btnS.UseVisualStyleBackColor = false;
+            this.btnS.Click += new System.EventHandler(this.btnS_Click);
+            // 
+            // btnNV
+            // 
+            this.btnNV.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnNV.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnNV.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnNV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnNV.Location = new System.Drawing.Point(125, 158);
+            this.btnNV.Name = "btnNV";
+            this.btnNV.Size = new System.Drawing.Size(28, 25);
+            this.btnNV.TabIndex = 28;
+            this.btnNV.Text = "NV";
+            this.btnNV.UseVisualStyleBackColor = false;
+            this.btnNV.Click += new System.EventHandler(this.btnNV_Click);
+            // 
+            // btnCV
+            // 
+            this.btnCV.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnCV.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnCV.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnCV.Location = new System.Drawing.Point(155, 158);
+            this.btnCV.Name = "btnCV";
+            this.btnCV.Size = new System.Drawing.Size(28, 25);
+            this.btnCV.TabIndex = 29;
+            this.btnCV.Text = "CV";
+            this.btnCV.UseVisualStyleBackColor = false;
+            this.btnCV.Click += new System.EventHandler(this.btnCV_Click);
+            // 
+            // cbFindProfileonTarget
+            // 
+            this.cbFindProfileonTarget.AutoSize = true;
+            this.cbFindProfileonTarget.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbFindProfileonTarget.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.cbFindProfileonTarget.Location = new System.Drawing.Point(155, 92);
+            this.cbFindProfileonTarget.Name = "cbFindProfileonTarget";
+            this.cbFindProfileonTarget.Size = new System.Drawing.Size(102, 19);
+            this.cbFindProfileonTarget.TabIndex = 28;
+            this.cbFindProfileonTarget.Text = "Set Find Profile";
+            this.cbFindProfileonTarget.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(8, 91);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(49, 17);
+            this.label3.TabIndex = 29;
+            this.label3.Text = "Target:";
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(579, 180);
+            this.ClientSize = new System.Drawing.Size(579, 209);
+            this.Controls.Add(this.btnCV);
+            this.Controls.Add(this.btnNV);
+            this.Controls.Add(this.btnS);
+            this.Controls.Add(this.btnE);
+            this.Controls.Add(this.btnW);
+            this.Controls.Add(this.btnN);
             this.Controls.Add(this.btnAllCats);
             this.Controls.Add(this.tcExtra);
             this.Controls.Add(this.label1);
@@ -564,6 +690,14 @@
         private System.Windows.Forms.Button btnAllCats;
         private System.Windows.Forms.TextBox txtOverlay;
         private System.Windows.Forms.Button btnOverlayText;
+        private System.Windows.Forms.Button btnN;
+        private System.Windows.Forms.Button btnW;
+        private System.Windows.Forms.Button btnE;
+        private System.Windows.Forms.Button btnS;
+        private System.Windows.Forms.Button btnNV;
+        private System.Windows.Forms.Button btnCV;
+        private System.Windows.Forms.CheckBox cbFindProfileonTarget;
+        private System.Windows.Forms.Label label3;
     }
 }
 

@@ -130,5 +130,17 @@ namespace EAACtrl.Properties {
                 this["YPos"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FindProfileOnTarget {
+            get {
+                return ((bool)(this["FindProfileOnTarget"]));
+            }
+            set {
+                this["FindProfileOnTarget"] = value;
+            }
+        }
     }
 }
