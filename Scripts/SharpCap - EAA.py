@@ -13,8 +13,8 @@ from System.IO import *
 import time
 
 #Set the camera we are going to use
-#sCameraName="Test Camera 1 (Deep Sky)"
-sCameraName="AA294CPRO"
+sCameraName="Test Camera 1 (Deep Sky)"
+#sCameraName="AA294CPRO"
 
 #SharpCap Capture Folder
 def selectSetupFindMode():
@@ -29,7 +29,7 @@ def selectSetupFindMode():
 			return
 
 	# If Live Stacking then stop the process
-	if SharpCap.IsLiveStacking:
+	if SharpCap.IsLiveStacking or SharpCap.LiveStacking.IsPaused:
 		SharpCap.LiveStacking.Reset()
 		SharpCap.Transforms.SelectedTransform = None
 
@@ -58,7 +58,7 @@ def selectSetupObserveMode(CaptureMode):
 	sTargetName=""
 
 	# Make sure live stacking is off and reset from last object
-	if SharpCap.IsLiveStacking:
+	if SharpCap.IsLiveStacking or SharpCap.LiveStacking.IsPaused:
 			SharpCap.LiveStacking.Reset()
 			SharpCap.Transforms.SelectedTransform = None
 
@@ -136,37 +136,39 @@ def ResetIPC():
 		File.Delete(sObjectInfoFile)
 		
 def CommandIPCFile():
-
-	sSCIPCFile =SharpCap.CaptureFolder + "\\SCIPC.txt"
+	try:
+		sSCIPCFile =SharpCap.CaptureFolder + "\\SCIPC.txt"
 	
-	if File.Exists(sSCIPCFile):
-		sCommand = File.ReadAllText(sSCIPCFile) 
+		if File.Exists(sSCIPCFile):
+			sCommand = File.ReadAllText(sSCIPCFile) 
 
-		# Find: Sharpcap to find mode - TODO: set using profile
-		if sCommand=="Find":
-			selectSetupFindMode()
-			File.Delete(sSCIPCFile)
-		# Capture: SharpCap to LiveStacking - TODO: set using profile	
-		elif sCommand=="CaptureMode1":
-			selectSetupObserveMode(1)
-			File.Delete(sSCIPCFile)
-		elif sCommand=="CaptureMode2":
-			selectSetupObserveMode(2)
-			File.Delete(sSCIPCFile)
-		elif sCommand=="CaptureMode3":
-			selectSetupObserveMode(3)
-			File.Delete(sSCIPCFile)			
-		# Log: Save as seen and pass the path back for copying and attaching to AP observation.
-		elif sCommand=="Log":
-			selectSaveAsSeen()
-			File.Delete(sSCIPCFile)
-		elif sCommand=="LogAndFind":
-			selectSaveAsSeen()
-			File.Delete(sSCIPCFile)
-			selectSetupFindMode()
-		elif sCommand=="ResetIPC":
-			resetIPC()
-	
+			# Find: Sharpcap to find mode
+			if sCommand=="Find":
+				selectSetupFindMode()
+				File.Delete(sSCIPCFile)
+			# Capture: SharpCap to LiveStacking
+			elif sCommand=="CaptureMode1":
+				selectSetupObserveMode(1)
+				File.Delete(sSCIPCFile)
+			elif sCommand=="CaptureMode2":
+				selectSetupObserveMode(2)
+				File.Delete(sSCIPCFile)
+			elif sCommand=="CaptureMode3":
+				selectSetupObserveMode(3)
+				File.Delete(sSCIPCFile)			
+			# Log: Save as seen and pass the path back for copying and attaching to AP observation.
+			elif sCommand=="Log":
+				selectSaveAsSeen()
+				File.Delete(sSCIPCFile)
+			elif sCommand=="LogAndFind":
+				selectSaveAsSeen()
+				File.Delete(sSCIPCFile)
+				selectSetupFindMode()
+			elif sCommand=="ResetIPC":
+				resetIPC()
+	except:
+		SharpCap.ShowMessageBox("SharpCap - Cmd Err")
+		
 	time.sleep(2)
 	
 

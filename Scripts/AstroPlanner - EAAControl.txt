@@ -1144,14 +1144,16 @@ function SetTargetFileInfo() as integer
 		sInfo = sInfo + ", " + sName
 	end if
 	
+	sInfo = sInfo + " ("
+	
 	// If a distance field exists then add to information
 	if Len(sDistance)>0 and sDistance<>"???" then
-		sInfo = sInfo + ", " + sDistance
+		sInfo = sInfo + sDistance + " - "
 	end if
 	
 	// Get the Objects constellation (abbreviation) and lookup the full name
 	dim objCon as Constellation = Constellation.GetConstellation(obj.Constellation)
-	sInfo = sInfo + " (" + objCon.Name
+	sInfo = sInfo + objCon.Name
 	
 	// Add object type information
 	sType=obj.Type
@@ -1179,7 +1181,7 @@ function SetTargetFileInfo() as integer
 		case "E Neb"
 			sType="Emission Nebula"
 		end select
-		sInfo = sInfo + ", " + sType + ")"
+		sInfo = sInfo + " - " + sType + ")"
 	else
 		sInfo = sInfo + ")"
 	end if
@@ -1221,6 +1223,7 @@ end function
 
 
 sub SetSession()
+	
 	dim dtNow as Date = Plan().LocalDateTime
 	
 	Debug "Sess Cnt:", APSession.Count
@@ -1230,7 +1233,7 @@ sub SetSession()
 		dim dtSessEnd as Date = oSession.Finish
 		
 		if dtSessEnd+3600 > dtNow then
-			// So there was session in the last hour. Use that session
+			// There was a session in the last hour. Use that session
 			dtNow = dtNow + 3600
 			oSession.Finish = dtNow.TotalSeconds
 			
@@ -1239,22 +1242,51 @@ sub SetSession()
 			// There was NO session within the last hour. Create a new one.
 			dim oNewSession as APSession = APSession.NewSession(Plan().LocalDateTime)
 			oNewSession.Finish = dtNow + 3600
-			oNewSession.Site = "Home"
+			oNewSession.Site = APResource.Default(APResource.rsrc_Site).Name
+			ONewSession.Observer = APResource.Default(APResource.rsrc_Observer).Name
 			
 			Debug "Sess NEW SESSION"
 		end if
 	end if
 end sub
 
+function GetObjectIDFromString(Target as string) as string
+	dim EndofID as integer
+	dim sObjectID as string =""
+	
+	if Target<>"" then
+		
+		dim CommaPos as integer = Instr(Target,",")
+		dim BracketPos as integer = Instr(Target,"(")
+		
+		if CommaPos >0 and CommaPos < BracketPos then
+			EndofID = CommaPos -1
+		else
+			EndofID = BracketPos -2
+		end if
+		
+		sObjectID =  Left(Target,EndofID)
+		
+	end if
+	
+	return sObjectID
+	
+end function
+
 // Searches for the object to apply the observation
 // Stops the user from having to have the correct object selected
 function GetPlanObjectForObs(id as string) as APPlanObject
+	
+	Debug "GetPlanObjectForObs Target:", id
+	
+	id = GetObjectIDFromString(id)
+	
 	Debug "GetPlanObjectForObs ID:", id
 	
 	if id<>""  then
 		dim i as integer
 		dim obj as APPlanObject
-		for i=0 to Plan.nItems
+		for i=1 to Plan.nItems
 			obj = Plan().Obj(i)
 			Debug "GetPlanObjectForObs Plan: ", obj.ID, " Display: ", obj.GetValueAsString("Display")
 			
@@ -1274,7 +1306,7 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 			Debug "GetPlanObjectForObs: Selected Object"
 			return Plan().SelectedObject
 		else
-			Debug "GetPlanObjectForObs: No id/selected object!"
+			Debug "GetPlanObjectForObs: No id selected object!"
 			return nil
 		end if
 	end if
@@ -1282,8 +1314,11 @@ end function
 
 sub LogObs(AppendCurrent as boolean, Param1 as string, Param2 as string, Param3 as string)
 	
-	dim obj as APPlanObject = Plan().SelectedObject
+	dim obj as APPlanObject
 	dim oAttachment as APObservationAttachment
+	
+	// Find the object to add or append the observation
+	obj = GetPlanObjectForObs(Param1)
 	
 	if obj<>nil then
 		
@@ -1316,6 +1351,7 @@ sub LogObs(AppendCurrent as boolean, Param1 as string, Param2 as string, Param3 
 		if not AppendCurrent then
 			oObs = obj.NewObservation(Plan.LocalDateTime, 0)
 			oObs.Plan = Plan().Name
+			
 			Debug "Plan:",Plan().Name,"ID:", oObs.ID,"Name:",oObs.Name,"Const:",oObs.Constellation
 		else
 			Debug "LogObs: Observation to append"
@@ -1332,15 +1368,15 @@ sub LogObs(AppendCurrent as boolean, Param1 as string, Param2 as string, Param3 
 			oObs.Save()
 			
 			if AppendCurrent then
-				Speak("Observation for " + oObs.ID + " appended")
+				Speak("Observation for," + oObs.ID + " appended")
 			else
-				Speak("Observation for" + oObs.ID + " created")
+				Speak("Observation for," + oObs.ID + " created")
 			end if
 		else
 			Speak("Cannot read image settings file")
 		end if
 	else
-		Speak("No object selected")
+		Speak("Object not found in plan")
 	end if
 end sub
 
@@ -1361,7 +1397,7 @@ function SlewTelescope() as JSON
 end function
 
 sub main()
-	DebugOff()
+	//DebugOff()
 	
 	dim sCmd as string = ""
 	dim sParams as string = ""
@@ -1376,8 +1412,11 @@ sub main()
 		sCmd  =  params.Lookup("cmd",0)
 		//Debug "Cmd=",sCmd
 		
+		// Param 1: Target Name
 		dim sParam1 as string = Web.DecodeURLComponent(params.Lookup("param1",""))
+		// Param 2: Image settings path
 		dim sParam2 as string = Web.DecodeURLComponent(params.Lookup("param2",""))
+		// Param 3: Image path
 		dim sParam3 as string = Web.DecodeURLComponent(params.Lookup("param3",""))
 		
 		//Debug "Param1=", sParam1," Param2=", sParam2," Param3=", sParam3
