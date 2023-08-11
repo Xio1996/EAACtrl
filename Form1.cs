@@ -676,7 +676,7 @@ namespace EAACtrl
                 //Get the objects ID
                 if (sObjectInfo != null)
                 {
-                    string sID = sObjectInfo.Substring(0, sObjectInfo.IndexOf(","));
+                    //string sID = sObjectInfo.Substring(0, sObjectInfo.IndexOf(","));
                     WriteMessage("Logging: " + sObjectInfo);
                     
                     if (sImagePath != null)
@@ -701,7 +701,7 @@ namespace EAACtrl
                             Root oAPCmd = new Root();
                             oAPCmd.script = "EAAControl";
                             oAPCmd.parameters = new Parameters();
-                            oAPCmd.parameters.param1 = Uri.EscapeDataString(sID);
+                            oAPCmd.parameters.param1 = Uri.EscapeDataString(sObjectInfo);
                             oAPCmd.parameters.param2 = Uri.EscapeDataString(sDestSettingsPath);
                             oAPCmd.parameters.param3 = Uri.EscapeDataString(sDestImagePath);
 
