@@ -53,10 +53,23 @@
             this.btnPlanetaryMoons = new System.Windows.Forms.Button();
             this.btnAsteroidsFOV = new System.Windows.Forms.Button();
             this.btnSCDSA = new System.Windows.Forms.Button();
+            this.tpSAMP = new System.Windows.Forms.TabPage();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.btnSAMPDo = new System.Windows.Forms.Button();
+            this.cbSAMPImage = new System.Windows.Forms.ComboBox();
+            this.btnSAMPImage = new System.Windows.Forms.Button();
+            this.cbSAMPSetFOV = new System.Windows.Forms.ComboBox();
+            this.btnSAMPSetFOV = new System.Windows.Forms.Button();
+            this.txtSAMPWebURL = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbSAMPProfile = new System.Windows.Forms.ComboBox();
+            this.btnSAMPDisconnect = new System.Windows.Forms.Button();
+            this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.btnSAMPConnect = new System.Windows.Forms.Button();
+            this.txtCdCPort = new System.Windows.Forms.TextBox();
+            this.txtCdCAddress = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cbSyncPlanetarium = new System.Windows.Forms.CheckBox();
             this.cbSlewOnTarget = new System.Windows.Forms.CheckBox();
@@ -82,9 +95,17 @@
             this.btnSNE = new System.Windows.Forms.Button();
             this.btnSNW = new System.Windows.Forms.Button();
             this.btnSNN = new System.Windows.Forms.Button();
+            this.tabSkyChart = new System.Windows.Forms.TabPage();
+            this.btnSkyChartCV = new System.Windows.Forms.Button();
+            this.btnSkyChartNV = new System.Windows.Forms.Button();
+            this.btnSkyChartS = new System.Windows.Forms.Button();
+            this.btnSkyChartE = new System.Windows.Forms.Button();
+            this.btnSkyChartW = new System.Windows.Forms.Button();
+            this.btnSkychartN = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.tpSAMP.SuspendLayout();
             this.tpConfig.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -93,6 +114,7 @@
             this.tabpStellarium.SuspendLayout();
             this.tabpTheSky.SuspendLayout();
             this.tabpSN.SuspendLayout();
+            this.tabSkyChart.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnTarget
@@ -236,6 +258,7 @@
             // tcExtra
             // 
             this.tcExtra.Controls.Add(this.tpTools);
+            this.tcExtra.Controls.Add(this.tpSAMP);
             this.tcExtra.Controls.Add(this.tpConfig);
             this.tcExtra.Controls.Add(this.tpDev);
             this.tcExtra.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold);
@@ -432,6 +455,165 @@
             this.btnSCDSA.UseVisualStyleBackColor = false;
             this.btnSCDSA.Click += new System.EventHandler(this.btnSCDSA_Click);
             // 
+            // tpSAMP
+            // 
+            this.tpSAMP.Controls.Add(this.comboBox1);
+            this.tpSAMP.Controls.Add(this.button2);
+            this.tpSAMP.Controls.Add(this.btnSAMPDo);
+            this.tpSAMP.Controls.Add(this.cbSAMPImage);
+            this.tpSAMP.Controls.Add(this.btnSAMPImage);
+            this.tpSAMP.Controls.Add(this.cbSAMPSetFOV);
+            this.tpSAMP.Controls.Add(this.btnSAMPSetFOV);
+            this.tpSAMP.Controls.Add(this.txtSAMPWebURL);
+            this.tpSAMP.Controls.Add(this.label2);
+            this.tpSAMP.Controls.Add(this.cbSAMPProfile);
+            this.tpSAMP.Controls.Add(this.btnSAMPDisconnect);
+            this.tpSAMP.Controls.Add(this.btnSAMPConnect);
+            this.tpSAMP.Location = new System.Drawing.Point(4, 26);
+            this.tpSAMP.Name = "tpSAMP";
+            this.tpSAMP.Padding = new System.Windows.Forms.Padding(3);
+            this.tpSAMP.Size = new System.Drawing.Size(368, 268);
+            this.tpSAMP.TabIndex = 3;
+            this.tpSAMP.Text = "SAMP";
+            this.tpSAMP.UseVisualStyleBackColor = true;
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.Enabled = false;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(117, 161);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(237, 25);
+            this.comboBox1.TabIndex = 48;
+            // 
+            // button2
+            // 
+            this.button2.Enabled = false;
+            this.button2.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.button2.Location = new System.Drawing.Point(7, 158);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(104, 32);
+            this.button2.TabIndex = 47;
+            this.button2.Text = "Script/Query";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // btnSAMPDo
+            // 
+            this.btnSAMPDo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSAMPDo.Location = new System.Drawing.Point(277, 190);
+            this.btnSAMPDo.Name = "btnSAMPDo";
+            this.btnSAMPDo.Size = new System.Drawing.Size(80, 32);
+            this.btnSAMPDo.TabIndex = 43;
+            this.btnSAMPDo.Text = "Do";
+            this.btnSAMPDo.UseVisualStyleBackColor = true;
+            this.btnSAMPDo.Click += new System.EventHandler(this.btnSAMPDo_Click);
+            // 
+            // cbSAMPImage
+            // 
+            this.cbSAMPImage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSAMPImage.FormattingEnabled = true;
+            this.cbSAMPImage.Items.AddRange(new object[] {
+            "CDS/P/DSS2/color",
+            "CDS/P/PanSTARRS/DR1/color-z-zg-g",
+            "CDS/P/PanSTARRS/DR1/color-i-r-g",
+            "CDS/P/2MASS/color",
+            "CDS/P/allWISE/color",
+            "fzu.cz/P/CTA-FRAM/survey/color"});
+            this.cbSAMPImage.Location = new System.Drawing.Point(117, 124);
+            this.cbSAMPImage.Name = "cbSAMPImage";
+            this.cbSAMPImage.Size = new System.Drawing.Size(237, 25);
+            this.cbSAMPImage.TabIndex = 42;
+            // 
+            // btnSAMPImage
+            // 
+            this.btnSAMPImage.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSAMPImage.Location = new System.Drawing.Point(7, 120);
+            this.btnSAMPImage.Name = "btnSAMPImage";
+            this.btnSAMPImage.Size = new System.Drawing.Size(104, 32);
+            this.btnSAMPImage.TabIndex = 41;
+            this.btnSAMPImage.Text = "Image";
+            this.btnSAMPImage.UseVisualStyleBackColor = true;
+            this.btnSAMPImage.Click += new System.EventHandler(this.btnSAMPImage_Click);
+            // 
+            // cbSAMPSetFOV
+            // 
+            this.cbSAMPSetFOV.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSAMPSetFOV.FormattingEnabled = true;
+            this.cbSAMPSetFOV.Items.AddRange(new object[] {
+            "CPC-800/AA294C FOV",
+            "5 degs",
+            "1 deg",
+            "30 arcminutes",
+            "25 arcminutes",
+            "10 arcminites"});
+            this.cbSAMPSetFOV.Location = new System.Drawing.Point(116, 86);
+            this.cbSAMPSetFOV.Name = "cbSAMPSetFOV";
+            this.cbSAMPSetFOV.Size = new System.Drawing.Size(238, 25);
+            this.cbSAMPSetFOV.TabIndex = 40;
+            // 
+            // btnSAMPSetFOV
+            // 
+            this.btnSAMPSetFOV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSAMPSetFOV.Location = new System.Drawing.Point(6, 82);
+            this.btnSAMPSetFOV.Name = "btnSAMPSetFOV";
+            this.btnSAMPSetFOV.Size = new System.Drawing.Size(104, 32);
+            this.btnSAMPSetFOV.TabIndex = 39;
+            this.btnSAMPSetFOV.Text = "Set FOV";
+            this.btnSAMPSetFOV.UseVisualStyleBackColor = true;
+            this.btnSAMPSetFOV.Click += new System.EventHandler(this.btnSAMPSetFOV_Click);
+            // 
+            // txtSAMPWebURL
+            // 
+            this.txtSAMPWebURL.Location = new System.Drawing.Point(100, 51);
+            this.txtSAMPWebURL.Name = "txtSAMPWebURL";
+            this.txtSAMPWebURL.Size = new System.Drawing.Size(255, 25);
+            this.txtSAMPWebURL.TabIndex = 37;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 55);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(88, 17);
+            this.label2.TabIndex = 36;
+            this.label2.Text = "WebHub URL";
+            // 
+            // cbSAMPProfile
+            // 
+            this.cbSAMPProfile.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSAMPProfile.FormattingEnabled = true;
+            this.cbSAMPProfile.Items.AddRange(new object[] {
+            "Standard Profile",
+            "Web Profile"});
+            this.cbSAMPProfile.Location = new System.Drawing.Point(190, 13);
+            this.cbSAMPProfile.Name = "cbSAMPProfile";
+            this.cbSAMPProfile.Size = new System.Drawing.Size(164, 25);
+            this.cbSAMPProfile.TabIndex = 34;
+            this.cbSAMPProfile.SelectedIndexChanged += new System.EventHandler(this.cbSAMPProfile_SelectedIndexChanged);
+            // 
+            // btnSAMPDisconnect
+            // 
+            this.btnSAMPDisconnect.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSAMPDisconnect.Location = new System.Drawing.Point(92, 10);
+            this.btnSAMPDisconnect.Name = "btnSAMPDisconnect";
+            this.btnSAMPDisconnect.Size = new System.Drawing.Size(90, 32);
+            this.btnSAMPDisconnect.TabIndex = 33;
+            this.btnSAMPDisconnect.Text = "Disconnect";
+            this.btnSAMPDisconnect.UseVisualStyleBackColor = true;
+            this.btnSAMPDisconnect.Click += new System.EventHandler(this.btnSAMPDisconnect_Click);
+            // 
+            // btnSAMPConnect
+            // 
+            this.btnSAMPConnect.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSAMPConnect.Location = new System.Drawing.Point(6, 10);
+            this.btnSAMPConnect.Name = "btnSAMPConnect";
+            this.btnSAMPConnect.Size = new System.Drawing.Size(80, 32);
+            this.btnSAMPConnect.TabIndex = 32;
+            this.btnSAMPConnect.Text = "Connect";
+            this.btnSAMPConnect.UseVisualStyleBackColor = true;
+            this.btnSAMPConnect.Click += new System.EventHandler(this.btnSAMPConnect_Click_1);
+            // 
             // tpConfig
             // 
             this.tpConfig.Controls.Add(this.groupBox3);
@@ -447,36 +629,28 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.button1);
-            this.groupBox3.Controls.Add(this.btnSAMPConnect);
+            this.groupBox3.Controls.Add(this.txtCdCPort);
+            this.groupBox3.Controls.Add(this.txtCdCAddress);
             this.groupBox3.Location = new System.Drawing.Point(9, 60);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(351, 57);
-            this.groupBox3.TabIndex = 34;
+            this.groupBox3.Size = new System.Drawing.Size(351, 58);
+            this.groupBox3.TabIndex = 33;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "SAMP (Aladin)";
+            this.groupBox3.Text = "CdC (Address / Port)";
             // 
-            // button1
+            // txtCdCPort
             // 
-            this.button1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.button1.Location = new System.Drawing.Point(94, 20);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(90, 32);
-            this.button1.TabIndex = 33;
-            this.button1.Text = "Disconnect";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            this.txtCdCPort.Location = new System.Drawing.Point(277, 23);
+            this.txtCdCPort.Name = "txtCdCPort";
+            this.txtCdCPort.Size = new System.Drawing.Size(68, 25);
+            this.txtCdCPort.TabIndex = 2;
             // 
-            // btnSAMPConnect
+            // txtCdCAddress
             // 
-            this.btnSAMPConnect.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSAMPConnect.Location = new System.Drawing.Point(8, 20);
-            this.btnSAMPConnect.Name = "btnSAMPConnect";
-            this.btnSAMPConnect.Size = new System.Drawing.Size(80, 32);
-            this.btnSAMPConnect.TabIndex = 32;
-            this.btnSAMPConnect.Text = "Connect";
-            this.btnSAMPConnect.UseVisualStyleBackColor = true;
-            this.btnSAMPConnect.Click += new System.EventHandler(this.btnSAMPConnect_Click);
+            this.txtCdCAddress.Location = new System.Drawing.Point(8, 23);
+            this.txtCdCAddress.Name = "txtCdCAddress";
+            this.txtCdCAddress.Size = new System.Drawing.Size(263, 25);
+            this.txtCdCAddress.TabIndex = 1;
             // 
             // groupBox1
             // 
@@ -554,6 +728,7 @@
             this.tabPlanetarium.Controls.Add(this.tabpStellarium);
             this.tabPlanetarium.Controls.Add(this.tabpTheSky);
             this.tabPlanetarium.Controls.Add(this.tabpSN);
+            this.tabPlanetarium.Controls.Add(this.tabSkyChart);
             this.tabPlanetarium.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.tabPlanetarium.Location = new System.Drawing.Point(3, 156);
             this.tabPlanetarium.Name = "tabPlanetarium";
@@ -818,6 +993,106 @@
             this.btnSNN.UseVisualStyleBackColor = false;
             this.btnSNN.Click += new System.EventHandler(this.btnSNN_Click);
             // 
+            // tabSkyChart
+            // 
+            this.tabSkyChart.Controls.Add(this.btnSkyChartCV);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartNV);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartS);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartE);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartW);
+            this.tabSkyChart.Controls.Add(this.btnSkychartN);
+            this.tabSkyChart.Location = new System.Drawing.Point(4, 26);
+            this.tabSkyChart.Name = "tabSkyChart";
+            this.tabSkyChart.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSkyChart.Size = new System.Drawing.Size(205, 116);
+            this.tabSkyChart.TabIndex = 3;
+            this.tabSkyChart.Text = "CdC";
+            this.tabSkyChart.UseVisualStyleBackColor = true;
+            // 
+            // btnSkyChartCV
+            // 
+            this.btnSkyChartCV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnSkyChartCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartCV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartCV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartCV.Location = new System.Drawing.Point(162, 7);
+            this.btnSkyChartCV.Name = "btnSkyChartCV";
+            this.btnSkyChartCV.Size = new System.Drawing.Size(36, 32);
+            this.btnSkyChartCV.TabIndex = 41;
+            this.btnSkyChartCV.Text = "CV";
+            this.btnSkyChartCV.UseVisualStyleBackColor = false;
+            this.btnSkyChartCV.Click += new System.EventHandler(this.btnSkyChartCV_Click);
+            // 
+            // btnSkyChartNV
+            // 
+            this.btnSkyChartNV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnSkyChartNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartNV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartNV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartNV.Location = new System.Drawing.Point(123, 7);
+            this.btnSkyChartNV.Name = "btnSkyChartNV";
+            this.btnSkyChartNV.Size = new System.Drawing.Size(37, 32);
+            this.btnSkyChartNV.TabIndex = 40;
+            this.btnSkyChartNV.Text = "NV";
+            this.btnSkyChartNV.UseVisualStyleBackColor = false;
+            this.btnSkyChartNV.Click += new System.EventHandler(this.btnSkyChartNV_Click);
+            // 
+            // btnSkyChartS
+            // 
+            this.btnSkyChartS.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartS.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartS.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartS.Location = new System.Drawing.Point(64, 7);
+            this.btnSkyChartS.Name = "btnSkyChartS";
+            this.btnSkyChartS.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartS.TabIndex = 39;
+            this.btnSkyChartS.Text = "S";
+            this.btnSkyChartS.UseVisualStyleBackColor = false;
+            this.btnSkyChartS.Click += new System.EventHandler(this.btnSkyChartS_Click);
+            // 
+            // btnSkyChartE
+            // 
+            this.btnSkyChartE.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartE.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartE.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartE.Location = new System.Drawing.Point(93, 7);
+            this.btnSkyChartE.Name = "btnSkyChartE";
+            this.btnSkyChartE.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartE.TabIndex = 38;
+            this.btnSkyChartE.Text = "E";
+            this.btnSkyChartE.UseVisualStyleBackColor = false;
+            this.btnSkyChartE.Click += new System.EventHandler(this.btnSkyChartE_Click);
+            // 
+            // btnSkyChartW
+            // 
+            this.btnSkyChartW.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartW.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartW.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartW.Location = new System.Drawing.Point(35, 7);
+            this.btnSkyChartW.Name = "btnSkyChartW";
+            this.btnSkyChartW.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartW.TabIndex = 37;
+            this.btnSkyChartW.Text = "W";
+            this.btnSkyChartW.UseVisualStyleBackColor = false;
+            this.btnSkyChartW.Click += new System.EventHandler(this.btnSkyChartW_Click);
+            // 
+            // btnSkychartN
+            // 
+            this.btnSkychartN.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkychartN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkychartN.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkychartN.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkychartN.Location = new System.Drawing.Point(6, 7);
+            this.btnSkychartN.Name = "btnSkychartN";
+            this.btnSkychartN.Size = new System.Drawing.Size(28, 32);
+            this.btnSkychartN.TabIndex = 36;
+            this.btnSkychartN.Text = "N";
+            this.btnSkychartN.UseVisualStyleBackColor = false;
+            this.btnSkychartN.Click += new System.EventHandler(this.btnSkychartN_Click);
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -853,9 +1128,12 @@
             this.tpTools.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.tpSAMP.ResumeLayout(false);
+            this.tpSAMP.PerformLayout();
             this.tpConfig.ResumeLayout(false);
             this.tpConfig.PerformLayout();
             this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tpDev.ResumeLayout(false);
@@ -864,6 +1142,7 @@
             this.tabpStellarium.ResumeLayout(false);
             this.tabpTheSky.ResumeLayout(false);
             this.tabpSN.ResumeLayout(false);
+            this.tabSkyChart.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -914,15 +1193,35 @@
         private System.Windows.Forms.CheckBox cbSyncPlanetarium;
         private System.Windows.Forms.CheckBox cbSlewOnTarget;
         private System.Windows.Forms.Button btnStellariumClearMarkers;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Button btnSAMPConnect;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button btnOverlayText;
         private System.Windows.Forms.TextBox txtOverlay;
         private System.Windows.Forms.CheckBox cbTextOverlay;
         private System.Windows.Forms.Button btnGetPlanetariumObject;
         private System.Windows.Forms.ComboBox cbPLGetObject;
+        private System.Windows.Forms.TabPage tpSAMP;
+        private System.Windows.Forms.ComboBox cbSAMPProfile;
+        private System.Windows.Forms.Button btnSAMPDisconnect;
+        private System.Windows.Forms.Button btnSAMPConnect;
+        private System.Windows.Forms.TextBox txtSAMPWebURL;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnSAMPSetFOV;
+        private System.Windows.Forms.ComboBox cbSAMPSetFOV;
+        private System.Windows.Forms.ComboBox cbSAMPImage;
+        private System.Windows.Forms.Button btnSAMPImage;
+        private System.Windows.Forms.Button btnSAMPDo;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.TabPage tabSkyChart;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox txtCdCPort;
+        private System.Windows.Forms.TextBox txtCdCAddress;
+        private System.Windows.Forms.Button btnSkyChartCV;
+        private System.Windows.Forms.Button btnSkyChartNV;
+        private System.Windows.Forms.Button btnSkyChartS;
+        private System.Windows.Forms.Button btnSkyChartE;
+        private System.Windows.Forms.Button btnSkyChartW;
+        private System.Windows.Forms.Button btnSkychartN;
     }
 }
 

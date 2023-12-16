@@ -202,5 +202,77 @@ namespace EAACtrl.Properties {
                 this["ExpandedTab"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SAMPProfile {
+            get {
+                return ((int)(this["SAMPProfile"]));
+            }
+            set {
+                this["SAMPProfile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SAMPWebHub {
+            get {
+                return ((string)(this["SAMPWebHub"]));
+            }
+            set {
+                this["SAMPWebHub"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SAMPFOV {
+            get {
+                return ((int)(this["SAMPFOV"]));
+            }
+            set {
+                this["SAMPFOV"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SAMPImage {
+            get {
+                return ((int)(this["SAMPImage"]));
+            }
+            set {
+                this["SAMPImage"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string CdCAddress {
+            get {
+                return ((string)(this["CdCAddress"]));
+            }
+            set {
+                this["CdCAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3292")]
+        public string CdCPort {
+            get {
+                return ((string)(this["CdCPort"]));
+            }
+            set {
+                this["CdCPort"] = value;
+            }
+        }
     }
 }

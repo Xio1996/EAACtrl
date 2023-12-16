@@ -28,6 +28,7 @@ using CefSharp.DevTools.IO;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using static EAACtrl.frmEAACP;
 using System.ComponentModel.Design;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace EAACtrl
 {
@@ -44,12 +45,21 @@ namespace EAACtrl
         private string mqttClientID = "";
         private string mqttBroker = "192.168.0.143";
 
-        private bool bmStandardProfile = true;
+        private bool bmStandardProfile = false;
         private bool bmSAMPConnected = false;
         private string sSAMP_PrivateKey = "";
         private string sSamp_hub_url = @"http://127.0.0.1:21012"; //Web Profile
 
         private string StarryNightMsgPath = @"C:\StarryNightMsg\snmsg.txt";
+
+        private string SelectedRA = "";
+        private string SelectedDec = "";
+
+        void StoreSelectedObject(string RA, string Dec)
+        {
+            SelectedRA = (double.Parse(RA) * 15).ToString();
+            SelectedDec = Dec;
+        }
 
         void SharpCap_MqttMsgReceived(object sender, MqttMsgPublishEventArgs e)
         {
@@ -165,7 +175,23 @@ namespace EAACtrl
             cbAPGetObjects.SelectedIndex = Properties.Settings.Default.APGetObjectsFormat;
             cbPLGetObject.SelectedIndex = Properties.Settings.Default.PLGetObjectsFormat;
             bExpanded = Properties.Settings.Default.Expanded;
+            cbSAMPProfile.SelectedIndex = Properties.Settings.Default.SAMPProfile;
+            txtSAMPWebURL.Text = Properties.Settings.Default.SAMPWebHub;
             tcExtra.SelectedIndex = Properties.Settings.Default.ExpandedTab;
+            cbSAMPSetFOV.SelectedIndex = Properties.Settings.Default.SAMPFOV;
+            cbSAMPImage.SelectedIndex = Properties.Settings.Default.SAMPImage;
+            txtCdCAddress.Text = Properties.Settings.Default.CdCAddress;
+            txtCdCPort.Text = Properties.Settings.Default.CdCPort;
+
+            if (cbSAMPProfile.SelectedIndex == 0)
+            {
+                bmStandardProfile = true;
+            }
+
+            if (txtSAMPWebURL.Text == "")
+            {
+                txtSAMPWebURL.Text = @"http://127.0.0.1:21012";
+            }
 
             //PlanetariumUI(tabPlanetarium.SelectedIndex);
 
@@ -225,6 +251,13 @@ namespace EAACtrl
             Properties.Settings.Default.PLGetObjectsFormat = cbPLGetObject.SelectedIndex;
             Properties.Settings.Default.Expanded = bExpanded;
             Properties.Settings.Default.ExpandedTab = tcExtra.SelectedIndex;
+            Properties.Settings.Default.SAMPWebHub = txtSAMPWebURL.Text;
+            Properties.Settings.Default.SAMPProfile = cbSAMPProfile.SelectedIndex;
+            Properties.Settings.Default.SAMPFOV = cbSAMPSetFOV.SelectedIndex;
+            Properties.Settings.Default.SAMPImage = cbSAMPImage.SelectedIndex;
+            Properties.Settings.Default.CdCAddress = txtCdCAddress.Text;
+            Properties.Settings.Default.CdCPort = txtCdCPort.Text;
+
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -246,11 +279,11 @@ namespace EAACtrl
 
                 TcpClient client = new TcpClient(server, port);
 
-                // Translate the passed message into ASCII and store it as a Byte array.
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
-
                 // Get a client stream for reading and writing.
                 NetworkStream stream = client.GetStream();
+                
+                // Translate the passed message into ASCII and store it as a Byte array.
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
 
                 // Send the message to the connected TcpServer.
                 stream.Write(data, 0, data.Length);
@@ -258,7 +291,7 @@ namespace EAACtrl
                 // Receive the server response.
 
                 // Buffer to store the response bytes.
-                data = new Byte[256];
+                data = new Byte[1024];
 
                 // Read the first batch of the TcpServer response bytes.
                 Int32 bytes = stream.Read(data, 0, data.Length);
@@ -275,9 +308,9 @@ namespace EAACtrl
                 WriteMessage("TCP Message (" + elapsedTime + ")\r\n");
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                ;
+                WriteMessage("TCP Exception: " + e.Message + "\r\n");
             }
 
             return responseData;
@@ -318,6 +351,8 @@ namespace EAACtrl
             else 
             {
                 bmStandardProfile = false;
+                sSamp_hub_url = txtSAMPWebURL.Text;
+
                 sSAMPRegister = sSAMPRegister.Replace("[SECRETorNAME]", "EAACtrl");
                 sSAMPRegister = sSAMPRegister.Replace("samp.hub.register", "samp.webhub.register");
                 WriteMessage("SampRegister: Web Profile, " + "URL=" + sSamp_hub_url + "\r\n");
@@ -515,6 +550,153 @@ namespace EAACtrl
             }
             finally 
             { 
+                lwebClient.Dispose();
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string Samp_script_aladin_send(string sPrivateKey, string sScriptCmd)
+        {
+
+            if (!bmSAMPConnected)
+            { return "NOTCONNECTED"; }
+
+            string result = "";
+            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notifyAll</methodName><params>";
+            sSAMPCoordPointAt += "<param><value>" + sPrivateKey + "</value></param>";
+            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>script.aladin.send</value></member><member><name>samp.params</name><value><struct>";
+            sSAMPCoordPointAt += "<member><name>script</name><value>" + sScriptCmd + "</value></member>";
+            sSAMPCoordPointAt += "</struct></value></member></struct></value></param></params></methodCall>";
+
+            WebClient lwebClient = new WebClient();
+
+            if (!bmStandardProfile)
+            {
+                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
+            }
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
+                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPCoordPointAt);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+                WriteMessage("SampAladinCmd " +sScriptCmd + " (" + elapsedTime + ")\r\n");
+
+            }
+            catch (Exception e)
+            {
+                WriteMessage("SampCoordPointAt " + e.Message + "\r\n");
+                result = "exception";
+            }
+            finally
+            {
+                lwebClient.Dispose();
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string Samp_getRegisteredClients(string sPrivateKey)
+        {
+            string result = "";
+            //string sXML = "<?xml version='1.0'?><methodCall><methodName>samp.webhub.register</methodName><params><param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member></struct></value></param></params></methodCall>";
+            string sSAMPDisconnect = "<?xml version='1.0'?><methodCall><methodName>samp.hub.getRegisteredClients</methodName><params><param><value>" + sPrivateKey + "</value></param></params></methodCall>";
+
+            if (!bmStandardProfile)
+            {
+                sSAMPDisconnect = sSAMPDisconnect.Replace("samp.hub.unregister", "samp.webhub.unregister");
+            }
+
+            WebClient lwebClient = new WebClient();
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
+                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPDisconnect);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+                WriteMessage("SampDisconnect (" + elapsedTime + ")\r\n");
+            }
+            catch (Exception e)
+            {
+                WriteMessage("SetAction ERROR " + e.Message + "\r\n");
+                result = "exception";
+            }
+            finally
+            {
+                lwebClient.Dispose();
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private string Samp_coord_get_sky(string sPrivateKey)
+        {
+
+            if (!bmSAMPConnected)
+            { return "NOTCONNECTED"; }
+
+            string result = "";
+            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notify</methodName><params>";
+            sSAMPCoordPointAt += "<param><value>" + sPrivateKey + "</value></param><param><value>c1</value></param>";
+            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>coord.get.sky</value></member>";
+            sSAMPCoordPointAt += "</struct></value></param></params></methodCall>";
+
+            WebClient lwebClient = new WebClient();
+
+            if (!bmStandardProfile)
+            {
+                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
+            }
+
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
+                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPCoordPointAt);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
+                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+                //WriteMessage("SampAladinCmd " + sScriptCmd + " (" + elapsedTime + ")\r\n");
+
+            }
+            catch (Exception e)
+            {
+                WriteMessage("SampCoordPointAt " + e.Message + "\r\n");
+                result = "exception";
+            }
+            finally
+            {
                 lwebClient.Dispose();
             }
 
@@ -1052,6 +1234,76 @@ namespace EAACtrl
             File.WriteAllText(StarryNightMsgPath, "altaz|" + Alt.ToString() + "|" + Az.ToString() + "|" + FOV.ToString());
         }
 
+        private void SkychartRedraw()
+        {
+            string sAddr = txtCdCAddress.Text;
+            int iPort = Int32.Parse(txtCdCPort.Text);
+            TCPMessage(sAddr, iPort, "REDRAW\r\n");
+        }
+
+        private void SkychartFOV(double FOV, bool Redraw = true)
+        {
+            string sAddr = txtCdCAddress.Text;
+            int iPort = Int32.Parse(txtCdCPort.Text);
+
+            string sFOVCmd = "SETFOV " + FOV.ToString() + "\r\n";
+            
+            TCPMessage(sAddr, iPort, sFOVCmd);
+
+            if (Redraw)
+            {
+                SkychartRedraw();
+            }
+        }
+
+        private void SkychartViewDirection(string Direction, bool ReDraw = true) 
+        {
+            string sAddr = txtCdCAddress.Text;
+            int iPort = Int32.Parse(txtCdCPort.Text);
+
+            string sCmd = Direction + "\r\n";
+            TCPMessage(sAddr, iPort, sCmd);
+
+            if (ReDraw)
+            { 
+                SkychartRedraw(); 
+            }
+        }
+
+        private void SkychartTargetPosition(string id, string RA, string Dec, double FOV)
+        {
+            try
+            {
+                WriteMessage("CdC Target Id=" + id + " RA:" + RA.ToString() + " Dec:" + Dec.ToString() + " FOV:" + FOV.ToString() + "\r\n");
+                string sSearchCmd = "SEARCH \"" + id + "\"\r\n";
+                
+                string sResult = "";
+
+                string sAddr = txtCdCAddress.Text;
+                int iPort = Int32.Parse(txtCdCPort.Text);
+
+                sResult = TCPMessage(sAddr, iPort, sSearchCmd);
+                if (sResult.Contains("Not found!"))
+                {
+                    string sRADec = "SETRA " + RA + "\r\n";
+                    sResult = TCPMessage(sAddr, iPort, sRADec);
+                    sRADec = "SETDEC " + Dec + "\r\n";
+                    sResult = TCPMessage(sAddr, iPort, sRADec);
+                }
+                
+                if (FOV > 0)
+                {
+                    SkychartFOV(FOV, false);
+                }
+
+                SkychartRedraw();
+            }
+            catch (Exception)
+            {
+                WriteMessage("CdC Target fail!\r\n");
+            }
+        }
+
         private void SyncPlanetarium()
         {
             string result = "";
@@ -1070,6 +1322,8 @@ namespace EAACtrl
                 SelectedObject oSelectedObject = JsonSerializer.Deserialize<SelectedObject>(result);
                 if (oSelectedObject.error == 0 && oSelectedObject.results != null)
                 {
+                    StoreSelectedObject(oSelectedObject.results.RA, oSelectedObject.results.Dec);
+
                     if (cbImagerZoom.Checked)
                     {
                         dblFOV = 1.05;
@@ -1119,6 +1373,15 @@ namespace EAACtrl
                             }
 
                             SetSNTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
+                            break;
+                        case 3: // CdC (SkyChart)
+                            if (cbImagerZoom.Checked)
+                            {
+                                // Set zoom for imager
+                                dblFOV = 1.0;
+                            }
+
+                            SkychartTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
                             break;
                     }
 
@@ -1242,6 +1505,8 @@ namespace EAACtrl
                 SelectedObject oSelectedObject = JsonSerializer.Deserialize<SelectedObject>(sResult);
                 if (oSelectedObject.error == 0 && oSelectedObject.results != null)
                 {
+                    StoreSelectedObject(oSelectedObject.results.RA, oSelectedObject.results.Dec);
+
                     SetOverlayText(oSelectedObject.results.target);
                     SharpCapCmd("Target|" + oSelectedObject.results.target);
                     frmEAACP.ActiveForm.Text = "EAACtrl - " + oSelectedObject.results.target;
@@ -1356,7 +1621,11 @@ namespace EAACtrl
 
         private void WriteMessage(string sMsg)
         {
-            tbMessages.AppendText(DateTime.Now.ToString("HH:mm:ss") + ": " + sMsg);
+            try
+            {
+                tbMessages.AppendText(DateTime.Now.ToString("HH:mm:ss") + ": " + sMsg);
+            }
+            catch { }
         }
 
         private void SetOverlayText(string sObjectName)
@@ -1377,7 +1646,7 @@ namespace EAACtrl
             if (sObjectInfo != null)
             {
                 //string sID = sObjectInfo.Substring(0, sObjectInfo.IndexOf(","));
-                WriteMessage("Logging: " + sObjectInfo + "\r\n");
+                //WriteMessage("Logging: " + sObjectInfo + "\r\n");
 
                 if (sImagePath != null)
                 {
@@ -1419,17 +1688,17 @@ namespace EAACtrl
                     }
                     else
                     {
-                        WriteMessage("ImageSettingsPath is NULL!\r\n");
+                        //WriteMessage("ImageSettingsPath is NULL!\r\n");
                     }
                 }
                 else
                 {
-                    WriteMessage("ImagePath is NULL!\r\n");
+                    //WriteMessage("ImagePath is NULL!\r\n");
                 }
             }
             else
             {
-                WriteMessage("ObjectInfo is NULL!\r\n");
+                //WriteMessage("ObjectInfo is NULL!\r\n");
             }
         }
 
@@ -1539,6 +1808,9 @@ namespace EAACtrl
                     if (oSelectedObject.error == 0 && oSelectedObject.results != null)
                     {
                         string RA = (double.Parse(oSelectedObject.results.RA)*15).ToString();
+
+                        StoreSelectedObject(oSelectedObject.results.RA, oSelectedObject.results.Dec);
+
                         Samp_coord_pointAt_sky(sSAMP_PrivateKey, RA, oSelectedObject.results.Dec);
                     }
                 }
@@ -1675,20 +1947,6 @@ namespace EAACtrl
             StellariumRemoveMarker("");
         }
 
-        private void btnSAMPConnect_Click(object sender, EventArgs e)
-        {
-            SampRegister();
-            if (sSAMP_PrivateKey != "")
-            {
-                SampMetaData(sSAMP_PrivateKey);
-            }
-        }
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            SampDisconnect(sSAMP_PrivateKey);
-        }
-
         private void btnOverlayText_Click_2(object sender, EventArgs e)
         {
             frmTextOverlay.Controls["lblText"].Text = txtOverlay.Text;
@@ -1706,6 +1964,131 @@ namespace EAACtrl
                 bOverlayVisible = true;
                 frmTextOverlay.Show();
             }
+        }
+
+        private void btnSAMPConnect_Click_1(object sender, EventArgs e)
+        {
+            SampRegister(bmStandardProfile);
+            if (sSAMP_PrivateKey != "")
+            {
+                SampMetaData(sSAMP_PrivateKey);
+                //Samp_getRegisteredClients(sSAMP_PrivateKey);
+                //Samp_coord_get_sky(sSAMP_PrivateKey);
+            }
+        }
+
+        private void btnSAMPDisconnect_Click(object sender, EventArgs e)
+        {
+            SampDisconnect(sSAMP_PrivateKey);
+        }
+
+        private void cbSAMPProfile_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbSAMPProfile.SelectedIndex == 0) 
+            {
+                bmStandardProfile = true;
+            }
+            else
+            {
+                bmStandardProfile = false;
+            }
+        }
+
+        private void btnSaveSAMPProfile_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Samp_script_aladin_send(sSAMP_PrivateKey, "zoom 54arcmin");
+        }
+
+
+        private string SAMPFOV()
+        {
+            string sFOV = "";
+
+            switch (cbSAMPSetFOV.SelectedIndex)
+            {
+                case 0:
+                    sFOV = "54arcmin";
+                    break;
+                case 1:
+                    sFOV = "5deg";
+                    break;
+                case 2:
+                    sFOV = "1deg";
+                    break;
+                case 3:
+                    sFOV = "30arcmin";
+                    break;
+                case 4:
+                    sFOV = "25arcmin";
+                    break;
+                case 5:
+                    sFOV = "10arcmin";
+                    break;
+            }
+
+            return sFOV;
+        }
+
+
+        private void btnSAMPSetFOV_Click(object sender, EventArgs e)
+        {
+            Samp_script_aladin_send(sSAMP_PrivateKey, "zoom " + SAMPFOV());
+        }
+
+        private void btnSAMPImage_Click(object sender, EventArgs e)
+        {
+            Samp_script_aladin_send(sSAMP_PrivateKey, "get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+        }
+
+        private void btnSAMPDo_Click(object sender, EventArgs e)
+        {
+
+            Samp_script_aladin_send(sSAMP_PrivateKey, "get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+        }
+
+        private void btnSkychartN_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart SETNORTH\r\n");
+            SkychartViewDirection("SETNORTH");
+            SkychartFOV(100);
+        }
+
+        private void btnSkyChartW_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart SETWEST\r\n");
+            SkychartViewDirection("SETWEST");
+            SkychartFOV(100);
+        }
+
+        private void btnSkyChartS_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart SETSOUTH\r\n");
+            SkychartViewDirection("SETSOUTH");
+            SkychartFOV(100);
+        }
+
+        private void btnSkyChartE_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart SETEAST\r\n");
+            SkychartViewDirection("SETEAST");
+            SkychartFOV(100);
+        }
+
+        private void btnSkyChartNV_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart FOV NV\r\n");
+            SkychartFOV(100);
+        }
+
+        private void btnSkyChartCV_Click(object sender, EventArgs e)
+        {
+            WriteMessage("Skychart FOV CV\r\n");
+            SkychartFOV(45);
         }
     }
 
