@@ -274,5 +274,29 @@ namespace EAACtrl.Properties {
                 this["CdCPort"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string StellariumAddress {
+            get {
+                return ((string)(this["StellariumAddress"]));
+            }
+            set {
+                this["StellariumAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8090")]
+        public string StellariumPort {
+            get {
+                return ((string)(this["StellariumPort"]));
+            }
+            set {
+                this["StellariumPort"] = value;
+            }
+        }
     }
 }

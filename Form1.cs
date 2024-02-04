@@ -1,34 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Timers;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.IO;
-using CefSharp.Web;
-using System.Text.Json.Serialization;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using CefSharp.DevTools.Network;
-using System.Security.Policy;
 using uPLibrary.Networking.M2Mqtt;
-using CefSharp.DevTools.IO;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using static EAACtrl.frmEAACP;
-using System.ComponentModel.Design;
-using System.Runtime.InteropServices.ComTypes;
+
 
 namespace EAACtrl
 {
@@ -45,15 +30,27 @@ namespace EAACtrl
         private string mqttClientID = "";
         private string mqttBroker = "192.168.0.143";
 
-        private bool bmStandardProfile = false;
-        private bool bmSAMPConnected = false;
-        private string sSAMP_PrivateKey = "";
-        private string sSamp_hub_url = @"http://127.0.0.1:21012"; //Web Profile
-
-        private string StarryNightMsgPath = @"C:\StarryNightMsg\snmsg.txt";
-
         private string SelectedRA = "";
         private string SelectedDec = "";
+
+        // *** NEW Objects Feb 2024
+        // AstroPlanner Helper class - replaces AP functions in EAACtrl Panel
+        private APHelper APHelper = new APHelper();
+
+        // Stellarium Communication and processing class
+        private Stellarium Stellarium = new Stellarium();
+
+        // TheSky Professional
+        private TheSky TheSky = new TheSky();
+
+        // Starry Night 8 Pro
+        private StarryNight StarryNight = new StarryNight();
+        
+        // CdC
+        private SkyChart SkyChart = new SkyChart();
+
+        // SAMP Client class
+        private SAMP SAMP = new SAMP();
 
         void StoreSelectedObject(string RA, string Dec)
         {
@@ -148,7 +145,6 @@ namespace EAACtrl
             oAPCmd.parameters = new Parameters();
             oAPCmd.parameters.cmd = "0";
             this.SendAPCmd("KeepAlive", oAPCmd);
-            //this.SendAPCmdAsync("0", "", "KeepAlive");
         }
 
         private void SetTimer()
@@ -182,18 +178,18 @@ namespace EAACtrl
             cbSAMPImage.SelectedIndex = Properties.Settings.Default.SAMPImage;
             txtCdCAddress.Text = Properties.Settings.Default.CdCAddress;
             txtCdCPort.Text = Properties.Settings.Default.CdCPort;
+            txtStellariumAddress.Text = Properties.Settings.Default.StellariumAddress;
+            txtStellariumPort.Text = Properties.Settings.Default.StellariumPort;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
-                bmStandardProfile = true;
+                SAMP.StandardProfile = true;
             }
 
             if (txtSAMPWebURL.Text == "")
             {
                 txtSAMPWebURL.Text = @"http://127.0.0.1:21012";
             }
-
-            //PlanetariumUI(tabPlanetarium.SelectedIndex);
 
             if (Properties.Settings.Default.YPos == -1)
             {
@@ -231,11 +227,50 @@ namespace EAACtrl
             }
         }
 
+        private void ExpandUI()
+        {
+            if (bExpanded)
+            {
+                frmEAACP.ActiveForm.Width = 240;
+                btnExpand.Text = ">>";
+            }
+            else
+            {
+                frmEAACP.ActiveForm.Width = 617;
+                btnExpand.Text = "<<";
+            }
+
+            bExpanded = !bExpanded;
+        }
+
+        private void btnExpand_Click(object sender, EventArgs e)
+        {
+            ExpandUI();
+        }
+
+        private void frmEAACP_Load(object sender, EventArgs e)
+        {
+            //CheckForIllegalCrossThreadCalls = false;
+
+            this.Width = 240;
+            if (bOverlayVisible)
+            {
+                frmTextOverlay.Show();
+            }
+
+            if (tabPlanetarium.SelectedIndex == 1)
+            {
+                Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "7");
+            }
+
+            WriteMessage("EAACtrl started.\r\n");
+        }
+
         private void frmEAACP_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (sSAMP_PrivateKey != "")
+            if (SAMP.SAMP_PrivateKey != "")
             {
-                SampDisconnect(sSAMP_PrivateKey);
+                SAMP.SampDisconnect();
             }
 
             Properties.Settings.Default.CaptureMode = cbCaptureProfile.SelectedIndex;
@@ -257,876 +292,52 @@ namespace EAACtrl
             Properties.Settings.Default.SAMPImage = cbSAMPImage.SelectedIndex;
             Properties.Settings.Default.CdCAddress = txtCdCAddress.Text;
             Properties.Settings.Default.CdCPort = txtCdCPort.Text;
+            Properties.Settings.Default.StellariumAddress = txtStellariumAddress.Text;
+            Properties.Settings.Default.StellariumPort = txtStellariumPort.Text;
 
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
         }
 
-        private string sTSScriptHeader = "/* Java Script */\r\n/* Socket Start Packet */\r\n";
-        private string sSetTSTargetPosition = "\r\n\r\nvar Out=\"\";\r\nvar ObjectFound = false;\r\n\r\n/* Find target and centre or if not found set chart centre position */\r\ntry {\r\n\tsky6StarChart.Find(ObjectName);\r\n\t/* Centre target */\r\n\tTheSkyXAction.execute(\"TARGET_CENTER\");\r\n\tObjectFound=true;\r\n}\r\ncatch(err){\tOut = err.message;}\r\n\r\ntry {\r\n\tif (!ObjectFound) {\r\n\t\t/* set RA and Dec in decimal degrees */\r\n\t\tsky6StarChart.RightAscension = RA;\r\n\t\tsky6StarChart.Declination = Dec;\r\n\t\tObjectFound = true;\r\n\t}\r\n}\r\ncatch (err) { Out += err.message; }\r\n\r\nif (ObjectFound) {\r\n\t/* Set FOV degrees */\r\n\tif (FOV > 0) {\r\n\t\tsky6StarChart.FieldOfView = FOV;\r\n\t}\r\n}\r\n\r\n/* Socket End Packet */";
-
-
-        private string TCPMessage(String server, Int32 port, String message)
+        private void btnOverlayText_Click_2(object sender, EventArgs e)
         {
-            // String to store the response ASCII representation.
-            String responseData = String.Empty;
-
-            try
-            {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                TcpClient client = new TcpClient(server, port);
-
-                // Get a client stream for reading and writing.
-                NetworkStream stream = client.GetStream();
-                
-                // Translate the passed message into ASCII and store it as a Byte array.
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
-
-                // Send the message to the connected TcpServer.
-                stream.Write(data, 0, data.Length);
-
-                // Receive the server response.
-
-                // Buffer to store the response bytes.
-                data = new Byte[1024];
-
-                // Read the first batch of the TcpServer response bytes.
-                Int32 bytes = stream.Read(data, 0, data.Length);
-                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-
-                stream.Close();
-                client.Close();
-                
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("TCP Message (" + elapsedTime + ")\r\n");
-
-            }
-            catch (Exception e)
-            {
-                WriteMessage("TCP Exception: " + e.Message + "\r\n");
-            }
-
-            return responseData;
+            frmTextOverlay.Controls["lblText"].Text = txtOverlay.Text;
         }
 
-        private string SampRegister(bool StandardProfile = true)
+        private void cbTextOverlay_CheckedChanged_1(object sender, EventArgs e)
         {
-            string result = "";
-            //string sXML = "<?xml version='1.0'?><methodCall><methodName>samp.hub.register</methodName><params><param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member></struct></value></param></params></methodCall>";
-            string sSAMPRegister = "<?xml version='1.0'?><methodCall><methodName>samp.hub.register</methodName><params><param><value>[SECRETorNAME]</value></param></params></methodCall>";
-
-            if (StandardProfile)
+            if (bOverlayVisible)
             {
-                // Locate home folder and read the lock file
-                string sHomeFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-                if (File.Exists(sHomeFolder + @"\.samp"))
-                {
-                    // Read the lock file
-                    string sSAMPLockFileContent = File.ReadAllText(sHomeFolder + @"\.samp");
-
-                    int ipos = sSAMPLockFileContent.IndexOf("samp.secret=");
-                    int ilastpos = sSAMPLockFileContent.IndexOf(Environment.NewLine, ipos);
-
-                    string sSamp_secret = sSAMPLockFileContent.Substring(ipos + 12, ilastpos - (ipos + 12));
-
-                    sSAMPRegister = sSAMPRegister.Replace("[SECRETorNAME]", sSamp_secret);
-
-                    ipos = sSAMPLockFileContent.IndexOf("samp.hub.xmlrpc.url=");
-                    ilastpos = sSAMPLockFileContent.IndexOf(Environment.NewLine, ipos);
-
-                    sSamp_hub_url = sSAMPLockFileContent.Substring(ipos + 20, ilastpos - (ipos + 20));
-
-                    WriteMessage("SampRegister: Standard Profile, " + "Secret=" + sSamp_secret + ", " + "URL=" + sSamp_hub_url + "\r\n");
-                }
-                else { return ("nolockfile"); }
+                bOverlayVisible = false;
+                frmTextOverlay.Hide();
             }
-            else 
+            else
             {
-                bmStandardProfile = false;
-                sSamp_hub_url = txtSAMPWebURL.Text;
-
-                sSAMPRegister = sSAMPRegister.Replace("[SECRETorNAME]", "EAACtrl");
-                sSAMPRegister = sSAMPRegister.Replace("samp.hub.register", "samp.webhub.register");
-                WriteMessage("SampRegister: Web Profile, " + "URL=" + sSamp_hub_url + "\r\n");
+                bOverlayVisible = true;
+                frmTextOverlay.Show();
             }
-            
-            WebClient lwebClient = new WebClient();
-            
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPRegister);
-
-                if (result != "")
-                {
-                    int iStart = 0, iEnd = 0, iPos = 0;
-                    iPos = result.IndexOf("samp.private-key", 0);
-                    iStart = result.IndexOf("<value>", iPos) + 7;
-                    iEnd = result.IndexOf("</value>", iStart);
-
-                    result = result.Substring(iStart, iEnd - iStart);
-
-                    sSAMP_PrivateKey = result;
-
-                    TimeSpan ts = stopwatch.Elapsed;
-
-                    string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                    WriteMessage("SampRegister: key=" + result + " (" + elapsedTime + ")\r\n");
-
-                    bmSAMPConnected = true;
-
-                }
-                else
-                {
-                    WriteMessage("SampRegister: Can't Connect!\r\n");
-                }
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SampRegister ERROR " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient?.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
         }
 
-        private string SampDisconnect(string sPrivateKey)
+        private void WriteMessage(string sMsg)
         {
-            string result = "";
-            //string sXML = "<?xml version='1.0'?><methodCall><methodName>samp.webhub.register</methodName><params><param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member></struct></value></param></params></methodCall>";
-            string sSAMPDisconnect = "<?xml version='1.0'?><methodCall><methodName>samp.hub.unregister</methodName><params><param><value>" + sPrivateKey + "</value></param></params></methodCall>";
-            
-            if (!bmStandardProfile)
-            {
-                sSAMPDisconnect = sSAMPDisconnect.Replace("samp.hub.unregister", "samp.webhub.unregister");
-            }
-
-            WebClient lwebClient = new WebClient();
-            
             try
             {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPDisconnect);
-
-                bmSAMPConnected = false;
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SampDisconnect (" + elapsedTime + ")\r\n");
+                tbMessages.AppendText(DateTime.Now.ToString("HH:mm:ss") + ": " + sMsg);
             }
-            catch (Exception e)
-            {
-                WriteMessage("SetAction ERROR " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
+            catch { }
         }
 
-        private string SampMetaData(string sPrivateKey)
+        private void SetOverlayText(string sObjectName)
         {
-            string result = "";
-            string sSAMPMetaData = "<?xml version='1.0'?><methodCall><methodName>samp.hub.declareMetadata</methodName><params><param><value><string>[PRIVATEKEY]</string></value></param>" +
-                "<param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member><member><name>samp.description</name>" +
-                "<value><string>Manges EAA workflow by coordinating astronomy apps such as AstroPlanner, SharpCap, Stellarium etc.</string></value></member>" +
-                "<member><name>samp.author</name><value><string>Pete Gallop</string></value></member></struct></value></param></params></methodCall>";
-
-            sSAMPMetaData = sSAMPMetaData.Replace("[PRIVATEKEY]", sPrivateKey);
-
-            if (!bmStandardProfile)
+            if (sObjectName != "")
             {
-                sSAMPMetaData = sSAMPMetaData.Replace("samp.hub.declareMetadata", "samp.webhub.declareMetadata");
+                frmTextOverlay.Controls["lblText"].Text = sObjectName;
             }
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            else
             {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPMetaData);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SampMetaData (" + elapsedTime + ")\r\n");
-
+                frmTextOverlay.Controls["lblText"].Text = @"EAA with an 8-inch SCT";
             }
-            catch (Exception e)
-            {
-                WriteMessage("SampMetaData " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string Samp_coord_pointAt_sky(string sPrivateKey, string RA, string Dec)
-        {
-
-            if (!bmSAMPConnected)
-            { return "NOTCONNECTED"; }
-
-            string result = "";
-            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notifyAll</methodName><params>";
-            sSAMPCoordPointAt += "<param><value>" + sPrivateKey + "</value></param>";
-            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>coord.pointAt.sky</value></member><member><name>samp.params</name><value><struct>";
-            sSAMPCoordPointAt += "<member><name>ra</name><value>" + RA + "</value></member>";
-            sSAMPCoordPointAt += "<member><name>dec</name><value>" + Dec + "</value></member>";
-            sSAMPCoordPointAt += "</struct></value></member></struct></value></param></params></methodCall>";
-
-            WebClient lwebClient = new WebClient();
-
-            if (!bmStandardProfile)
-            {
-                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
-            }
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SampCoordPointAt " + RA + "," + Dec + " (" + elapsedTime + ")\r\n");
-
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SampCoordPointAt " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string Samp_script_aladin_send(string sPrivateKey, string sScriptCmd)
-        {
-
-            if (!bmSAMPConnected)
-            { return "NOTCONNECTED"; }
-
-            string result = "";
-            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notifyAll</methodName><params>";
-            sSAMPCoordPointAt += "<param><value>" + sPrivateKey + "</value></param>";
-            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>script.aladin.send</value></member><member><name>samp.params</name><value><struct>";
-            sSAMPCoordPointAt += "<member><name>script</name><value>" + sScriptCmd + "</value></member>";
-            sSAMPCoordPointAt += "</struct></value></member></struct></value></param></params></methodCall>";
-
-            WebClient lwebClient = new WebClient();
-
-            if (!bmStandardProfile)
-            {
-                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
-            }
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SampAladinCmd " +sScriptCmd + " (" + elapsedTime + ")\r\n");
-
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SampCoordPointAt " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string Samp_getRegisteredClients(string sPrivateKey)
-        {
-            string result = "";
-            //string sXML = "<?xml version='1.0'?><methodCall><methodName>samp.webhub.register</methodName><params><param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member></struct></value></param></params></methodCall>";
-            string sSAMPDisconnect = "<?xml version='1.0'?><methodCall><methodName>samp.hub.getRegisteredClients</methodName><params><param><value>" + sPrivateKey + "</value></param></params></methodCall>";
-
-            if (!bmStandardProfile)
-            {
-                sSAMPDisconnect = sSAMPDisconnect.Replace("samp.hub.unregister", "samp.webhub.unregister");
-            }
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPDisconnect);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SampDisconnect (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SetAction ERROR " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string Samp_coord_get_sky(string sPrivateKey)
-        {
-
-            if (!bmSAMPConnected)
-            { return "NOTCONNECTED"; }
-
-            string result = "";
-            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notify</methodName><params>";
-            sSAMPCoordPointAt += "<param><value>" + sPrivateKey + "</value></param><param><value>c1</value></param>";
-            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>coord.get.sky</value></member>";
-            sSAMPCoordPointAt += "</struct></value></param></params></methodCall>";
-
-            WebClient lwebClient = new WebClient();
-
-            if (!bmStandardProfile)
-            {
-                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
-            }
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(sSamp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                //WriteMessage("SampAladinCmd " + sScriptCmd + " (" + elapsedTime + ")\r\n");
-
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SampCoordPointAt " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SetStelAction(string sName)
-        {
-            string result = "";
-
-            string sWebServiceURL = @"http://localhost:8090/api/stelaction/do";
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = lwebClient.UploadString(sWebServiceURL, "POST", "id=" + sName);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SetStAction: " + sName + "(" + elapsedTime + "\r\n");
-
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SetStAction ERROR " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SetStelProperty(string sName, string sValue)
-        {
-            string result = "";
-
-            string sWebServiceURL = @"http://localhost:8090/api/stelproperty/set";
-            WebClient lwebClient = new WebClient();
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = lwebClient.UploadString(sWebServiceURL, "POST", "id=" + sName + "&value=" + sValue);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SetStProp: " + sName + ":" + sValue + "(" + elapsedTime + "\r\n");
-            }
-            catch (Exception e)
-            {
-                WriteMessage("SetStProp ERROR " + e.Message + "\r\n");
-                result = "exception";
-            }
-            finally 
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SetStellariumFOV(int iFOV)
-        {
-            string result = "";
-
-            string sWebServiceURL = "http://localhost:8090/api/main/fov";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("fov", iFOV.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("SetStFOV " + iFOV.ToString() + "deg (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("SetStFOV ERROR \r\n");
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SyncStellariumToPosition(double RA, double Dec)
-        {
-            string result = "";
-            string sWebServiceURL = "http://localhost:8090/api/main/focus";
-            string sPos = RA.ToString() + ", " + Dec.ToString();
-
-            // Convert selected object's RA to degrees and then both RA and Dec to radians
-            RA = RA * 15 * Math.PI / 180;
-            Dec = Dec * Math.PI / 180;
-
-            // Calculate 3D vector for Stellarium
-            double dblX = Math.Cos(Dec) * Math.Cos(RA);
-            double dblY = Math.Cos(Dec) * Math.Sin(RA);
-            double dblZ = Math.Sin(Dec);
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("position", "[" + dblX.ToString() + "," + dblY.ToString() + "," + dblZ.ToString() + "]");
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-
-                WriteMessage("SyncStToPos " + sPos + " (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("SyncStToPos ERROR \r\n");
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-
-        private string StellariumToAltAzPosition(double Alt, double Az)
-        {
-            string result = "";
-            string sWebServiceURL = "http://localhost:8090/api/main/view";
-            string sPos = Alt.ToString() + ", " + Az.ToString();
-
-            Az = 180 - Az;
-            // Convert to radians
-            Az = Az * Math.PI / 180;
-            Alt = Alt * Math.PI / 180;
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("az", Az.ToString());
-            nvcParams.Add("alt", Alt.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("SyncStToAltAz " + sPos + " (" + elapsedTime+ ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("SyncStToAltAz ERROR \r\n");
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string StellariumMove(double X, double Y)
-        {
-            string result = "";
-            string sWebServiceURL = "http://localhost:8090/api/main/move";
-            string sPos = X.ToString() + ", " + Y.ToString();
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("x", X.ToString());
-            nvcParams.Add("y", Y.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("StMove " + sPos + " (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("StMove ERROR \r\n");
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SyncStellariumToID(string sID)
-        {
-            string result = "";
-
-            string sWebServiceURL = "http://localhost:8090/api/main/focus";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("target", sID);
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("SyncToID " + sID + " (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("SyncStToID ERROR \r\n");
-            }
-            finally 
-            { 
-                lwebClient?.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string SyncStellariumToAPObject(string sID, string sRA, string sDec, string sType)
-        {
-            string result = "";
-
-            string sWebServiceURL = "http://localhost:8090/api/scripts/direct";
-
-            string sInput = "sObject=\"" + sID + "\";sRA=\"" + sRA + "\";sDec=\"" + sDec + "\";sType=\"" + sType + "\";\r\n";
-            string sCode = "objmap = core.getObjectInfo(sObject);\r\nsInfo = new String(core.mapToString(objmap));\r\nsFound=sInfo.slice(5,10);\r\n\r\nif (sFound==\"found\")\r\n{\r\n\tCustomObjectMgr.addCustomObject(sObject, sRA, sDec, true);\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n\tcore.addToSelectedObjectInfoString(\"AP Type: \" + sType,false)\r\n}\r\nelse\r\n{\r\n\tcore.output(\"Object found\");\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n}";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sInput + sCode);
-
-            WebClient lwebClient = new WebClient();
-            try
-            {
-                
-
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("SyncStToAPObj " + sID + " " + sRA + ", " + sDec + " (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("SyncStToAPObj ERROR \r\n");
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private string StellariumRemoveMarker(string sMarkerName)
-        {
-            string result = "";
-
-            string sWebServiceURL = "http://localhost:8090/api/scripts/direct";
-
-            string sInput = "sMarker=\"" + sMarkerName + "\";\r\n";
-            string sCode = "if (sMarker==\"\")\r\n{\r\n\tCustomObjectMgr.removeCustomObjects();\r\n}\r\nelse\r\n{\r\n\tCustomObjectMgr.removeCustomObject(sMarker);\r\n}";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sInput + sCode);
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("StRemoveMarker (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("StRemoveMarker ERROR \r\n");
-            }
-            finally 
-            {
-                lwebClient?.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return result;
-        }
-
-        private StellObject StellariumGetSelectedObjectInfo()
-        {
-            string result = "";
-            StellObject oSelectedObject = null;
-
-            string sWebServiceURL = "http://localhost:8090/api/objects/info?format=json";
-
-            WebClient lwebClient = new WebClient();
-
-            try
-            {
-                aTimer.Enabled = false;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = lwebClient.DownloadString(sWebServiceURL);
-                if (result != "")
-                {
-                    oSelectedObject = JsonSerializer.Deserialize<StellObject>(result);
-                }
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                WriteMessage("StGetSelectedObj (" + elapsedTime + ")\r\n");
-            }
-            catch (Exception)
-            {
-                WriteMessage("StGetSelectedObj ERROR \r\n");
-            }
-            finally 
-            { 
-                lwebClient.Dispose();
-            }
-
-            aTimer.Enabled = true;
-
-            return oSelectedObject;
         }
 
         private string SendAPCmd(string sCmdName, Root APCmd)
@@ -1136,6 +347,7 @@ namespace EAACtrl
             string scriptpayload = "http://localhost:8080?cmd=launch&auth=xyz&cmdformat=json&responseformat=json&payload=";
             scriptpayload += Uri.EscapeDataString(JsonSerializer.Serialize<Root>(APCmd));
             WebClient lwebClient = new WebClient();
+            lwebClient.Encoding=Encoding.UTF8;
             try
             {
                 aTimer.Enabled = false;
@@ -1146,9 +358,7 @@ namespace EAACtrl
                 result = lwebClient.DownloadString(scriptpayload);
 
                 TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",
-                    ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
 
                 iCmdCount++;
 
@@ -1176,132 +386,6 @@ namespace EAACtrl
             aTimer.Enabled = true;
 
             return result;
-        }
-
-        // Connects to Rotator. Calculates the PA and sets rotator angle to PA. This is reflected in TheSky FOVI as long as the FOVI is set as linked to the camera's rotator.
-        private void AltAzFOVICorrection()
-        {
-            try
-            {
-                string sAltAzFOVICorr = "/* Java Script */\r\n/* Socket Start Packet */\r\nvar Out;\r\n/* Find centre of chart and calculate PA for rotator */\r\ntry {\r\n\tif (ccdsoftCamera.rotatorIsConnected() == 0) {\r\n\t\tccdsoftCamera.rotatorConnect();\r\n\t\tOut = \"Rotator Connected,\"\r\n\t}\r\n\r\n\tif (ccdsoftCamera.rotatorIsConnected() > 0) {\r\n\t\tccdsoftCamera.rotatorGotoPositionAngle(sky6StarChart.Rotation);\r\n\t\tOut = \"  PA:\" + sky6StarChart.Rotation.toFixed(3);\r\n\t}\r\n\telse {\r\n\t\tOut = \"-2\";\r\n\t}\r\n}\r\ncatch (err) { Out = \"-1\"; }\r\n/* Socket End Packet */";
-                string sPA = TCPMessage("127.0.0.1", 3040, sAltAzFOVICorr);
-                WriteMessage("TS AltAzFOVI" + sPA.Substring(0, sPA.LastIndexOf("|")) + "\r\n");
-            }
-            catch (Exception) { WriteMessage("TS AltAzFOVI failed!\r\n"); }
-        }
-
-        private void SlewToTarget(string RA, string Dec)
-        {
-            string sSlewScript = "/* Java Script */\r\n/* Socket Start Packet */\r\nif (sky6RASCOMTele.IsConnected==0)//Connect failed for some reason\r\n{\r\n\tOut = \"-1\"\r\n}\r\nelse\r\n{\r\n\tsky6RASCOMTele.Asynchronous = true;\r\n\tsky6RASCOMTele.SlewToRaDec(\"" + RA + "\", \"" + Dec + "\",\"\");\r\n\tOut  = \"0\";\r\n}\r\n/* Socket End Packet */";
-            TCPMessage("127.0.0.1", 3040, sSlewScript);
-        }
-
-        private void SetTSTargetPosition(string id, string RA, string Dec, double FOV)
-        {
-            try
-            {
-                WriteMessage("TS Target Id=" + id + " RA:" + RA.ToString() + " Dec:" + Dec.ToString() + "\r\n");
-                string sScriptParams = "var ObjectName = \"" + id + "\";var RA = " + RA + ";var Dec = " + Dec + ";var FOV = " + FOV.ToString() + ";";
-
-                TCPMessage("127.0.0.1", 3040, sTSScriptHeader + sScriptParams + sSetTSTargetPosition);
-            }
-            catch (Exception)
-            {
-                WriteMessage("TS Target fail!\r\n");
-            }
-        }
-
-        private void SetSNTargetPosition(string id, string RA, string Dec, double FOV)
-        {
-            double dblRA = Double.Parse(RA);
-            double dblDec = Double.Parse(Dec);
-
-            WriteMessage("SetSNTarPos " + id + ", " + RA + ", " + Dec + ", " + FOV.ToString() + "\r\n");
-            
-            File.WriteAllText(StarryNightMsgPath, "target|" + id + "|" + dblRA.ToString() + "|" + dblDec.ToString() + "|" + FOV.ToString());
-        }
-
-        private void SetSNFOV(double FOV)
-        {
-            WriteMessage("SetSNFOV " + FOV.ToString() + "\r\n");
-            File.WriteAllText(StarryNightMsgPath, "fov|" + FOV.ToString());
-
-        }
-
-        private void SetSNAltAz(double Alt, double Az, double FOV)
-        {
-            WriteMessage("SetSNAltAz " + Az.ToString() + ", " + Alt.ToString() + "\r\n");
-            File.WriteAllText(StarryNightMsgPath, "altaz|" + Alt.ToString() + "|" + Az.ToString() + "|" + FOV.ToString());
-        }
-
-        private void SkychartRedraw()
-        {
-            string sAddr = txtCdCAddress.Text;
-            int iPort = Int32.Parse(txtCdCPort.Text);
-            TCPMessage(sAddr, iPort, "REDRAW\r\n");
-        }
-
-        private void SkychartFOV(double FOV, bool Redraw = true)
-        {
-            string sAddr = txtCdCAddress.Text;
-            int iPort = Int32.Parse(txtCdCPort.Text);
-
-            string sFOVCmd = "SETFOV " + FOV.ToString() + "\r\n";
-            
-            TCPMessage(sAddr, iPort, sFOVCmd);
-
-            if (Redraw)
-            {
-                SkychartRedraw();
-            }
-        }
-
-        private void SkychartViewDirection(string Direction, bool ReDraw = true) 
-        {
-            string sAddr = txtCdCAddress.Text;
-            int iPort = Int32.Parse(txtCdCPort.Text);
-
-            string sCmd = Direction + "\r\n";
-            TCPMessage(sAddr, iPort, sCmd);
-
-            if (ReDraw)
-            { 
-                SkychartRedraw(); 
-            }
-        }
-
-        private void SkychartTargetPosition(string id, string RA, string Dec, double FOV)
-        {
-            try
-            {
-                WriteMessage("CdC Target Id=" + id + " RA:" + RA.ToString() + " Dec:" + Dec.ToString() + " FOV:" + FOV.ToString() + "\r\n");
-                string sSearchCmd = "SEARCH \"" + id + "\"\r\n";
-                
-                string sResult = "";
-
-                string sAddr = txtCdCAddress.Text;
-                int iPort = Int32.Parse(txtCdCPort.Text);
-
-                sResult = TCPMessage(sAddr, iPort, sSearchCmd);
-                if (sResult.Contains("Not found!"))
-                {
-                    string sRADec = "SETRA " + RA + "\r\n";
-                    sResult = TCPMessage(sAddr, iPort, sRADec);
-                    sRADec = "SETDEC " + Dec + "\r\n";
-                    sResult = TCPMessage(sAddr, iPort, sRADec);
-                }
-                
-                if (FOV > 0)
-                {
-                    SkychartFOV(FOV, false);
-                }
-
-                SkychartRedraw();
-            }
-            catch (Exception)
-            {
-                WriteMessage("CdC Target fail!\r\n");
-            }
         }
 
         private void SyncPlanetarium()
@@ -1332,11 +416,11 @@ namespace EAACtrl
                     switch (tabPlanetarium.SelectedIndex)
                     {
                         case 0: // Stellarium
-                            string sResult = SyncStellariumToAPObject(oSelectedObject.results.id,
+                            string sResult = Stellarium.SyncStellariumToAPObject(oSelectedObject.results.id,
                                                                    oSelectedObject.results.SRA,
                                                                    oSelectedObject.results.SDec,
                                                                    oSelectedObject.results.Type);
-
+                            WriteMessage(Stellarium.Message);
                             if (sResult == "ok")
                             {
                                 bOK = true;
@@ -1346,7 +430,8 @@ namespace EAACtrl
                             {
                                 if (cbImagerZoom.Checked)
                                 {
-                                    SetStellariumFOV(1);
+                                    Stellarium.SetStellariumFOV(1);
+                                    WriteMessage(Stellarium.Message);
                                 }
                             }
                             break;
@@ -1357,11 +442,12 @@ namespace EAACtrl
                                 oSelectedObject.results.id = "MPL " + oSelectedObject.results.id;
                             }
 
-                            SetTSTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
-
+                            TheSky.SetTSTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
+                            WriteMessage(TheSky.Message);
                             if (cbFOVICorr.Checked)
                             {
-                                AltAzFOVICorrection();
+                                TheSky.AltAzFOVICorrection();
+                                WriteMessage(TheSky.Message);
                             }
                             break;
 
@@ -1372,7 +458,7 @@ namespace EAACtrl
                                 dblFOV = 0.0;
                             }
 
-                            SetSNTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
+                            StarryNight.SetSNTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
                             break;
                         case 3: // CdC (SkyChart)
                             if (cbImagerZoom.Checked)
@@ -1381,93 +467,13 @@ namespace EAACtrl
                                 dblFOV = 1.0;
                             }
 
-                            SkychartTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
+                            SkyChart.SkychartTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
                             break;
                     }
 
-                    if (sSAMP_PrivateKey!="")
+                    if (SAMP.SAMP_PrivateKey!="")
                     {
-                        Samp_coord_pointAt_sky(sSAMP_PrivateKey, (double.Parse(oSelectedObject.results.RA)*15).ToString() , oSelectedObject.results.Dec);
-                    }
-                }
-                else
-                {
-                    WriteMessage("Sync AP-TS Error -1\r\n");
-                }
-            }
-            else
-            {
-                WriteMessage("Sync AP-TS Error -2\r\n");
-            }
-        }
-        private void SyncPlanetariumOLD()
-        {
-            string result = "";
-            double dblFOV = -1.0;
-            bool bOK = false;
-
-            // Get current AP object name and RA/DEC
-            Root oAPCmd = new Root();
-            oAPCmd.script = "EAAControl";
-            oAPCmd.parameters = new Parameters();
-            oAPCmd.parameters.cmd = "1";
-
-            result = SendAPCmd("GetTarget", oAPCmd);
-            if (result != "")
-            {
-                SelectedObject oSelectedObject = JsonSerializer.Deserialize<SelectedObject>(result);
-                if (oSelectedObject.error == 0 && oSelectedObject.results != null)
-                {
-                    if (cbImagerZoom.Checked)
-                    {
-                        dblFOV = 1.05;
-                    }
-
-                    if (tabPlanetarium.SelectedIndex == 0)
-                    {
-
-                        // Minor planets need the MPL prefix to be found as a target in TS
-                        if (oSelectedObject.results.Type == "Minor")
-                        {
-                            oSelectedObject.results.id = "MPL " + oSelectedObject.results.id;
-                        }
-
-                        SetTSTargetPosition(oSelectedObject.results.id, oSelectedObject.results.RA, oSelectedObject.results.Dec, dblFOV);
-
-                        if (cbFOVICorr.Checked)
-                        {
-                            AltAzFOVICorrection();
-                        }
-                    }
-                    else
-                    {
-                        string sResult = SyncStellariumToID(oSelectedObject.results.id);
-                        if (sResult == "true")
-                        {
-                            WriteMessage("SyncByID AP-ST done.\r\n");
-                            bOK = true;
-                        }
-                        else
-                        {
-                            sResult = SyncStellariumToPosition(Convert.ToDouble(oSelectedObject.results.RA), Convert.ToDouble(oSelectedObject.results.Dec));
-                            if (sResult == "ok")
-                            {
-                                WriteMessage("SyncByPos AP-ST done.\r\n");
-                                bOK = true;
-                            }
-                            else
-                            {
-                                WriteMessage("SyncByPos AP-ST ERROR.\r\n");
-                            }
-                        }
-
-                        if (bOK)
-                        {
-                            if (cbImagerZoom.Checked)
-                            {
-                                SetStellariumFOV(1);
-                            }
-                        }
+                        SAMP.Samp_coord_pointAt_sky((double.Parse(oSelectedObject.results.RA) * 15).ToString(), oSelectedObject.results.Dec);
                     }
                 }
                 else
@@ -1590,16 +596,6 @@ namespace EAACtrl
             }
         }
 
-        private void btnAzAltFOVI_Click(object sender, EventArgs e)
-        {
-            AltAzFOVICorrection();
-        }
-
-        private void btnFind_Click(object sender, EventArgs e)
-        {
-            SharpCapCmd("Find");
-        }
-
         private void btnCapture_Click(object sender, EventArgs e)
         {
             string sProfile = "";
@@ -1617,27 +613,6 @@ namespace EAACtrl
                     break;
             }
             SharpCapCmd("Capture|" + sProfile);
-        }
-
-        private void WriteMessage(string sMsg)
-        {
-            try
-            {
-                tbMessages.AppendText(DateTime.Now.ToString("HH:mm:ss") + ": " + sMsg);
-            }
-            catch { }
-        }
-
-        private void SetOverlayText(string sObjectName)
-        {
-            if (sObjectName != "")
-            {
-                frmTextOverlay.Controls["lblText"].Text = sObjectName;
-            }
-            else
-            {
-                frmTextOverlay.Controls["lblText"].Text = @"EAA with an 8-inch SCT";
-            }
         }
 
         private void ProcessCaptureInfo(bool bCreate, string sObjectInfo, string sImageInfo, string sImagePath, string sCameraSettingsPath)
@@ -1706,44 +681,14 @@ namespace EAACtrl
         {
             SharpCapCmd("Log");
         }
-
-        private void ExpandUI()
+        private void btnLogPlus_Click(object sender, EventArgs e)
         {
-            if (bExpanded)
-            {
-                frmEAACP.ActiveForm.Width = 240;
-                btnExpand.Text = ">>";
-            }
-            else
-            {
-                frmEAACP.ActiveForm.Width = 617;
-                btnExpand.Text = "<<";
-            }
-
-            bExpanded = !bExpanded;
+            SharpCapCmd("LogAppend");
         }
 
-        private void btnExpand_Click(object sender, EventArgs e)
+        private void btnFind_Click(object sender, EventArgs e)
         {
-            ExpandUI();
-        }
-
-        private void frmEAACP_Load(object sender, EventArgs e)
-        {
-            //CheckForIllegalCrossThreadCalls = false;
-
-            this.Width = 240;
-            if (bOverlayVisible)
-            {
-                frmTextOverlay.Show();
-            }
-
-            if (tabPlanetarium.SelectedIndex == 1)
-            {
-                SetStelProperty("NebulaMgr.catalogFilters", "7");
-            }
-
-            WriteMessage("EAACtrl started.\r\n");
+            SharpCapCmd("Find");
         }
 
         private void btnSCDSA_Click(object sender, EventArgs e)
@@ -1775,19 +720,79 @@ namespace EAACtrl
 
             SendAPCmd("PLMOONS", oAPCmd);
         }
+       
+        // ******* NEW CODE FEB 2024
 
-        private void btnLogPlus_Click(object sender, EventArgs e)
+        private string APExecuteScript(string ScriptPayload)
         {
-            SharpCapCmd("LogAppend");
+            string result = "";
+
+            string apWebServices = "http://localhost:8080?cmd=launch&auth=xyz&cmdformat=json&responseformat=json&payload=";
+            apWebServices += ScriptPayload;
+            WebClient lwebClient = new WebClient();
+            lwebClient.Encoding = Encoding.UTF8;
+            try
+            {
+                aTimer.Enabled = false;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = lwebClient.DownloadString(apWebServices);
+
+                TimeSpan ts = stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                iCmdCount++;
+
+                WriteMessage("APExecuteScript (" + elapsedTime + ")\r\n");
+
+            }
+            catch (Exception e)
+            {
+                WriteMessage("APExecuteScript ERROR " + e.Message + "\r\n");
+            }
+            finally
+            {
+                lwebClient.Dispose();
+            }
+
+            aTimer.Enabled = true;
+
+            return result;
+        }
+
+        private APGetCmdResult APGetObjects(int Cmd, int Option, string ObjType)
+        {
+            APGetCmd getCmd = new APGetCmd();
+            getCmd.script = "EAAControl2";
+            getCmd.parameters= new APGetCmdParams();
+            getCmd.parameters.Cmd = Cmd;
+            getCmd.parameters.Option = Option;
+            getCmd.parameters.ObjType = ObjType;
+            
+            string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APGetCmd>(getCmd)));
+            APGetCmdResult apObjects = JsonSerializer.Deserialize<APGetCmdResult>(sOut);
+            if (apObjects.error == 0 && apObjects.results != null)
+            {
+                return apObjects;
+            }
+
+            return null;
         }
 
         private void btnStelGetObjectInfo_Click(object sender, EventArgs e)
         {
-            StellObject obj = StellariumGetSelectedObjectInfo();
-            if (obj != null) 
+            APGetCmdResult apOut = APGetObjects(1, 1,"");
+            foreach (APCmdObject obj in apOut.results.Objects)
             {
-                // Convert RA/DEC to CDC portal values and place on clipboard
+                string sConst = APHelper.ConstellationFullName(obj.Constellation);
+                string sType = APHelper.DisplayTypeFromAPType (obj.Type);
+                string sTargetName = APHelper.TargetDisplay(obj);
+                WriteMessage(sConst + " " + sType + " " + sTargetName + "\r\n");
+                Stellarium.SyncStellariumToAPObject(obj.ID, obj.RA2000.ToString(), obj.Dec2000.ToString(), obj.Type);
             }
+
         }
 
         private void btnAPGetObject_Click(object sender, EventArgs e)
@@ -1811,7 +816,7 @@ namespace EAACtrl
 
                         StoreSelectedObject(oSelectedObject.results.RA, oSelectedObject.results.Dec);
 
-                        Samp_coord_pointAt_sky(sSAMP_PrivateKey, RA, oSelectedObject.results.Dec);
+                        SAMP.Samp_coord_pointAt_sky(RA, oSelectedObject.results.Dec);
                     }
                 }
             }
@@ -1840,50 +845,61 @@ namespace EAACtrl
             }
         }
 
- 
-
         private void btnAzAltFOVI_Click_1(object sender, EventArgs e)
         {
-            AltAzFOVICorrection();
+            TheSky.AltAzFOVICorrection();
+            WriteMessage(TheSky.Message);
         }
 
         private void btnN_Click_1(object sender, EventArgs e)
         {
-            //SetStelAction("actionLook_Towards_North");
-            StellariumToAltAzPosition(45, 0);
-            SetStellariumFOV(85);
+            Stellarium.StellariumToAltAzPosition(45, 0);
+            WriteMessage(Stellarium.Message);
+            Stellarium.SetStellariumFOV(85);
+            WriteMessage(Stellarium.Message);
         }
         
-
         private void btnW_Click_1(object sender, EventArgs e)
         {
-            //SetStelAction("actionLook_Towards_West");
-            StellariumToAltAzPosition(45, 270);
-            SetStellariumFOV(85);
+            Stellarium.StellariumToAltAzPosition(45, 270);
+            WriteMessage(Stellarium.Message);
+            Stellarium.SetStellariumFOV(85);
+            WriteMessage(Stellarium.Message);
         }
 
         private void btnS_Click_1(object sender, EventArgs e)
         {
-            //SetStelAction("actionLook_Towards_South");
-            StellariumToAltAzPosition(45, 180);
-            SetStellariumFOV(85);
+            Stellarium.StellariumToAltAzPosition(45, 180);
+            WriteMessage(Stellarium.Message);
+            Stellarium.SetStellariumFOV(85);
+            WriteMessage(Stellarium.Message);
         }
 
         private void btnE_Click_1(object sender, EventArgs e)
         {
-            //SetStelAction("actionLook_Towards_East");
-            StellariumToAltAzPosition(45, 90);
-            SetStellariumFOV(85);
+            Stellarium.StellariumToAltAzPosition(45, 90);
+            WriteMessage(Stellarium.Message);
+            Stellarium.SetStellariumFOV(85);
+            WriteMessage(Stellarium.Message);
         }
 
         private void btnNV_Click_1(object sender, EventArgs e)
         {
-            SetStellariumFOV(72);
+            Stellarium.SetStellariumFOV(72);
+            WriteMessage(Stellarium.Message);
         }
 
         private void btnCV_Click_1(object sender, EventArgs e)
         {
-            SetStellariumFOV(36);
+            Stellarium.SetStellariumFOV(36);
+            WriteMessage(Stellarium.Message);
+        }
+
+        private void btnStellariumClearMarkers_Click(object sender, EventArgs e)
+        {
+            // Removes all markers from Stellarium that were created manually (shift + left click) or via the EAACtrl app.
+            Stellarium.StellariumRemoveMarker("");
+            WriteMessage(Stellarium.Message);
         }
 
         private void btnAllCats_Click_1(object sender, EventArgs e)
@@ -1891,21 +907,24 @@ namespace EAACtrl
             switch (btnAllCats.Text)
             {
                 case "Def Cats":
-                    if (SetStelProperty("NebulaMgr.catalogFilters", "255852135") != "exception")
+                    if (Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "255852135") != "exception")
                     {
                         btnAllCats.Text = "All Cats";
+                        WriteMessage(Stellarium.Message);
                     }
                     break;
                 case "All Cats":
-                    if (SetStelProperty("NebulaMgr.catalogFilters", "255852279") != "exception")
+                    if (Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "255852279") != "exception")
                     {
                         btnAllCats.Text = "All+D Cats";
+                        WriteMessage(Stellarium.Message);
                     }
                     break;
                 case "All+D Cats":
-                    if (SetStelProperty("NebulaMgr.catalogFilters", "7") != "exception")
+                    if (Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "7") != "exception")
                     {
                         btnAllCats.Text = "Def Cats";
+                        WriteMessage(Stellarium.Message);
                     }
                     break;
             }
@@ -1913,65 +932,48 @@ namespace EAACtrl
 
         private void btnSNN_Click(object sender, EventArgs e)
         {
-            SetSNAltAz(45, 0, 118);
+            StarryNight.SetSNAltAz(45, 0, 118);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSNW_Click(object sender, EventArgs e)
         {
-            SetSNAltAz(45, 270, 118);
+            StarryNight.SetSNAltAz(45, 270, 118);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSNS_Click(object sender, EventArgs e)
         {
-            SetSNAltAz(45, 180, 118);
+            StarryNight.SetSNAltAz(45, 180, 118);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSNE_Click(object sender, EventArgs e)
         {
-            SetSNAltAz(45, 90, 118);
+            StarryNight.SetSNAltAz(45, 90, 118);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSNNV_Click(object sender, EventArgs e)
         {
-            SetSNFOV(118);
+            StarryNight.SetSNFOV(118);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSNCV_Click(object sender, EventArgs e)
         {
-            SetSNFOV(36);
-        }
-
-        private void btnStellariumClearMarkers_Click(object sender, EventArgs e)
-        {
-            // Removes all markers from Stellarium that were created manually (shift + left click) or via the EAACtrl app.
-            StellariumRemoveMarker("");
-        }
-
-        private void btnOverlayText_Click_2(object sender, EventArgs e)
-        {
-            frmTextOverlay.Controls["lblText"].Text = txtOverlay.Text;
-        }
-
-        private void cbTextOverlay_CheckedChanged_1(object sender, EventArgs e)
-        {
-            if (bOverlayVisible)
-            {
-                bOverlayVisible = false;
-                frmTextOverlay.Hide();
-            }
-            else
-            {
-                bOverlayVisible = true;
-                frmTextOverlay.Show();
-            }
+            StarryNight.SetSNFOV(36);
+            WriteMessage(StarryNight.Message);
         }
 
         private void btnSAMPConnect_Click_1(object sender, EventArgs e)
         {
-            SampRegister(bmStandardProfile);
-            if (sSAMP_PrivateKey != "")
+            SAMP.SampRegister();
+            WriteMessage(SAMP.Message);
+            if (SAMP.SAMP_PrivateKey != "")
             {
-                SampMetaData(sSAMP_PrivateKey);
+                SAMP.SampMetaData();
+                WriteMessage(SAMP.Message);
                 //Samp_getRegisteredClients(sSAMP_PrivateKey);
                 //Samp_coord_get_sky(sSAMP_PrivateKey);
             }
@@ -1979,31 +981,27 @@ namespace EAACtrl
 
         private void btnSAMPDisconnect_Click(object sender, EventArgs e)
         {
-            SampDisconnect(sSAMP_PrivateKey);
+            SAMP.SampDisconnect();
+            WriteMessage(SAMP.Message);
         }
 
         private void cbSAMPProfile_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cbSAMPProfile.SelectedIndex == 0) 
             {
-                bmStandardProfile = true;
+                SAMP.StandardProfile = true;
             }
             else
             {
-                bmStandardProfile = false;
+                SAMP.StandardProfile = false;
             }
-        }
-
-        private void btnSaveSAMPProfile_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Samp_script_aladin_send(sSAMP_PrivateKey, "zoom 54arcmin");
+            SAMP.Samp_script_aladin_send("zoom 54arcmin");
+            WriteMessage(SAMP.Message);
         }
-
 
         private string SAMPFOV()
         {
@@ -2034,61 +1032,80 @@ namespace EAACtrl
             return sFOV;
         }
 
-
         private void btnSAMPSetFOV_Click(object sender, EventArgs e)
         {
-            Samp_script_aladin_send(sSAMP_PrivateKey, "zoom " + SAMPFOV());
+            SAMP.Samp_script_aladin_send("zoom " + SAMPFOV());
+            WriteMessage(SAMP.Message);
         }
 
         private void btnSAMPImage_Click(object sender, EventArgs e)
         {
-            Samp_script_aladin_send(sSAMP_PrivateKey, "get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+            SAMP.Samp_script_aladin_send("get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+            WriteMessage(SAMP.Message);
         }
 
         private void btnSAMPDo_Click(object sender, EventArgs e)
         {
 
-            Samp_script_aladin_send(sSAMP_PrivateKey, "get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+            SAMP.Samp_script_aladin_send("get HiPS(" + cbSAMPImage.Items[cbSAMPImage.SelectedIndex] + ") " + SelectedRA + " " + SelectedDec + " " + SAMPFOV());
+            WriteMessage(SAMP.Message);
         }
 
         private void btnSkychartN_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart SETNORTH\r\n");
-            SkychartViewDirection("SETNORTH");
-            SkychartFOV(100);
+            SkyChart.SkychartViewDirection("SETNORTH");
+            SkyChart.SkychartFOV(100);
         }
 
         private void btnSkyChartW_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart SETWEST\r\n");
-            SkychartViewDirection("SETWEST");
-            SkychartFOV(100);
+            SkyChart.SkychartViewDirection("SETWEST");
+            SkyChart.SkychartFOV(100);
         }
 
         private void btnSkyChartS_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart SETSOUTH\r\n");
-            SkychartViewDirection("SETSOUTH");
-            SkychartFOV(100);
+            SkyChart.SkychartViewDirection("SETSOUTH");
+            SkyChart.SkychartFOV(100);
         }
 
         private void btnSkyChartE_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart SETEAST\r\n");
-            SkychartViewDirection("SETEAST");
-            SkychartFOV(100);
+            SkyChart.SkychartViewDirection("SETEAST");
+            SkyChart.SkychartFOV(100);
         }
 
         private void btnSkyChartNV_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart FOV NV\r\n");
-            SkychartFOV(100);
+            SkyChart.SkychartFOV(100);
         }
 
         private void btnSkyChartCV_Click(object sender, EventArgs e)
         {
             WriteMessage("Skychart FOV CV\r\n");
-            SkychartFOV(45);
+            SkyChart.SkychartFOV(45);
+        }
+
+        private void btnGetPlanetariumObject_Click(object sender, EventArgs e)
+        {
+            switch (cbPLGetObject.SelectedIndex)
+            {
+                case 0:
+     
+                    // Add Selected Object in Stellarium to current AP Plan
+                    Root oAPCmd = new Root(); 
+                    oAPCmd.script = "EAAControl";
+                    oAPCmd.parameters = new Parameters();
+                    oAPCmd.parameters.cmd = "10";
+
+                    string sResult = SendAPCmd("GETOBJECTS", oAPCmd);
+                    break;
+            }
         }
     }
 
@@ -2156,5 +1173,57 @@ namespace EAACtrl
         public double raJ2000 { get; set; }
         public string type { get; set; }
 
+    }
+    // New AP classes
+    public class APPutCmd
+    {
+        public string script { get; set; }
+        public APPutCmdParams parameters { get; set; }
+    }
+
+    public class APPutCmdParams
+    {
+        public int Cmd { get; set; }
+        public int Option { get; set; }
+        public List<APCmdObject> Objects { get; set; }
+    }
+
+    public class APGetCmd
+    {
+        public string script { get; set; }
+        public APGetCmdParams parameters { get; set; }
+    }
+
+    public class APGetCmdParams
+    {
+        public int Cmd { get; set; }
+        public int Option { get; set; }
+        public string ObjType { get; set; }
+    }
+
+    public class APGetCmdResult
+    {
+        public int error { get; set; }
+        public APGetResults results { get; set; }
+    }
+
+    public class APGetResults
+    {
+        public List<APCmdObject> Objects { get; set; }
+    }
+
+    public class APCmdObject
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Size { get; set; }
+        public string Constellation { get; set; }
+        public string Catalogue { get; set; }
+        public string Distance { get; set; }
+        public int PosAngle { get; set; }
+        public double Magnitude { get; set; }
+        public double RA2000 { get; set; }
+        public double Dec2000 { get; set; }
     }
 }

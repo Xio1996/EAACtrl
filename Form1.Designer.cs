@@ -67,6 +67,9 @@
             this.btnSAMPDisconnect = new System.Windows.Forms.Button();
             this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.txtStellariumPort = new System.Windows.Forms.TextBox();
+            this.txtStellariumAddress = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.txtCdCPort = new System.Windows.Forms.TextBox();
             this.txtCdCAddress = new System.Windows.Forms.TextBox();
@@ -107,6 +110,7 @@
             this.groupBox2.SuspendLayout();
             this.tpSAMP.SuspendLayout();
             this.tpConfig.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tpDev.SuspendLayout();
@@ -294,12 +298,7 @@
             this.cbPLGetObject.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cbPLGetObject.FormattingEnabled = true;
             this.cbPLGetObject.Items.AddRange(new object[] {
-            "DSA",
-            "Object ID only",
-            "Object full information (csv)",
-            "RA/Dec J2000 (CDS/Simbad)",
-            "AstroPlanner, add to plan",
-            "SAMP coords (Aladin)"});
+            "Add to AstroPlanner"});
             this.cbPLGetObject.Location = new System.Drawing.Point(130, 47);
             this.cbPLGetObject.Name = "cbPLGetObject";
             this.cbPLGetObject.Size = new System.Drawing.Size(230, 25);
@@ -317,6 +316,7 @@
             this.btnGetPlanetariumObject.TabIndex = 35;
             this.btnGetPlanetariumObject.Text = "PL Get Object";
             this.btnGetPlanetariumObject.UseVisualStyleBackColor = false;
+            this.btnGetPlanetariumObject.Click += new System.EventHandler(this.btnGetPlanetariumObject_Click);
             // 
             // groupBox2
             // 
@@ -616,6 +616,7 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.groupBox4);
             this.tpConfig.Controls.Add(this.groupBox3);
             this.tpConfig.Controls.Add(this.groupBox1);
             this.tpConfig.Controls.Add(this.cbFOVICorr);
@@ -626,6 +627,31 @@
             this.tpConfig.TabIndex = 2;
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.txtStellariumPort);
+            this.groupBox4.Controls.Add(this.txtStellariumAddress);
+            this.groupBox4.Location = new System.Drawing.Point(9, 123);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(351, 58);
+            this.groupBox4.TabIndex = 34;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Stellarium (Address / Port)";
+            // 
+            // txtStellariumPort
+            // 
+            this.txtStellariumPort.Location = new System.Drawing.Point(277, 23);
+            this.txtStellariumPort.Name = "txtStellariumPort";
+            this.txtStellariumPort.Size = new System.Drawing.Size(68, 25);
+            this.txtStellariumPort.TabIndex = 2;
+            // 
+            // txtStellariumAddress
+            // 
+            this.txtStellariumAddress.Location = new System.Drawing.Point(8, 23);
+            this.txtStellariumAddress.Name = "txtStellariumAddress";
+            this.txtStellariumAddress.Size = new System.Drawing.Size(263, 25);
+            this.txtStellariumAddress.TabIndex = 1;
             // 
             // groupBox3
             // 
@@ -1119,7 +1145,7 @@
             this.Name = "frmEAACP";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "EAACtrl (1.1)";
+            this.Text = "EAACtrl (2.0)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmEAACP_FormClosing);
             this.Load += new System.EventHandler(this.frmEAACP_Load);
@@ -1132,6 +1158,8 @@
             this.tpSAMP.PerformLayout();
             this.tpConfig.ResumeLayout(false);
             this.tpConfig.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -1222,6 +1250,9 @@
         private System.Windows.Forms.Button btnSkyChartE;
         private System.Windows.Forms.Button btnSkyChartW;
         private System.Windows.Forms.Button btnSkychartN;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.TextBox txtStellariumPort;
+        private System.Windows.Forms.TextBox txtStellariumAddress;
     }
 }
 
