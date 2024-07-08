@@ -1,0 +1,297 @@
+//- Show the exact location of a comet/asteroid or any other AstroPlanner object in SharpCap using the Deep Space Annotation feature.
+//- Allows objects information to be formatted for use in SharpCap's Deep Sky Annotation (DSA) feature via the clipboard.
+//- All data for minor bodies is retrieved via JPL's Horizons web service as this provides more precise location data.
+//- Any other object selected in AstroPlanner uses the position information as calculated by AstroPlanner.
+//-
+//- This script was primarily written for point-source objects such as minor planets/quasars and does not use the size and position angle fields of DSA.
+//-
+//- USAGE:
+//- 1. Add the asteroid/comet/object, you want to mark in SharpCap image, to the plan.
+//- 2. Select the object and run the script.
+//- 3. Plate solve your current image in SharpCap and start Deep Space Annotation
+//- 4. Click on the 'Paste Custom Object' button to mark the object with a cross.
+//-
+//- TIP 1 - To get the most accurate position, use live stacking (or single non-live shot) to record the image before plate solving. This ensures the position of the minor body
+//- stays in the same place and removes tracking, atmospheric and rotation errors.
+//-
+//- TIP 2 - Can be used on old images using SharpCap's Folder Monitor camera and AstroPlanner's Fix date, set to the date/time of the old image.
+//-
+//- See YouTube video of the script/process https://www.youtube.com/watch?v=USpVpwq_cP0
+//- Cloudy Nights - user Xio1996
+//-
+//- SUPPORTED CATALOGUES
+//- All asteroid catalogues from MPC and JPL.
+//- All comets from MPCComet and JPL catalogues
+//- Tested on AstroPlanner 2.4b13 [64-bit] and SharpCap v4.0.9109
+//- Script uses APPlan.GMTDateTime() and Web.LastError new to version 2.4b13
+//-
+//- Version 1.0 01-Sept-2022 - Initial release
+//-
+
+//# Name: SharpCapDSA
+//# E-Mail: petergallop@gmail.com
+//# Author: Pete Gallop
+//# Category: Web
+//# MinVersion: 2.4b13
+//# Keywords: SharpCap, Minor Bodies, JPL Horizons
+//# URL: http://youtu.be/USpVpwq_cP0
+
+// Workaround from PR until APPlan.GMTDateTime, which returns the entire date/time of GMT based on the plan's local date/time.
+// This function is left if a user wants to use the script in pre 2.4b13 versions of AstroPlanner
+//function UTC(extends p as APPlan) as Date
+// dim d as Date = p.LocalDateTime
+// dim s as SiteResource = p.CurrentSite
+// dim GMTOffset as double = s.GMTOffset(d)
+// d = d - GMTOffset * 3600.0
+// return d
+//end function
+
+sub EncodeURI(ByRef url as string)
+	url = ReplaceAll(url,"'","%27")
+	url = ReplaceAll(url," ","%20")
+end sub
+
+function FormatNumber(sInput as String, iDecpts as integer) as string
+	dim dblInput as double = 0
+	
+	dblInput= CDbl(sInput)
+	
+	return DoubleToStr(dblInput, iDecpts)
+	
+end function
+
+function CometHorizonsCommand(sName as string) as string
+	dim sCometName as string = ""
+	Dim iBracketEnd, iSlashPos as integer = 0
+	
+	Debug "CometHorizonsCommand(), Name=", sName
+	
+	if sName = "" then
+		return ""
+	end if
+	
+	dim iFirstCharacter as integer = Asc(Left(sName,1))
+	
+	select case iFirstCharacter
+	case 40
+		// JPL Comet starting with a '('
+		Debug "CometHorizonsCommand(), JPL Starting with a ("
+		iBracketEnd = Instr(1, sName, ")")
+		iSlashPos = Instr(iBracketEnd, sName, "/")
+		sCometName = Trim(Mid(sName,2,iBracketEnd-2)) + Trim(Mid(sName, iBracketEnd+1, iSlashPos-iBracketEnd-1))
+	case 48,49,50,51,52,53,54,55,56,57
+		// MPC Comet starting with a number
+		Debug "CometHorizonsCommand(), MPC Starting with a number"
+		sCometName = Trim(Mid(sName,1,Instr(sName,"/")-1))
+	else
+		// MPC/JPL Comet starting with a letter
+		Debug "CometHorizonsCommand(), MPC/JPL Starting with letter"
+		sCometName = Trim(Mid(sName,1,Instr(sName,"(")-1))
+	end select
+	
+	debug "Comet Name=", sCometName
+	
+	// The CAP directive returns last apparition before current date. Stops a list of apparitions being returned.
+	return "DES=" + sCometName + "%3BCAP%3B"
+	
+end function
+
+function AsteroidHorizonsCommand(sName as string, sCatalogue as string) as string
+	dim sAsteroidName as string = ""
+	dim iBracketEnd, iSlashPos as integer = 0
+	
+	Debug "AsteroidHorizonsCommand(), In Name=", sName, " Cat=", sCatalogue
+	
+	if sName = "" then
+		return ""
+	end if
+	
+	dim iFirstCharacter as integer = Asc(Left(sName,1))
+	
+	select case sCatalogue
+	case "MPCORB","JPLUnnumbered","MPCDistant","MPCNEA","MPCPHA","MPCUnusual"
+		if iFirstCharacter = 40 then
+			// MPC Numbered Asteroid Name
+			Debug "AsteroidHorizonsCommand(), MPC Starting with a (. E.g. (1) Ceres"
+			iBracketEnd = Instr(1, sName, ")")
+			iSlashPos = Instr(iBracketEnd, sName, "/")
+			sAsteroidName = Trim(Mid(sName,2,iBracketEnd-2)) + "%3B"
+		else
+			Debug "AsteroidHorizonsCommand(), MPC/JPL unnumbered e.g. 1979 MW5"
+			sAsteroidName = sName
+		end if
+	case "JPLNumbered"
+		Debug "AsteroidHorizonsCommand(), JPL Starting with a number e.g. 550875 2012 TE312 or 1 Ceres"
+		sAsteroidName = Left(sName,Instr(sName," ")-1) +"%3B"
+	end select
+	
+	Debug "AsteroidHorizonsCommand(), Out Name=", sAsteroidName
+	
+	return sAsteroidName
+	
+end function
+
+function SharpCapDSAFormat(IDs as String, Name as String, Type as String, RA as String, Dec as String, VMag as String, optional RMax as String = "", optional RMin  as String = "", optional PosAngle as string = "") as string
+	
+	//Create the SharpCap Format - fields sep = |
+	// IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
+	// More information - https://forums.sharpcap.co.uk/viewtopic.php?p=27143#p27143
+	
+	return IDs + "|" + Name + "|" + Type + "|" + RA + "|" + Dec + "|" + VMag + "|" + RMax + "|" + RMin + "|" + PosAngle
+end function
+
+function  ProcessHorizonsData(sName as String, sType as String, ByRef sData as String) as string
+	dim sEphemeris, sRADEC, sMag, sIlum, sDistanceAU, sRelVelocity, sLightTime, sConstellation, sSharpCap as string = ""
+	dim iStart, iEnd as Integer
+	
+	// Find the ephemeris section in the returned data
+	iStart= Instr(sData,"$$SOE")
+	iEnd = Instr(sData,"$$EOE")
+	
+	// Check that we found the emphemeris data - if not return blank.
+	if iStart = 0 or iEnd = 0 then
+		return ""
+	end if
+	
+	// Jump 36 characters to the start of the coordinates field
+	sEphemeris = Mid(sData, iStart+36,iEnd-iStart-36)
+	
+	debug "JPL Ephemeris=", sEphemeris
+	
+	// The Horizons data looks like fixed field lengths. There is variable padding spaces between the fields most probably to accomodate different units/precision.
+	// The quick solution was to create a string array split on the spaces and then remove the empty fields.
+	// In the Horizons app manual it says you can output fields delimited by commas. There is no mention how to do this in the API docs. Query JPL?
+	dim sDA() as string = Split(sEphemeris," ")
+	
+	// Remove all the empty array members to leave the data fields
+	dim iCount as integer =0
+	While iCount<>UBound(sDA)
+		if LTrim(sDA(iCount))="" then
+			sDA.Remove iCount
+		else
+			iCount = iCount + 1
+		end if
+	Wend
+	
+	// Format the data fields into the required variables
+	sRADEC = sDA(0) +" " + sDA(1) + " " + sDA(2) + " " + sDA(3) + " " + sDA(4) + " " + sDA(5)
+	sMag = FormatNumber(sDA(6),2)
+	sIlum = FormatNumber(sDA(8),2)
+	sDistanceAU = FormatNumber(sDA(9),2)
+	sRelVelocity = FormatNumber(sDA(10),2)
+	sLightTime = FormatNumber(sDA(11),2)
+	sConstellation = sDA(12)
+	
+	debug "JPL Data: RADDEC=",sRADEC," Mag=",sMag," Ilumination%=",sIlum," Distance(au)=",sDistanceAU," Rel Velocity (km/s)=",sRelVelocity," LightTime(min)=",sLightTime," Const=",sConstellation
+	
+	return SharpCapDSAFormat(sName, "LT=" + sLightTime + "min, Dist=" + sDistanceAU  + "au", sType + " (JPL Horizons)", sRADEC, "", sMag)
+	
+end function
+
+function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as string
+	
+	// JPL Horizon strings used to build the object query
+	// More information - https://ssd-api.jpl.nasa.gov/doc/horizons.html
+	dim sHorizonsRequest as String = "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='1,9,10,20,21,29'"
+	dim sHorizonLocation as String = ""
+	dim sHorizonsTime as String = ""
+	dim sHorizonsObjectID as String=""
+	
+	// The returned Horizons data
+	dim sHorizonsData as String = ""
+	
+	debug "QueryJPLHorizons(), Type=", Type
+	
+	// Create the command depending on type Minor or Comet
+	if Type="Minor" then
+		//Take the asteroids IAU number. %3b = ; (encoded). Format for JPL & MPC numbered asteroids.
+		sHorizonsObjectID = "&COMMAND='" + AsteroidHorizonsCommand(ID,Catalogue) + "'"
+	else
+		// Formats for JPL or MPC comet designations
+		sHorizonsObjectID = "&COMMAND='" + CometHorizonsCommand(ID) + "'"
+	end if
+	
+	//Lat/Lng of observer. Altitiude of observer is in KMs so convert from AP's meters.
+	sHorizonLocation = "&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='" + Str(Plan.CurrentSite.Longitude) + "," + Str(Plan.CurrentSite.Latitude) + "," + Str(Plan.CurrentSite.Altitude/1000) + "'"
+	
+	// Get the plans current time in UTC. Will be replaced with Plan().GMTDateTime
+	//dim dtStartDate as Date = new Date(Plan().UTC) // Use this line for pre-2.4b13 versions
+	dim dtStartDate as Date = new Date(Plan().GMTDateTime)
+	
+	sHorizonsTime = "&TLIST='" + dtStartDate.SQLDateTime() + "'"
+	
+	dim sHorizonsQuery as String = sHorizonsRequest + sHorizonLocation + sHorizonsTime + sHorizonsObjectID
+	
+	debug "Query=",sHorizonsQuery
+	
+	EncodeURI(sHorizonsQuery)
+	
+	debug "Encoded Query=",sHorizonsQuery
+	
+	// Issue the call the JPL Horizons Web Service - 20 second timeout - Would really like to know the return code
+	sHorizonsData = Web.HTTPGet(sHorizonsQuery, 20)
+	debug "Web Last Error:", Web.LastError
+	if sHorizonsData = "" then
+		Speak("No data was returned")
+		return ""
+	end if
+	
+	// DEBUG - Will write the query and returned data to a file for debugging
+	//dim a as APTextFile = APTextFile.WriteFile("JPLHorizonsDebug","txt")
+	//a.WriteLine(sHorizonsQuery)
+	//a.WriteLine(sHorizonsData)
+	
+	return  ProcessHorizonsData(ID, Type, sHorizonsData)
+	
+end function
+
+function ProcessOtherObjects(Obj as APPlanObject) as string
+	return SharpCapDSAFormat(Obj.ID, Obj.Name, Obj.Type, FormatRA(obj.RA,True,"hmsa") + " " + FormatDec(obj.Dec,True,"dmsa"),"",str(obj.Magnitude))
+end function
+
+sub main()
+	
+	// Comment to enable debug output
+	//DebugOff()
+	
+	dim obj as APPlanObject = Plan().SelectedObject
+	dim sOut as string
+	
+	// Check we have an object selected in the plan
+	if obj=nil then
+		Speak("No object selected")
+		return
+	end if
+	
+	// Check we have a site selected for the plan
+	if Plan.CurrentSite=nil then
+		Speak("No site selected.")
+		return
+	end if
+	
+	select case obj.Type
+	case "Minor","Comet"
+		
+		//Check we are connected to the internet as we need the JPL Horizons web service
+		if NetworkConnected()=False then
+			Speak("No network connection!")
+			return
+		end if
+		
+		sOut = QueryJPLHorizons(obj.ID, obj.Type, obj.GetValueAsString("Catalogue"))
+		debug "JPL DSA=",sOut
+	else
+		// For all other objects use AstroPlanners data to create DSA format
+		// Tested succesfully on quasars
+		sOut = ProcessOtherObjects(obj)
+		debug "AP DSA=",sOut
+	end select
+	
+	if sOut<>"" then
+		Clipboard = sOut
+		Speak("DSA completed")
+	else
+		Speak("DSA Failed")
+	end if
+	
+end sub
