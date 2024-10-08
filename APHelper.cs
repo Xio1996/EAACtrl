@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,18 @@ namespace EAACtrl
 {
     internal class APHelper
     {
+        public struct SizeInfo 
+        {
+            public double MajorAxis;
+            public double MinorAxis;
+        }
+
+        public struct SizeInfoString
+        {
+            public string MajorAxis;
+            public string MinorAxis;
+        }
+
         private Dictionary<string, string> ConstellationMappings = new Dictionary<string, string>()
         {
             {"and", "Andromeda"}, {"ant", "Antlia"}, {"aps", "Apus"}, {"aqr", "Aquarius"},
@@ -52,7 +65,8 @@ namespace EAACtrl
         {
             {"P Neb","Planetary Nebula"}, {"Open","Open Cluster"}, {"Open+D Neb","Open Cluster + Dark Nebula"},
             {"Neb","Nebula"}, {"SNR","Supernova Remnant"}, {"D Neb","Dark Nebula"}, {"Open+Asterism","Open Cluster + Asterism"},
-            {"Dbl+Asterism","Double Star + Asterism"}, {"GalClus","Galaxy Cluster"}, {"E Neb","Emission Nebula"}
+            {"Dbl+Asterism","Double Star + Asterism"}, {"GalClus","Galaxy Cluster"}, {"E Neb","Emission Nebula"},
+            {"Mult","Multiple Star"}
         };
 
         public string DisplayTypeFromAPType(string ObjectType)
@@ -70,6 +84,30 @@ namespace EAACtrl
             }
 
             return "";
+        }
+
+        public string RADecimalHoursToHMS(double RA, string format)
+        {
+            TimeSpan time = TimeSpan.FromHours(RA * 15 * 24 / 360);
+            return time.ToString(format);
+        }
+
+        public string DecDecimalToDMS(double Dec )
+        {
+            int degrees = Math.Abs((int)Dec);
+            double minutes = (Math.Abs((Dec)) - degrees) * 60;
+            double seconds = (minutes - (int)minutes) * 60;
+            string dms = $"{(Dec < 0 ? "-" : "")}{degrees}d{((int)minutes).ToString("D2")}m{seconds.ToString("0.00s")}";
+            return dms;
+        }
+
+        public string DecDecimalToDMSSp(double Dec)
+        {
+            int degrees = Math.Abs((int)Dec);
+            double minutes = (Math.Abs((Dec)) - degrees) * 60;
+            double seconds = (minutes - (int)minutes) * 60;
+            string dms = $"{(Dec < 0 ? "-" : "+")}{degrees} {((int)minutes).ToString("D2")} {seconds.ToString("0.00")}";
+            return dms;
         }
 
         public string TargetDisplay(APCmdObject apObj)
@@ -135,6 +173,44 @@ namespace EAACtrl
                 }
             }
             return sInfo;
+        }
+
+        public SizeInfo ObjectSize(string apSize)
+        {
+            SizeInfo sizeInfo = new SizeInfo();
+            sizeInfo.MajorAxis = 0; sizeInfo.MinorAxis = 0; 
+
+            var Sizes = apSize.Split('x');
+            if (Sizes.Length == 2)
+            {
+                sizeInfo.MajorAxis = double.Parse(Sizes[0].Trim());
+                sizeInfo.MinorAxis = double.Parse(Sizes[1].Trim());
+            }
+            else 
+            {
+                sizeInfo.MajorAxis = double.Parse(apSize.Trim());
+                sizeInfo.MinorAxis = sizeInfo.MajorAxis;
+            }
+
+            return sizeInfo;
+        }
+
+        public SizeInfoString ObjectSizeString(string apSize)
+        {
+            SizeInfoString sizeInfoString = new SizeInfoString();
+            sizeInfoString.MajorAxis = ""; sizeInfoString.MinorAxis = "";
+
+            if (apSize.Trim().Length > 0)
+            {
+                SizeInfo sizeInfo = ObjectSize(apSize);
+                if (sizeInfo.MajorAxis > 0)
+                {
+                    sizeInfoString.MajorAxis = sizeInfo.MajorAxis.ToString();
+                    sizeInfoString.MinorAxis = sizeInfo.MinorAxis.ToString();
+                }
+            }
+
+            return sizeInfoString;
         }
     }
 }

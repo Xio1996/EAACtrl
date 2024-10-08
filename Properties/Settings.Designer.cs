@@ -12,7 +12,7 @@ namespace EAACtrl.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -296,6 +296,496 @@ namespace EAACtrl.Properties {
             }
             set {
                 this["StellariumPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool APAutoSort {
+            get {
+                return ((bool)(this["APAutoSort"]));
+            }
+            set {
+                this["APAutoSort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TSAutoFOVI {
+            get {
+                return ((bool)(this["TSAutoFOVI"]));
+            }
+            set {
+                this["TSAutoFOVI"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\peter\\AppData\\Roaming\\Stellarium\\scripts")]
+        public string StScriptFolder {
+            get {
+                return ((string)(this["StScriptFolder"]));
+            }
+            set {
+                this["StScriptFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool soID {
+            get {
+                return ((bool)(this["soID"]));
+            }
+            set {
+                this["soID"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soMag {
+            get {
+                return ((bool)(this["soMag"]));
+            }
+            set {
+                this["soMag"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soType {
+            get {
+                return ((bool)(this["soType"]));
+            }
+            set {
+                this["soType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soNames {
+            get {
+                return ((bool)(this["soNames"]));
+            }
+            set {
+                this["soNames"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soGalaxyType {
+            get {
+                return ((bool)(this["soGalaxyType"]));
+            }
+            set {
+                this["soGalaxyType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soDistance {
+            get {
+                return ((bool)(this["soDistance"]));
+            }
+            set {
+                this["soDistance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("70.4")]
+        public double Hubble {
+            get {
+                return ((double)(this["Hubble"]));
+            }
+            set {
+                this["Hubble"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DistanceUnit {
+            get {
+                return ((int)(this["DistanceUnit"]));
+            }
+            set {
+                this["DistanceUnit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowRV {
+            get {
+                return ((bool)(this["ShowRV"]));
+            }
+            set {
+                this["ShowRV"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool soCatalogue {
+            get {
+                return ((bool)(this["soCatalogue"]));
+            }
+            set {
+                this["soCatalogue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string sfMagnitude {
+            get {
+                return ((string)(this["sfMagnitude"]));
+            }
+            set {
+                this["sfMagnitude"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string sfDistMin {
+            get {
+                return ((string)(this["sfDistMin"]));
+            }
+            set {
+                this["sfDistMin"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string sfDistMax {
+            get {
+                return ((string)(this["sfDistMax"]));
+            }
+            set {
+                this["sfDistMax"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool sfAll {
+            get {
+                return ((bool)(this["sfAll"]));
+            }
+            set {
+                this["sfAll"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfStars {
+            get {
+                return ((bool)(this["sfStars"]));
+            }
+            set {
+                this["sfStars"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfGalaxies {
+            get {
+                return ((bool)(this["sfGalaxies"]));
+            }
+            set {
+                this["sfGalaxies"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfQuasars {
+            get {
+                return ((bool)(this["sfQuasars"]));
+            }
+            set {
+                this["sfQuasars"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfDouble {
+            get {
+                return ((bool)(this["sfDouble"]));
+            }
+            set {
+                this["sfDouble"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfVariable {
+            get {
+                return ((bool)(this["sfVariable"]));
+            }
+            set {
+                this["sfVariable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sSharpCapDSA {
+            get {
+                return ((bool)(this["sSharpCapDSA"]));
+            }
+            set {
+                this["sSharpCapDSA"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sResultsList {
+            get {
+                return ((bool)(this["sResultsList"]));
+            }
+            set {
+                this["sResultsList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("13")]
+        public string StFontSize {
+            get {
+                return ((string)(this["StFontSize"]));
+            }
+            set {
+                this["StFontSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color StFontColour {
+            get {
+                return ((global::System.Drawing.Color)(this["StFontColour"]));
+            }
+            set {
+                this["StFontColour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public string StGraphicSize {
+            get {
+                return ((string)(this["StGraphicSize"]));
+            }
+            set {
+                this["StGraphicSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Drawing.Color StGraphicColour {
+            get {
+                return ((global::System.Drawing.Color)(this["StGraphicColour"]));
+            }
+            set {
+                this["StGraphicColour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("circle")]
+        public string StGraphic {
+            get {
+                return ((string)(this["StGraphic"]));
+            }
+            set {
+                this["StGraphic"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int sfDatasource {
+            get {
+                return ((int)(this["sfDatasource"]));
+            }
+            set {
+                this["sfDatasource"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfGlobulars {
+            get {
+                return ((bool)(this["sfGlobulars"]));
+            }
+            set {
+                this["sfGlobulars"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SearchArea {
+            get {
+                return ((int)(this["SearchArea"]));
+            }
+            set {
+                this["SearchArea"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.5")]
+        public double SearchRadius {
+            get {
+                return ((double)(this["SearchRadius"]));
+            }
+            set {
+                this["SearchRadius"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1.3150645")]
+        public double SiteLng {
+            get {
+                return ((double)(this["SiteLng"]));
+            }
+            set {
+                this["SiteLng"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50.7432162")]
+        public double SiteLat {
+            get {
+                return ((double)(this["SiteLat"]));
+            }
+            set {
+                this["SiteLat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("57")]
+        public double SiteElev {
+            get {
+                return ((double)(this["SiteElev"]));
+            }
+            set {
+                this["SiteElev"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("\"\"")]
+        public string ASCOMTelescope {
+            get {
+                return ((string)(this["ASCOMTelescope"]));
+            }
+            set {
+                this["ASCOMTelescope"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfNoMag {
+            get {
+                return ((bool)(this["sfNoMag"]));
+            }
+            set {
+                this["sfNoMag"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfNebulae {
+            get {
+                return ((bool)(this["sfNebulae"]));
+            }
+            set {
+                this["sfNebulae"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool sfAstroPlanner {
+            get {
+                return ((bool)(this["sfAstroPlanner"]));
+            }
+            set {
+                this["sfAstroPlanner"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool sfPlanetarium {
+            get {
+                return ((bool)(this["sfPlanetarium"]));
+            }
+            set {
+                this["sfPlanetarium"] = value;
             }
         }
     }

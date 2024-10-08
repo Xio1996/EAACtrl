@@ -1,23 +1,40 @@
-# Find and Observe Modes
-# The script moves between each mode of observing, finding and frameing an object and then live stacking
-# or observing the object. Each mode change configures SharpCap to my required settings.
+# SharpCap MQTT Control Script
 #
+# The script requires an MQTT server to be specified in the parameters below.
+# The script subscribes to the topic 'SharpCap/command' to receive commands from external applications.
+# Data/output is sent to the topic 'SharpCap/out'.
 
-import clr
-clr.AddReference("System")
-clr.AddReference("System.IO")
-
-from System import *
-from System.IO import *
-
+import sys
+import random
 import time
+
+# The location of the paho-mqtt python package
+sys.path.append(r"C:\Users\peter\AppData\Local\MyPythonPackages")
+
+from paho.mqtt import client as mqtt_client
+
+#TerraNova (telescope laptop)
+broker = '192.168.0.143'
+port = 1883
+
+CommandTopic = "SharpCap/command"
+ResultTopic = "SharpCap/out"
+
+# Generate a Client ID with the subscribe prefix.
+client_id = f'subscribe-{random.randint(0, 100)}'
+
+# username = 'emqx'
+# password = 'public'
 
 #Set the camera we are going to use
 sCameraName="Test Camera 1 (Deep Sky)"
 #sCameraName="AA294CPRO"
+#sCameraName="ZWO ASI Cameras::ZWO ASI533MM"
+#sCameraName="Player One Cameras::Ares-C PRO (IMX533)"
 
-#SharpCap Capture Folder
-def selectSetupFindMode():
+gExposure = -1
+
+def selectFindMode():
 
 	# Check that the camera is connected
 	if not SharpCap.IsCameraSelected:
@@ -46,15 +63,9 @@ def selectSetupFindMode():
 	# Display a reticule if one is not already selected
 	if not SharpCap.Reticules.IsVisible:
 		SharpCap.Reticules.SelectedReticule = SharpCap.Reticules[1]		
- 	
- 	# Background subtraction Off - might cause flashing image.
- 	#SharpCap.SelectedCamera.Controls[32].Value = "Off"
- 	
-	# Change the Find and Frame expsoure to 2000ms
-	#SharpCap.SelectedCamera.Controls.Exposure.ExposureMs = 500
-	 
 
-def selectSetupObserveMode(CaptureMode):
+def selectCaptureMode(CaptureMode):
+	global gExposure
 	sTargetName=""
 
 	# Make sure live stacking is off and reset from last object
@@ -68,10 +79,9 @@ def selectSetupObserveMode(CaptureMode):
 		SharpCap.SelectedCamera = SharpCap.Cameras.Find( lambda x:x.DeviceName == sCameraName)
 		
 		if not SharpCap.IsCameraSelected:
-			SharpCap.ShowNotification("Find Mode - Cannot find specified camera.") 
+			SharpCap.ShowNotification("Capture Mode - Cannot find specified camera.") 
 			return
 			
-	
 	# Reset the Zoom to Auto. So we can see the whole image
 	if SharpCap.ZoomPercent != 0:
 		SharpCap.ZoomPercent=0
@@ -79,108 +89,123 @@ def selectSetupObserveMode(CaptureMode):
 	# Turn off reticule if one is already selected
 	if SharpCap.Reticules.IsVisible:
 		SharpCap.Reticules.SelectedReticule = SharpCap.Reticules[0]			
-	
-	#Fetch target name from Shared file.
-	TargetFileName=SharpCap.CaptureFolder + "\\ObjectInfo.txt"
-	
-	if File.Exists(TargetFileName):
-		sTargetName = File.ReadAllText(TargetFileName) 
-	
-		#If the clipboard has text then use that as the target name
-		#if Clipboard.ContainsText():
-		SharpCap.TargetName=sTargetName			
-	
+
 	# Load CaptureMode profile
-	sProfileName = "CaptureMode" + str(CaptureMode) + " (" + SharpCap.SelectedCamera.DeviceName + ")"
+	sProfileName = str(CaptureMode) + " (" + SharpCap.SelectedCamera.DeviceName + ")"
+	
 	if not SharpCap.SelectedCamera.LoadCaptureProfile(sProfileName):
 		SharpCap.ShowNotification("Capture Mode - Cannot load profile: " + sProfileName)
 		return
-		
+
 	time.sleep(1)
+	
+	gExposure = SharpCap.SelectedCamera.Controls.Exposure.ExposureMs/1000;
+	print("gExposure=" + str(gExposure));
 
 	SharpCap.LiveStacking.Activate()
 
+
+def selectSaveAsSeen(Cmd):
+    global gExposure
+    ImageDetails=""
+    
+    if SharpCap.IsLiveStacking:
+		
+        # Save the image
+        SharpCap.LiveStacking.SaveImageWithDisplayStretch()
+		
+        # Get stack info (StackedFrames, Total Exposure, Last Exposure)
+        StackedFrames = SharpCap.LiveStacking.StackedFrames;
+        #SubExposure = SharpCap.SelectedCamera.Controls.Exposure.ExposureMs/1000;
+        TotalExposure = StackedFrames * gExposure;
+        
+        sStackInfo = str(StackedFrames) + "," + str(TotalExposure) + "," + str(gExposure) 
+
+        # Find the path and name of the last stacked image
+        sLastImageFile = SharpCap.CaptureFolder + "\\" + SharpCap.LiveStacking.GetSavedFiles()[len(SharpCap.LiveStacking.GetSavedFiles())-1]
+
+        sLastSettingsFile = sLastImageFile[:sLastImageFile.rfind('_')]
+        sLastSettingsFile = sLastSettingsFile + "_WithDisplayStretch.CameraSettings.txt"
+        
+        # Return image and image settings details.
+        client = mqtt_client.Client(client_id)
+        ImageDetails= Cmd + "|" + CurrentTargetObject + "|" + sStackInfo + "|" + sLastImageFile + "|" + sLastSettingsFile
+        print (ImageDetails)
+        
+    else:
+         SharpCap.ShowMessageBox("Not Live Stacking!")
+
+    return ImageDetails
+
+def connect_mqtt() -> mqtt_client:
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("SharpCap connected to MQTT Broker - " + str(broker) + " port " + str(port))
+        else:
+            print("Failed to connect, return code %d\n", rc)
+
+    client = mqtt_client.Client(client_id)
+    # client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.connect(broker, port)
+    return client
+
+
+def subscribe(client: mqtt_client):
+    def on_message(client, userdata, msg):
+        global CurrentTargetObject
+
+        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+
+        SCMsg = msg.payload.decode()
+        if len(SCMsg) == 0:
+            # Nothing in the message!
+            return
+            
+        params = SCMsg.split("|")
+        print(params)
+        
+        if len(params) == 0:
+            # No parameters! Need at least one command parameter.
+            return
+        
+        # First parameter is the command.
+        Cmd = params[0]
+		
+        if Cmd == "Exit":
+            client.disconnect()
+        elif Cmd == "Find":
+            selectFindMode()
+        elif Cmd == "Target":
+            if len(params) == 2:        
+                selectFindMode()
+                # SharpCap will replace invalid filename characters with a '_'. Keep the original object ID for matching to AP object on logging.
+                CurrentTargetObject = params[1]
+                SharpCap.TargetName = params[1]
+        elif Cmd == "Capture":
+            # Check we have enough params - Command, Profile Name 
+            if len(params) == 2:
+                selectCaptureMode(params[1])
+        elif Cmd == "Log" or Cmd == "LogAppend":
+            ImageDetails = selectSaveAsSeen(Cmd)
+            
+            if ImageDetails == "":
+                ImageDetails = "FAILED|Logging"
+                
+            ret = client.publish(ResultTopic, ImageDetails)
+        
+    client.subscribe(CommandTopic)
+    client.on_message = on_message
+    print("SharpCap subscribed to topic - " + CommandTopic)
+
+def run():
+    print("EAACtrl Script v2")
+    print("Camera = ", SharpCap.SelectedCamera)
 	
-def selectSaveAsSeen():
-	if SharpCap.IsLiveStacking:
-		
-		# Save the image
-		SharpCap.LiveStacking.SaveImageWithDisplayStretch()
-		
-		# Get stack info (StackedFrames, Total Exposure, Last Exposure)
-		sStackInfo = str(SharpCap.LiveStacking.StackedFrames) + "," + str(SharpCap.LiveStacking.TotalExposure) + "," + str(SharpCap.SelectedCamera.Controls.Exposure.ExposureMs) + "\n"
-		
-		# Find the path and name of the last stacked image
-		sLastImageFile = SharpCap.CaptureFolder + "\\" + SharpCap.LiveStacking.GetSavedFiles()[len(SharpCap.LiveStacking.GetSavedFiles())-1]
-		
-		sLastSettingsFile = sLastImageFile[:sLastImageFile.rfind('_')]
-		sLastSettingsFile = sLastSettingsFile + ".CameraSettings.txt"
-		
-		File.WriteAllText(SharpCap.CaptureFolder + "\\CaptureInfo.txt",SharpCap.TargetName + "\n" + sStackInfo + sLastImageFile + "\n" + sLastSettingsFile)
-		
-	else:
-		SharpCap.ShowMessageBox("Not Live Stacking!")
-		
-def ResetIPC():
-	
-	sSCIPCFile = SharpCap.CaptureFolder + "\\SCIPC.txt"
-	if File.Exists(sSCIPCFile):
-		File.Delete(sSCIPCFile)
-		
-	sCaptureInfoFile = SharpCap.CaptureFolder + "\\CaptureInfo.txt"
-	if File.Exists(sCaptureInfoFile):
-		File.Delete(sCaptureInfoFile)
-		
-	sObjectInfoFile = SharpCap.CaptureFolder + "\\ObjectInfo.txt"
-	if File.Exists(sObjectInfoFile):
-		File.Delete(sObjectInfoFile)
-		
-def CommandIPCFile():
-	try:
-		sSCIPCFile =SharpCap.CaptureFolder + "\\SCIPC.txt"
-	
-		if File.Exists(sSCIPCFile):
-			sCommand = File.ReadAllText(sSCIPCFile) 
+    client = connect_mqtt()
+    subscribe(client)
+    client.loop_forever()
 
-			# Find: Sharpcap to find mode
-			if sCommand=="Find":
-				selectSetupFindMode()
-				File.Delete(sSCIPCFile)
-			# Capture: SharpCap to LiveStacking
-			elif sCommand=="CaptureMode1":
-				selectSetupObserveMode(1)
-				File.Delete(sSCIPCFile)
-			elif sCommand=="CaptureMode2":
-				selectSetupObserveMode(2)
-				File.Delete(sSCIPCFile)
-			elif sCommand=="CaptureMode3":
-				selectSetupObserveMode(3)
-				File.Delete(sSCIPCFile)			
-			# Log: Save as seen and pass the path back for copying and attaching to AP observation.
-			elif sCommand=="Log":
-				selectSaveAsSeen()
-				File.Delete(sSCIPCFile)
-			elif sCommand=="LogAndFind":
-				selectSaveAsSeen()
-				File.Delete(sSCIPCFile)
-				selectSetupFindMode()
-			elif sCommand=="ResetIPC":
-				resetIPC()
-	except:
-		SharpCap.ShowMessageBox("SharpCap - Cmd Err")
-		
-	time.sleep(2)
-	
 
-#SharpCap.AddCustomButton("Find Mode", None, "Configure for finding and framing objects", selectSetupFindMode)
-#SharpCap.AddCustomButton("Observe Mode", None, "Configure for live stacking objects", selectSetupObserveMode)
-#SharpCap.AddCustomButton("Add Observation", None, "Record Obs in AstroPlanner", selectSaveAsSeen)
-
-#Remove any files used for IPC from previous session
-ResetIPC()
-
-while True:
-	CommandIPCFile()
-
-#SharpCap.RemoveCustomButton(SharpCap.CustomButtons[0])
-#SharpCap.Sequencer.RunSequenceFile("C:\Users\pete:r\OneDrive\Astronomy\Sharpcap\Find+Frame.scs")
+if __name__ == '__main__':
+    run()

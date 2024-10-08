@@ -22,19 +22,15 @@ namespace EAACtrl
 
         public void SetSNTargetPosition(string id, string RA, string Dec, double FOV)
         {
-            double dblRA = Double.Parse(RA);
-            double dblDec = Double.Parse(Dec);
-
             sMsg = "SetSNTarPos " + id + ", " + RA + ", " + Dec + ", " + FOV.ToString() + "\r\n";
 
-            File.WriteAllText(StarryNightMsgPath, "target|" + id + "|" + dblRA.ToString() + "|" + dblDec.ToString() + "|" + FOV.ToString());
+            File.WriteAllText(StarryNightMsgPath, "target|" + id + "|" + RA + "|" + Dec + "|" + FOV.ToString());
         }
 
         public void SetSNFOV(double FOV)
         {
             sMsg = "SetSNFOV " + FOV.ToString() + "\r\n";
             File.WriteAllText(StarryNightMsgPath, "fov|" + FOV.ToString());
-
         }
 
         public void SetSNAltAz(double Alt, double Az, double FOV)

@@ -1,13 +1,426 @@
 // AstroPlanner EAACtrl Script
 //
-// Called by the EAACtrl app to carry out functions such as adding observations, setting the target etc.
-// This also combines the DSA, Asteroids Search and Planetary Moons scripts as AP can take several seconds to move
-// between scripts. AP also has a tendancy to unload a script from memory. The EAACtrl panel sends a keep alive message
-// every few seconds to try and stop this from happening.
+// Version 2 - 3rd Febraury 2024 (started)
+// The EAACtrl panel sends a keep alive message every few seconds to try and stop this from happening.
 //
-function SharpCapPath() as string
-	return "\\TERRANOVA\SharpCap Captures\"
+// 5th April 2024 - Default filter name added to observation.
+
+//- Searches for all Asteroids in the specified field of view and magnitude limit.
+//- The FOV's centre can be selected as the current Telescope position or the currently selected plan object.
+//- The returned objects can be saved to the clipboard in SharpCap Deep Space Annotation, CSV or the URL for the JPL query.
+//-
+//- This script uses the JPL Small-Body Identification Tool Web Service interface.
+//- The API documentation can be found at https://ssd-api.jpl.nasa.gov/doc/sb_ident.html
+//- The web tool can be found at https://ssd.jpl.nasa.gov/tools/sb_ident.html#/
+//-
+//- WARNING - the query can take a long time to complete. The script will timeout after 2 minutes.
+//-
+//- Usage
+//- 1a. Select an object in your plan and execute the script.
+//- 1b. If using telescope position (and it's connected) then just execute the script.
+//- 2. A dialog will be displayed. This allows the selection of:
+//-    Centre of FOV - Telescope Position or Selected Plan Object Position
+//-    Limiting magnitude.
+//-    Height and Width of FOV in arcminutes.
+//- 3. Press 'Search' and wait (queries can take many seconds to complete)
+//- 4. Any asteroids that match your search criteria will be returned.
+//- 5. Select your Clipboard output format and press OK.
+//-
+//- Version 1: Initial release
+//-
+//- ToDo: Allow objects to be added to the current plan.
+
+//# Name: Asteroids FOV Search
+//# URL:
+//# Author: Peter Gallop
+//# E-Mail: petergallop@gmail.com
+//# Category: General
+//# MinVersion: 2.4b13
+//# Keywords: Minor Bodies, Asteroids, Search, JPL Small-Body Identification Tool
+
+class MFMinorBodies
+	implements MultiFieldObject
+	private dim sName as string
+	private dim sMag as string
+	private dim sRA as string
+	private dim sDec as string
+	
+	sub Constructor(sArray() as string)
+		Debug "MFMinorBodies Constructor ", sArray(0)
+		sName = sArray(0)
+		sRA = sArray(1)
+		sDec = sArray(2)
+		sMag = sArray(6)
+	end sub
+	
+	Function ColumnName(idx as integer) as string
+		Debug "Column Name", idx
+		select case idx
+		case 1
+			return "Name"
+		case 2
+			return "Magnitude"
+		case 3
+			return "RA"
+		case 4
+			return "Dec"
+		end select
+	end function
+	
+	Function ColumnType(idx as integer) as integer
+		select case idx
+		case 1
+			return mfo_String
+		case 2
+			return mfo_String
+		case 3
+			return mfo_String
+		case 4
+			return mfo_String
+		end select
+	end function
+	
+	Function ColumnValue(idx as integer) as string
+		Debug "Column Value for ",idx
+		select case idx
+		case 1
+			return sName
+		case 2
+			return sMag
+		case 3
+			return sRA
+		case 4
+			return sDec
+		end select
+	end function
+	
+	Function nColumns() as integer
+		dim iCount as integer = 4
+		Debug "Column Count=4"
+		return iCount
+	end function
+end class
+
+function CreateJPLSmallBodyIDQuery(dblRA as double, dblDec as double, iMagLimit as integer, dblDimension as double) as string
+	dim sDec as string = ""
+	dim sQuery as string = "https://ssd-api.jpl.nasa.gov/sb_ident.api?"
+	
+	// Location of observer - must be the first parameters in the query!
+	sQuery = sQuery + "lat=" + Str(Plan.CurrentSite.Latitude) + "&lon=" + Str(Plan.CurrentSite.Longitude) + "&alt=" + Str(Plan.CurrentSite.Altitude/1000)
+	
+	// A more accurate calculation is applied to the objects found in the first pass.
+	sQuery = sQuery + "&two-pass=true&suppress-first-pass=true"
+	
+	// The date of the search. Use Julian Date of plan to 4 decimal places
+	sQuery = sQuery + "&obs-time=" + DoubleToStr(Plan.JulianDate,4)  //2459826.20200
+	
+	// Minimum magnitude of search
+	sQuery = sQuery + "&vmag-lim=" + Str(iMagLimit)
+	
+	// The ReplaceAll is to mitigate a bug in the FormatDec that always adds a space between elements
+	if dblDec < 0 then
+		sDec = ReplaceAll("M" + FormatDec(dblDec,true,"dms-")," ","")
+		sDec = Replace(sDec,"-","")
+	else
+		sDec = ReplaceAll(FormatDec(dblDec,true,"dms-")," ","")
+	end if
+	
+	// Specify the centre RA/Dec and the half width/height of the surrounding search box.
+	sQuery = sQuery + "&fov-ra-center=" + FormatRA(dblRA, true,"hms-") + "&fov-dec-center=" + sDec + "&fov-ra-hwidth=" + Str(dblDimension) + "&fov-dec-hwidth=" + Str(dblDimension)
+	
+	Debug "Query=", sQuery
+	
+	return sQuery
 end function
+
+function CallJPLSmallBodyIdentificationAPI(sQuery as string, ByRef sData as string, ByRef QueryRunTimeSecs as double) as boolean
+	dim dblStartTime as double = MicroSeconds()
+	
+	// Query JPL. Timeout is set to 120 seconds. Normal query processing is 20-40 seconds for 1 deg x 1 deg FOV, min magnitude 18.
+	sData = Web.HTTPGet(sQuery, 120)
+	
+	// Record how long the query took to complete
+	QueryRunTimeSecs = (MicroSeconds() - dblStartTime) / 1000000
+	
+	debug "Data=",sData
+	debug "Web Last Error:", Web.LastError
+	
+	if sData = "" then
+		Speak("No data was returned")
+		return false
+	end if
+	return true
+end function
+
+function QueryDialog(ByRef iLocation as integer, ByRef iMinMagnitude as integer, ByRef dblDiagonal as double) as boolean
+	dim dlg as new Dialog
+	dim types() as string = Array("Telescope Position", "Selected Plan Object")
+	dim mags() as string = Array("0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25")
+	dim dblFOVWidth, dblFOVHeight as double
+	
+	dlg.CaptionParameter("Search FOV for minor bodies.",1,false,true)
+	dlg.PopupParameter("Search Location", Plan().RestoreValue("SearchLoc",0), types)
+	dlg.PopupParameter("Min. Magnitude", Plan().RestoreValue("MinMag",18), mags)
+	dlg.DoubleParameter("FOV (ArcMins) Width", Plan().RestoreValue("FOVWidth",1),0.1,300)
+	dlg.DoubleParameter(true, "Height", Plan().RestoreValue("FOVHeight",1),0.1,300)
+	dlg.CaptionParameter("WARNING - Query can take up to 2 minutes!",1,false,true)
+	if not dlg.Show("Asteroid FOV Search (JPL Small-Body Identification)") then return false
+	
+	iMinMagnitude = dlg.IntegerParameter("Min. Magnitude")
+	dblFOVWidth = dlg.DoubleParameter("FOV (ArcMins) Width")
+	dblFOVHeight = dlg.DoubleParameter("Height")
+	iLocation = dlg.PopupParameter("Search Location")
+	
+	Plan().SaveValue("MinMag",iMinMagnitude)
+	Plan().SaveValue("FOVWidth",dblFOVWidth)
+	Plan().SaveValue("FOVHeight",dblFOVHeight)
+	Plan().SaveValue("SearchLoc",iLocation)
+	
+	Debug "Query Dialog: MinMag=",iMinMagnitude," FOV Width=",dblFOVWidth," FOV Height=",dblFOVHeight," Location=", iLocation
+	
+	// In order to simplify the calculation a search box is required that can be used for equatorial, alt-az mounts with imagers at any
+	// rotation. Taking the diagonal of the user specified box will allow the user specified FOV to be fully covered in any orientation.
+	// The draw back is that it increases the search radius, when that might not be necessary.
+	// Calculate the FOV diagonal distance in degrees.
+	dblDiagonal = (Sqrt(Pow(dblFOVWidth/60,2) + Pow(dblFOVHeight/60,2)))/2
+	
+	Debug "Diagonal=",dblDiagonal
+	return true
+end function
+
+function GenerateCSV(ByRef cDataObjects as Collection, ByRef bSelected() as boolean, ByRef sCSV as string) as boolean
+	dim sParams() as string
+	
+	sCSV = "Name,Magnitude,RA,Dec" + NewLine()
+	
+	// Iterate through all the objects
+	for i as integer =0 to cDataObjects.Count-1
+		if bSelected(i) then
+			sParams = cDataObjects.Item(i)
+			sCSV = sCSV + sParams(0) + "," + sParams(6) + "," + sParams(1) + "," + sParams(2) + NewLine()
+		end if
+	next
+	
+	return true
+end function
+
+function GenerateDSA(ByRef cDataObjects as Collection, ByRef bSelected() as boolean, ByRef sDSA as string) as boolean
+	dim sParams() as string
+	
+	for i as integer =0 to cDataObjects.Count-1
+		if bSelected(i) then
+			sParams = cDataObjects.Item(i)
+			sDSA = sDSA + sParams(0) + "|" + sParams(0) + "|Minor Body|" + sParams(1) + "|" + sParams(2) + "|" + sParams(6) + "|||" + NewLine()
+		end if
+	next
+	
+	return true
+	
+end function
+
+function ResultsDialog(ByRef cDataObjects as Collection, sQuery As string, iMinMagnitude as integer, dblDiagonal as double, dblQueryRuntimeSecs as double) as boolean
+	dim dlg as new Dialog
+	dim mfResults() as MFMinorBodies
+	dim bClicked() as boolean
+	dim iClipboardChoice, iPlanChoice as integer
+	dim sOutput as string
+	
+	redim bClicked(cDataObjects.Count-1)
+	
+	debug "ResultsDialog Start"
+	
+	for i as integer = 0 to cDataObjects.Count-1
+		mfResults.Append new MFMinorBodies(cDataObjects.Item(i))
+		bClicked(i)=true
+	next
+	
+	debug "ResultsDialog MFMinorBodies Created"
+	
+	// Create captions to provide information on query and results
+	dlg.CaptionParameter("Minor Body Results - " + Str(cDataObjects.Count) + " objects found in " + DoubleToStr(dblQueryRuntimeSecs,1) + " seconds                                                                                        ",1,false,false,false,false,true)
+	dlg.CaptionParameter("Actual Search Box: " + DoubleToStr(dblDiagonal*2,2) + DegreeSymbol() + " x " + DoubleToStr(dblDiagonal*2,2) + DegreeSymbol() + ", Minimum Magnitude: " + Str(iMinMagnitude),1,false,false,false,false,true)
+	dlg.CheckListParameter("Minor Bodies", bClicked, mfResults,false)
+	dlg.ChoiceParameter("Clipboard Output", 0, "None", "SharpCap - Deep Sky Annotation Format", "CSV Format", "JPL Small-Body Identification Query", "All - JPL Query, CSV, SharpCap DSA")
+	//dlg.ChoiceParameter("AstroPlanner Output", 0, "None","Add Objects to Current Plan")
+	
+	debug "ResultsDialog CheckListParameter created"
+	
+	if not dlg.Show("Asteroid FOV Search (JPL)",false,10) then return false
+	
+	// Get user choices
+	iClipboardChoice = dlg.ChoiceParameter("Clipboard Output")
+	//iPlanChoice = dlg.ChoiceParameter("AstroPlanner Output")
+	bClicked = dlg.CheckListParameter("Minor Bodies")
+	
+	debug "Clipboard Output=", iClipboardChoice, " AstroPlanner Output=", iPlanChoice
+	
+	select case iClipboardChoice
+	case 1
+		// SharpCap DSA format
+		debug "SharpCap DSA format"
+		if GenerateDSA(cDataObjects, bClicked, sOutput) then
+			Clipboard = sOutput
+		end if
+	case 2
+		// CSV Format
+		debug "CSV Format"
+		if GenerateCSV(cDataObjects, bClicked, sOutput) then
+			Clipboard = sOutput
+		end if
+	case 3
+		// JPL Small-Body Identification Query
+		debug "JPL Small-Body Identification Query"
+		Clipboard = sQuery
+	case 4
+		debug "All - Query, CSV, DSA"
+		dim sAll as string
+		
+		sAll = sQuery
+		
+		if GenerateCSV(cDataObjects, bClicked, sOutput) then
+			sAll = sAll + NewLine() + NewLine() + sOutput
+			sOutput=""
+		end if
+		
+		if GenerateDSA(cDataObjects, bClicked, sOutput) then
+			sAll = sAll + NewLine() + NewLine() + sOutput
+		end if
+		
+		Clipboard = sAll
+		
+	end select
+	
+	//select case iPlanChoice
+	//case 1
+	// Add objects to current plan
+	//end select
+	
+	debug "ResultsDialog End"
+end function
+
+function ProcessData(ByRef sData as string) as Collection
+	dim iStartIndex, iEndIndex, iDataCount, i as integer = 0
+	dim asAsteroid(-1) as string
+	dim sMinorBody as string
+	dim cMinorObjects as new Collection
+	
+	debug "ProcessData Start"
+	
+	// Find the amount of objects returned, if any.
+	iStartIndex = Instr(sData,"n_second_pass")
+	if iStartIndex > 0 then
+		iEndIndex = Instr(iStartIndex,sData,",")
+		iDataCount = Val(Trim(Mid(sData, iStartIndex+16,iEndIndex-iStartIndex-16)))
+		
+		Debug "Minor Body Count=",iDataCount
+		// Find the start of the data block
+		iStartIndex = Instr(iEndIndex, sData, "[")
+		for i=0 to iDataCount-1
+			iStartIndex = Instr(iStartIndex+1, sData, "[")
+			iEndIndex = Instr(iStartIndex, sData, "]")
+			sMinorBody = ReplaceAll(Mid(sData, iStartIndex+1, iEndIndex-1-iStartIndex),"""","")
+			sMinorBody = ReplaceAll(sMinorBody,"\","")
+			sMinorBody = ReplaceAll(sMinorBody,"'"," ")
+			sMinorBody = ReplaceAll(sMinorBody,":"," ")
+			cMinorObjects.Add(SplitComma(sMinorBody))
+			debug i," ",sMinorBody
+		next
+	end if
+	
+	debug "ProcessData End"
+	
+	return cMinorObjects
+end function
+
+sub AFOVS()
+	
+	dim obj as APPlanObject = Plan().SelectedObject
+	
+	dim iLocation as integer
+	dim iMinMagnitude as integer = 0
+	dim dblDiagonal as double
+	dim bCancel as boolean = false
+	dim dblQueryRuntimeSecs as double = 0
+	
+	dim sQuery as string = ""
+	dim sData as string = ""
+	
+	dim cData as Collection
+	
+	DebugOff()
+	
+	// Check we have a site selected for the plan
+	if Plan.CurrentSite=nil then
+		Speak("No site selected.")
+		return
+	end if
+	
+	if NetworkConnected() = false then
+		Speak("No network connection!")
+		return
+	End if
+	
+	// Display Query dialog - returns parameters to create JPL query
+	if not QueryDialog(iLocation, iMinMagnitude, dblDiagonal) then
+		// User pressed cancel, so finish script
+		return
+	end if
+	
+	if iLocation=0 then
+		// If the telescope is connected then use the telescope's RA/DEC coordinates
+		if Plan.TelescopeConnected then
+			sQuery = CreateJPLSmallBodyIDQuery(Plan.CurrentRA, Plan.CurrentDec, iMinMagnitude, dblDiagonal)
+		else
+			Speak("Telescope is not connected.")
+			return
+		end if
+	else
+		// If an object is selected then use the objects RA/Dec coordinates
+		if obj <> nil then
+			sQuery = CreateJPLSmallBodyIDQuery(obj.RA, obj.Dec, iMinMagnitude, dblDiagonal)
+		else
+			Speak("No object selected.")
+			return
+		End if
+	end if
+	
+	// Call the JPL web service
+	if not CallJPLSmallBodyIdentificationAPI(sQuery, sData, dblQueryRuntimeSecs) then
+		return
+	end if
+	
+	cData = ProcessData(sData)
+	Call ResultsDialog(cData, sQuery, iMinMagnitude, dblDiagonal, dblQueryRuntimeSecs)
+	
+	// Add to Plan - Will lookup each name in the JPL Catalogue and add that object to plan. If the minor planet cannot be found then the object is added from the query.
+	// The user needs to be shown how many asteroids are from JPL Catalog and how many are really just dummy objects.
+	
+end sub
+
+// - END OF ASTEROID FOV SEARCH
+
+//- PLANETARY MOONS
+//- Allows the addition of the main moons of Mars, Jupiter, Saturn, Uranus and Neptune to the current plan.
+//- The moon's location, magnitude, separation etc. are obtained through the JPL Horizons web service.
+//- A dialog allows the observer to select which moons to add to the current plan or update if they are already present.
+//- Whenever the script is re-executed the exisiting moon's fields will be updated and any new selected moons added.
+//- Moon's fields: ID, Name, Magnitude, Separation (centre to centre, arc seconds), RA and DEC. Additional information on the moon is added to the User Object Notes.
+//-
+//- The moons' location will be shown in the 'Field of View' and optionally can be exported in SharpCap's Deep Space Annotation format to aid identification.
+//- Observations can be added for a moon in the same way as any other plan object.
+
+//# Name: Planetary Moons
+//# URL:
+// VERSION HISTORY
+// 0.1 7th Jan 2023 - Initial release
+// 0.2 9th Jan 2023 - Added DSA options, Query Info and moon information.
+
+//# Author: Pete Gallop
+//# E-Mail: petergallop@gmail.com
+//# Category: Import|Objects|Planetary Moons
+//# MinVersion: 2.4b15
+//# Keywords: moon, planet
+
 class MFMoon
 	implements MultiFieldObject
 	private dim sName as string
@@ -15,6 +428,7 @@ class MFMoon
 	private dim sSize as string
 	private dim sPeriod as string
 	private dim sNotes as string
+	
 	sub Constructor(psName as string, psJPLID as string, psSize as string, psPeriod as string, psNotes as string)
 		sName = psName
 		sJPLID = psJPLID
@@ -22,21 +436,27 @@ class MFMoon
 		sPeriod = psPeriod
 		sNotes = psNotes
 	end sub
+	
 	public function Name() as string
 		return sName
 	end function
+	
 	public function JPLID() as string
 		return sJPLID
 	end function
+	
 	public function Diameter() as string
 		return sSize
 	end function
+	
 	public function OrbitalPeriod() as string
 		return sPeriod
 	end function
+	
 	public function Notes() as string
 		return sNotes
 	end function
+	
 	Function ColumnName(idx as integer) as string
 		// Debug "Column Name", idx
 		select case idx
@@ -50,6 +470,7 @@ class MFMoon
 			return "Period"
 		end select
 	end function
+	
 	Function ColumnType(idx as integer) as integer
 		select case idx
 		case 1
@@ -62,6 +483,7 @@ class MFMoon
 			return mfo_String
 		end select
 	end function
+	
 	Function ColumnValue(idx as integer) as string
 		// Debug "Column Value for ",idx
 		select case idx
@@ -75,56 +497,79 @@ class MFMoon
 			return sPeriod
 		end select
 	end function
+	
 	Function nColumns() as integer
 		dim iCount as integer = 4
 		return iCount
 	end function
 end class
+
 // Encode the full URI string
-//sub EncodeURI(ByRef url as string)
-//url = ReplaceAll(url,"'","%27")
-//url = ReplaceAll(url," ","%20")
-//end sub
-//function FormatNumber(sInput as String, iDecpts as integer) as string
-//dim dblInput as double = 0
-//dblInput= CDbl(sInput)
-//return DoubleToStr(dblInput, iDecpts)
-//end function
+sub PLMEncodeURI(ByRef url as string)
+	url = ReplaceAll(url,"'","%27")
+	url = ReplaceAll(url," ","%20")
+end sub
+
+function PLMFormatNumber(sInput as String, iDecpts as integer) as string
+	dim dblInput as double = 0
+	
+	dblInput= CDbl(sInput)
+	
+	return DoubleToStr(dblInput, iDecpts)
+	
+end function
+
 function QueryJPLHorizons(ID as string) as string
+	
 	// JPL Horizon strings used to build the object query
 	// More information - https://ssd-api.jpl.nasa.gov/doc/horizons.html
 	dim sHorizonsRequest as String = "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&APPARENT='REFRACTED'&CSV_FORMAT='YES'&QUANTITIES='1,8,9,12'"
 	dim sHorizonLocation, sHorizonsTime, sHorizonsObjectID as String = ""
+	
 	// The returned Horizons data
 	dim sHorizonsData as String = ""
+	
 	// Use the moon's JPL ID 401, 702 etc
 	sHorizonsObjectID = "&COMMAND='" + ID + "'"
+	
 	//Lat & Lng of observer. Altitiude of observer is in KMs so convert from AP's meters.
 	sHorizonLocation = "&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='" + Str(Plan.CurrentSite.Longitude) + "," + Str(Plan.CurrentSite.Latitude) + "," + Str(Plan.CurrentSite.Altitude/1000) + "'"
+	
 	// Get the plans current time in UTC. Will be replaced with Plan().GMTDateTime
 	//dim dtStartDate as Date = new Date(Plan().UTC) // Use this line for pre-2.4b13 versions
 	dim dtStartDate as Date = new Date(Plan().GMTDateTime)
+	
 	// We only want one value returned so we use TLIST rather than a start/end time range
 	sHorizonsTime = "&TLIST='" + dtStartDate.SQLDateTime() + "'"
+	
 	dim sHorizonsQuery as String = sHorizonsRequest + sHorizonLocation + sHorizonsTime + sHorizonsObjectID
+	
 	debug "Query=",sHorizonsQuery
-	EncodeURI(sHorizonsQuery)
+	
+	PLMEncodeURI(sHorizonsQuery)
+	
 	debug "Encoded Query=",sHorizonsQuery
+	
 	// Issue the call the JPL Horizons Web Service - 20 second timeout.
 	sHorizonsData = Web.HTTPGet(sHorizonsQuery, 20)
 	if sHorizonsData = "" then
 		Speak("No data was returned")
 		return ""
 	end if
+	
 	// DEBUG - Write the query and returned data to a file for debugging
 	//dim a as APTextFile = APTextFile.WriteFile("JPLHorizonsDebug","txt")
 	//a.WriteLine(sHorizonsQuery)
 	//a.WriteLine(sHorizonsData)
+	
 	return  sHorizonsData
+	
 end function
+
 function FindMoonsInPlan(ByRef objMoons() as MFMoon) as boolean()
 	dim MoonsSel() as boolean
 	dim  oObject as APPlanObject
+	
 	// Find all the moons in the current plan and return a boolean array for use in the check listbox
 	for i as integer = 0 to objMoons.UBound
 		oObject = Plan.FindObject(objMoons(i).ColumnValue(1))
@@ -134,29 +579,40 @@ function FindMoonsInPlan(ByRef objMoons() as MFMoon) as boolean()
 			MoonsSel.Append true
 		end if
 	next i
+	
 	return MoonsSel
 end function
+
 function QueryDialog(ByRef objMoons() as MFMoon, ByRef MoonsSel() as boolean, ByRef iDSAOut as integer,  ByRef bQueryInfo as boolean) as boolean
 	dim dlg as new Dialog
+	
 	// Find all moons that are already in the plan so that they are pre-ticked in the selection list
 	MoonsSel = FindMoonsInPlan(objMoons)
-	dlg.CaptionParameter("Select the moons to add/update in the current plan.                                              .",1,false,true)
+	
+	dlg.CaptionParameter("Select the moons to add/update in the current plan.                                                              .",1,false,true)
 	dlg.CheckListParameter(false,"Moons",MoonsSel, objMoons,false,10)
 	dlg.ChoiceParameter("SharpCap Deep Sky Annotation Format (to clipboard)", Plan.RestoreValue("DSAOut",0),"Off","Full (name, separation, magnitude, diameter, orbital period)","Minimal (name only)")
 	dlg.BooleanParameter("Show query info on completion", Plan.RestoreValue("QueryInfo",false))
 	dlg.CaptionParameter("Deselecting moons will not delete them from the plan.")
+	
 	if not dlg.Show("Solar System - Planetary Moons",false, 1) then return false
+	
 	MoonsSel = dlg.CheckListParameter("Moons")
 	iDSAOut = dlg.ChoiceParameter("SharpCap Deep Sky Annotation Format (to clipboard)")
 	bQueryInfo = dlg.BooleanParameter("Show query info on completion")
+	
 	Plan.SaveValue("DSAOut",iDSAOut)
 	Plan.SaveValue("QueryInfo", bQueryInfo)
+	
 	return true
+	
 end function
+
 // The effect of the Sun at the site location
 function SolarPresence(sCode as string) as string
 	dim sOut as string
 	Debug "SP:Code=[",sCode,"]"
+	
 	select case sCode
 	case "*"
 		sOut="Daylight"
@@ -169,17 +625,22 @@ function SolarPresence(sCode as string) as string
 	else
 		sOut="Night"
 	end select
+	
 	return sOut
 end function
+
 // The Earth's Moon visibility at the site location.
 function LunarPresence(sCode as string) as string
 	dim sOut as string = "Earth Moon not visible"
 	Debug "LP:Code=[",sCode,"]"
+	
 	if sCode="m" then
 		sOut="Earth Moon visible"
 	end if
+	
 	return sOut
 end function
+
 // The visibility of the moon due to its orbit around its planet
 function Visibility(sCode as string) as string
 	dim sOut as string
@@ -203,25 +664,31 @@ function Visibility(sCode as string) as string
 	end select
 	return sOut
 end function
+
 function ProcessMoonData(oMoon as MFMoon, sHorizonData as string, iDSAOut as integer, ByRef sDSAData as string, ByRef bCreated as boolean) as boolean
 	dim iStartIndex, iEndIndex as integer
 	dim sDataLine as string
+	
 	// Locate the data block in the returned Horizon's message.
 	iStartIndex = Instr(sHorizonData,"$$SOE")
 	iEndIndex = Instr(sHorizonData,"$$EOE")
+	
 	// Get the moon data line
 	sDataLine = Trim(Mid(sHorizonData, iStartIndex+7, iEndIndex-(iStartIndex+7)))
 	Debug "PMD:Data=", sDataLine
+	
 	// The data line is CSV. Split and trim to get a data array.
 	dim sDA() as string = Split(sDataLine,",")
 	for i as integer=0 to sDA.UBound
 		sDA(i) = Trim(sDA(i))
 	next
+	
 	// Debug output
 	Debug "DateTime=",sDA(0), "  Sun=",sDA(1), " Moon=",sDA(2), " RA=", sDA(3), " Dec=", sDA(4), "AirMass=",sDA(5), "Mag_ex=",sDA(6)," APMag=",sDA(7), " S-brt=", sDA(8), " ang-sep=",sDA(9), " vis=",sDA(10)
 	Debug "Solar Presence=",SolarPresence(sDA(1))
 	Debug "Lunar Presence=",LunarPresence(sDA(2))
 	Debug "Visibility=",Visibility(Right(sDA(10),1))
+	
 	// Add or update the moon in the current plan
 	dim  oObject as APPlanObject = Plan.FindObject(oMoon.Name)
 	if oObject = nil then
@@ -233,16 +700,19 @@ function ProcessMoonData(oMoon as MFMoon, sHorizonData as string, iDSAOut as int
 		//oObject.Type = "Planetary Moon"
 		oObject.Type=""
 	end if
+	
 	// These parameters will be created or updated
 	dim sUserNotes as string = "Last update=" + sDA(0) + " UT, Visibility=" + Visibility(Right(sDA(10),1)) + ", Magnitude=" + sDA(7) + ", Separation=" + sDA(9) + " arcsec" + ", AirMass=" + sDA(5)
 	sUserNotes = sUserNotes + ", Magnitude extinction=" + sDA(6) + ", Surface Brightness=" + sDA(8) + " Mag/arcsec 2, Lunar Prescence=" + LunarPresence(sDA(2)) + ", Solar Prescence=" + SolarPresence(sDA(1))
 	sUserNotes =  sUserNotes + NewLine() + "PHYSICAL - Diameter: " + oMoon.Diameter + " km, Orbital Period: " + oMoon.OrbitalPeriod
 	sUserNotes = sUserNotes + NewLine() + "NOTES - " + oMoon.Notes
 	oObject.UserNotes = sUserNotes
+	
 	oObject.Magnitude = Val(sDA(7))
 	oObject.Separation = Val(sDA(9))
 	oObject.RA = ParseRA(sDA(3))
 	oObject.Dec = ParseDec(sDA(4))
+	
 	if iDSAOut=1 then
 		//Create the SharpCap Format - fields sep = |
 		// IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
@@ -251,8 +721,10 @@ function ProcessMoonData(oMoon as MFMoon, sHorizonData as string, iDSAOut as int
 	elseif iDSAOut=2 then
 		sDSAData = sDSAData + oObject.ID + "|||" + sDA(3) + "|" + sDA(4) + "||||" + NewLine()
 	end if
+	
 	return true
 end function
+
 sub QueryInfoDialog(QueryRunTimeSecs as double, iProcessed as integer, iAdded as integer, iTotalMoons as integer)
 	dim dlg as new Dialog
 	dlg.CaptionParameter("Total moons available: " + Str(iTotalMoons+1))
@@ -260,25 +732,33 @@ sub QueryInfoDialog(QueryRunTimeSecs as double, iProcessed as integer, iAdded as
 	dlg.CaptionParameter("Moons info updated: " + Str(iProcessed - iAdded))
 	dlg.CaptionParameter("Query time: " + FormatNumber(Str(QueryRunTimeSecs),2) + " seconds")
 	dlg.NoCancel()
+	
 	call dlg.Show("Solar System - Planetary Moons - Query Information",false, 2)
+	
 end sub
-sub PlanetaryMoons()
+
+sub PLM()
+	
 	dim objMoons() as MFMoon
 	dim bMoonSel() as boolean
 	dim sHorizonData, sDSAData as string
 	dim bQueryInfo, bCreated as boolean = false
 	dim iProcessed, iAdded, iDSAOut as integer = 0
-	//DebugOff()
+	
+	DebugOff()
+	
 	// Check we have a site selected for the plan
 	if Plan.CurrentSite=nil then
 		Speak("No site selected.")
 		return
 	end if
+	
 	if NetworkConnected() = false then
 		Speak("No network connection!")
 		return
 	End if
-	// Moon Data (22 moons)
+	
+	// Moon Data (23 moons)
 	// If more moons are added then the name field must be of the format "Planet - Moon"
 	// JPL ID field is obtainable from the JPL Horizons query e.g 401, 802
 	// Diameter of moon in km's
@@ -286,11 +766,13 @@ sub PlanetaryMoons()
 	// Notes on the object (please change as you see fit) information from Wikipedia.
 	objMoons.Append new MFMoon("Mars - Phobos", "401", "22.2", "7h 39m","Discoverd by Asaph Hall, 18th August 1877, orbits 6,000km from Mars.")
 	objMoons.Append new MFMoon("Mars - Deimos", "402", "12.4", "30h 18m","Discovered by Asaph Hall, 12th August 1877, orbits 23,460km from Mars.")
+	
 	objMoons.Append new MFMoon("Jupiter - Io", "501", "3,643", "1.76d","Slightly larger than Earth's moon, over 400 active volcanoes, highest density and strongest gravity of any moon. Discovered by Galileo Galilei, 8th January 1610.")
 	objMoons.Append new MFMoon("Jupiter - Europa", "502", "3,121", "3.52d","Smallest of the four Galilean moons, smoothest surface of any moon. Discovered by Galileo Galilei, 8th January 1610.")
 	objMoons.Append new MFMoon("Jupiter - Ganymede", "503", "5,268", "7.1d","Largest moon in the Solar System, metallic core and a magnetic field. Discovered by Galileo Galilei, 7th January 1610.")
 	objMoons.Append new MFMoon("Jupiter - Callisto", "504", "4,820", "16.6d","Surface is the oldest and most heavily cratered in the Solar System. Discovered by Galileo Galilei, 7th January 1610.")
 	objMoons.Append new MFMoon("Jupiter - Amalthea", "505", "167", "11h 57m","Discovered by E.E. Barnard, 9th September 1892")
+	
 	objMoons.Append new MFMoon("Saturn - Titan", "606", "5,149", "16","Largest moon of Saturn. The only moon to have a dense atmosphere and stable bodies of surface liquid. Discovered by Christiaan Huygens, March 25th 1655.")
 	objMoons.Append new MFMoon("Saturn - Rhea", "605", "1,527", "4.5d","Second largest moon of Saturn. Discovered by G.D. Cassini, December 23rd 1672.")
 	objMoons.Append new MFMoon("Saturn - Iapetus", "608", "1,470", "79d","Low density body, dark leading hemisphere and bright trailing hemisphere. Discovered by G.D. Cassini, October 25th 1671.")
@@ -299,22 +781,31 @@ sub PlanetaryMoons()
 	objMoons.Append new MFMoon("Saturn - Tethys", "603", "1,062", "1.9d","Low density (water ice?) moon. Discovered by G.D. Cassini, March 11th 1684.")
 	objMoons.Append new MFMoon("Saturn - Enceladus", "602", "504", "33h 36m","Covered in clean, fresh ice, highly reflective surface, Cryovolcanoes at south pole. Discovered by William Herschell, August 28th 1789.")
 	objMoons.Append new MFMoon("Saturn - Mimas", "601", "396", "23h 36m","Smallest solar system body to be rounded because of self-gravitation. Discovered by William Herschell, September 17th 1789.")
+	
 	objMoons.Append new MFMoon("Uranus - Ariel", "701", "1,160","2.52d","Fourth largest moon and most reflective surface of Uranus moons. Discovered by William Lassell, October 24th 1851.")
 	objMoons.Append new MFMoon("Uranus - Umbriel", "702", "1,169","4.14d","Darkest surface of Uranian moon. Discovered by William Lassell, October 24th 1851.")
 	objMoons.Append new MFMoon("Uranus - Titania", "703", "1,577","8.7d","Largest moon of Uranus. Discovered by William Herschell, January 11th 1787.")
 	objMoons.Append new MFMoon("Uranus - Oberon", "704", "1,522","13.4d","Outermost major moon of Uranus and the second largest/massive. Discovered by William Herschell, January 11th 1787.")
 	objMoons.Append new MFMoon("Uranus - Miranda", "705", "471","4.1d","Smallest and innermost of Uranus's major moons. Discovered by Gerard P. Kuiper, February 16th 1948")
+	
 	objMoons.Append new MFMoon("Neptune - Triton", "801", "2,700","5.87d","Largest moon of Neptune, only moon in the Solar System with a retrograde orbit. Discovered by William Lassell, October 10th 1846.")
 	objMoons.Append new MFMoon("Neptune - Nereid", "802", "340","360d","Third largest moon of Neptune. Discovered by Gerard P. Kuiper, May 1st 1949.")
+	objMoons.Append new MFMoon("Neptune - Proteus", "808", "420","1.1d","Second largest moon of Neptune. Discovered by Voyager Science Team, 1989.")
+	
 	if QueryDialog(objMoons, bMoonSel, iDSAOut, bQueryInfo) then
+		
 		dim dblStartTime as double = MicroSeconds()
 		Dialog.StartProgress("Quering JPL...", true, bMoonSel.UBound)
 		Delay(0.25)
+		
 		Debug "bMoonSel=",bMoonSel.UBound
+		
 		for i as integer = 0 to bMoonSel.UBound
 			if bMoonSel(i) then
 				Debug "Call QueryJPLHorizons() Moon=", objMoons(i).ColumnValue(1)
+				
 				iProcessed = iProcessed + 1 //Record the number of Moons added/updated
+				
 				sHorizonData =  QueryJPLHorizons(objMoons(i).ColumnValue(2))
 				if sHorizonData<>"" then
 					//call ProcessMoonData(objMoons(i).ColumnValue(1), sHorizonData, bDSA, sDSAData, bCreated)
@@ -324,424 +815,54 @@ sub PlanetaryMoons()
 					end if
 				end if
 			end if
+			
 			if Dialog.UpdateProgress(i) then exit
+			
 			Delay(0.2)
 		next
+		
 		Delay(0.5)
+		
 		// If selected place moon(s) data in DSA format onto the clipboard
 		if iDSAOut>0 then
 			Clipboard = sDSAData
 		end if
+		
 		Dialog.StopProgress()
 		dim QueryRunTimeSecs as double = (MicroSeconds() - dblStartTime) / 1000000
 		Debug "Query Time=",QueryRunTimeSecs
+		
 		// Display query info/stats if the user requested them
 		if bQueryInfo then
 			QueryInfoDialog(QueryRunTimeSecs, iProcessed, iAdded, objMoons.UBound)
 		end if
+		
 	end if
 end sub
-class MFMinorBodies
-	implements MultiFieldObject
-	private dim sName as string
-	private dim sMag as string
-	private dim sRA as string
-	private dim sDec as string
-	sub Constructor(sArray() as string)
-		Debug "MFMinorBodies Constructor ", sArray(0)
-		sName = sArray(0)
-		sRA = sArray(1)
-		sDec = sArray(2)
-		sMag = sArray(6)
-	end sub
-	Function ColumnName(idx as integer) as string
-		Debug "Column Name", idx
-		select case idx
-		case 1
-			return "Name"
-		case 2
-			return "Magnitude"
-		case 3
-			return "RA"
-		case 4
-			return "Dec"
-		end select
-	end function
-	Function ColumnType(idx as integer) as integer
-		select case idx
-		case 1
-			return mfo_String
-		case 2
-			return mfo_String
-		case 3
-			return mfo_String
-		case 4
-			return mfo_String
-		end select
-	end function
-	Function ColumnValue(idx as integer) as string
-		Debug "Column Value for ",idx
-		select case idx
-		case 1
-			return sName
-		case 2
-			return sMag
-		case 3
-			return sRA
-		case 4
-			return sDec
-		end select
-	end function
-	
-	
-	
-	
-	Function nColumns() as integer
-		dim iCount as integer = 4
-		Debug "Column Count=4"
-		return iCount
-	end function
-end class
 
-
-
-
-function CreateJPLSmallBodyIDQuery(dblRA as double, dblDec as double, iMagLimit as integer, dblDimension as double) as string
-	dim sDec as string = ""
-	dim sQuery as string = "https://ssd-api.jpl.nasa.gov/sb_ident.api?"
-	// Location of observer - must be the first parameters in the query!
-	sQuery = sQuery + "lat=" + Str(Plan.CurrentSite.Latitude) + "&lon=" + Str(Plan.CurrentSite.Longitude) + "&alt=" + Str(Plan.CurrentSite.Altitude/1000)
-	// A more accurate calculation is applied to the objects found in the first pass.
-	sQuery = sQuery + "&two-pass=true&suppress-first-pass=true"
-	// The date of the search. Use Julian Date of plan to 4 decimal places
-	sQuery = sQuery + "&obs-time=" + DoubleToStr(Plan.JulianDate,4)  //2459826.20200
-	// Minimum magnitude of search
-	sQuery = sQuery + "&vmag-lim=" + Str(iMagLimit)
-	// The ReplaceAll is to mitigate a bug in the FormatDec that always adds a space between elements
-	if dblDec < 0 then
-		sDec = ReplaceAll("M" + FormatDec(dblDec,true,"dms-")," ","")
-		sDec = Replace(sDec,"-","")
-	else
-		sDec = ReplaceAll(FormatDec(dblDec,true,"dms-")," ","")
-	end if
-	// Specify the centre RA/Dec and the half width/height of the surrounding search box.
-	sQuery = sQuery + "&fov-ra-center=" + FormatRA(dblRA, true,"hms-") + "&fov-dec-center=" + sDec + "&fov-ra-hwidth=" + Str(dblDimension) + "&fov-dec-hwidth=" + Str(dblDimension)
-	Debug "Query=", sQuery
-	return sQuery
-end function
-function CallJPLSmallBodyIdentificationAPI(sQuery as string, ByRef sData as string, ByRef QueryRunTimeSecs as double) as boolean
-	dim dblStartTime as double = MicroSeconds()
-	Dialog.StartProgress("JPL Horizons Query...", true)
-	Call Dialog.UpdateProgress(5)
-	Delay(1)
-	// Query JPL. Timeout is set to 120 seconds. Normal query processing is 20-40 seconds for 1 deg x 1 deg FOV, min magnitude 18.
-	sData = Web.HTTPGet(sQuery, 120)
-	// Record how long the query took to complete
-	QueryRunTimeSecs = (MicroSeconds() - dblStartTime) / 1000000
-	Dialog.StopProgress()
-	debug "Data=",sData
-	debug "Web Last Error:", Web.LastError
-	if sData = "" then
-		Speak("No data was returned")
-		return false
-	end if
-	return true
-end function
-function QueryDialog(ByRef iLocation as integer, ByRef iMinMagnitude as integer, ByRef dblDiagonal as double) as boolean
-	dim dlg as new Dialog
-	dim types() as string = Array("Telescope Position", "Selected Plan Object")
-	dim mags() as string = Array("0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25")
-	dim dblFOVWidth, dblFOVHeight as double
-	
-	dlg.CaptionParameter("Search FOV for minor bodies.",1,false,true)
-	dlg.PopupParameter("Search Location", Plan().RestoreValue("SearchLoc",0), types)
-	dlg.PopupParameter("Min. Magnitude", Plan().RestoreValue("MinMag",18), mags)
-	dlg.DoubleParameter("FOV (ArcMins) Width", Plan().RestoreValue("FOVWidth",1),0.1,300)
-	dlg.DoubleParameter(true, "Height", Plan().RestoreValue("FOVHeight",1),0.1,300)
-	dlg.CaptionParameter("WARNING - Query can take up to 2 minutes!",1,false,true)
-	if not dlg.Show("Asteroid FOV Search (JPL Small-Body Identification)") then return false
-	
-	iMinMagnitude = dlg.IntegerParameter("Min. Magnitude")
-	dblFOVWidth = dlg.DoubleParameter("FOV (ArcMins) Width")
-	dblFOVHeight = dlg.DoubleParameter("Height")
-	iLocation = dlg.PopupParameter("Search Location")
-	Plan().SaveValue("MinMag",iMinMagnitude)
-	Plan().SaveValue("FOVWidth",dblFOVWidth)
-	Plan().SaveValue("FOVHeight",dblFOVHeight)
-	Plan().SaveValue("SearchLoc",iLocation)
-	Debug "Query Dialog: MinMag=",iMinMagnitude," FOV Width=",dblFOVWidth," FOV Height=",dblFOVHeight," Location=", iLocation
-	// In order to simplify the calculation a search box is required that can be used for equatorial, alt-az mounts with imagers at any
-	// rotation. Taking the diagonal of the user specified box will allow the user specified FOV to be fully covered in any orientation.
-	// The draw back is that it increases the search radius, when that might not be necessary.
-	// Calculate the FOV diagonal distance in degrees.
-	dblDiagonal = (Sqrt(Pow(dblFOVWidth/60,2) + Pow(dblFOVHeight/60,2)))/2
-	Debug "Diagonal=",dblDiagonal
-	return true
-end function
-function GenerateCSV(ByRef cDataObjects as Collection, ByRef bSelected() as boolean, ByRef sCSV as string) as boolean
-	dim sParams() as string
-	sCSV = "Name,Magnitude,RA,Dec" + NewLine()
-	// Iterate through all the objects
-	for i as integer =0 to cDataObjects.Count-1
-		if bSelected(i) then
-			sParams = cDataObjects.Item(i)
-			sCSV = sCSV + sParams(0) + "," + sParams(6) + "," + sParams(1) + "," + sParams(2) + NewLine()
-		end if
-	next
-	return true
-end function
-function GenerateDSA(ByRef cDataObjects as Collection, ByRef bSelected() as boolean, ByRef sDSA as string) as boolean
-	dim sParams() as string
-	for i as integer =0 to cDataObjects.Count-1
-		if bSelected(i) then
-			sParams = cDataObjects.Item(i)
-			sDSA = sDSA + sParams(0) + "|" + sParams(0) + "|Minor Body|" + sParams(1) + "|" + sParams(2) + "|" + sParams(6) + "|||" + NewLine()
-		end if
-	next
-	return true
-end function
-function ResultsDialog(ByRef cDataObjects as Collection, sQuery As string, iMinMagnitude as integer, dblDiagonal as double, dblQueryRuntimeSecs as double) as boolean
-	dim dlg as new Dialog
-	dim mfResults() as MFMinorBodies
-	dim bClicked() as boolean
-	dim iClipboardChoice, iPlanChoice as integer
-	dim sOutput as string
-	redim bClicked(cDataObjects.Count-1)
-	debug "ResultsDialog Start"
-	for i as integer = 0 to cDataObjects.Count-1
-		mfResults.Append new MFMinorBodies(cDataObjects.Item(i))
-		bClicked(i)=true
-	next
-	debug "ResultsDialog MFMinorBodies Created"
-	// Create captions to provide information on query and results
-	dlg.CaptionParameter("Minor Body Results - " + Str(cDataObjects.Count) + " objects found in " + DoubleToStr(dblQueryRuntimeSecs,1) + " seconds                                                                                        ",1,false,false,false,false,true)
-	dlg.CaptionParameter("Actual Search Box: " + DoubleToStr(dblDiagonal*2,2) + DegreeSymbol() + " x " + DoubleToStr(dblDiagonal*2,2) + DegreeSymbol() + ", Minimum Magnitude: " + Str(iMinMagnitude),1,false,false,false,false,true)
-	dlg.CheckListParameter("Minor Bodies", bClicked, mfResults,false,4)
-	dlg.ChoiceParameter("Clipboard Output", 0, "None", "SharpCap - Deep Sky Annotation Format", "CSV Format", "JPL Small-Body Identification Query", "All - JPL Query, CSV, SharpCap DSA")
-	//dlg.ChoiceParameter("AstroPlanner Output", 0, "None","Add Objects to Current Plan")
-	debug "ResultsDialog CheckListParameter created"
-	if not dlg.Show("Asteroid FOV Search (JPL)",false,10) then return false
-	// Get user choices
-	iClipboardChoice = dlg.ChoiceParameter("Clipboard Output")
-	//iPlanChoice = dlg.ChoiceParameter("AstroPlanner Output")
-	bClicked = dlg.CheckListParameter("Minor Bodies")
-	debug "Clipboard Output=", iClipboardChoice, " AstroPlanner Output=", iPlanChoice
-	select case iClipboardChoice
-	case 1
-		// SharpCap DSA format
-		debug "SharpCap DSA format"
-		if GenerateDSA(cDataObjects, bClicked, sOutput) then
-			Clipboard = sOutput
-		end if
-	case 2
-		// CSV Format
-		debug "CSV Format"
-		if GenerateCSV(cDataObjects, bClicked, sOutput) then
-			Clipboard = sOutput
-		end if
-	case 3
-		// JPL Small-Body Identification Query
-		debug "JPL Small-Body Identification Query"
-		Clipboard = sQuery
-	case 4
-		debug "All - Query, CSV, DSA"
-		dim sAll as string
-		sAll = sQuery
-		if GenerateCSV(cDataObjects, bClicked, sOutput) then
-			sAll = sAll + NewLine() + NewLine() + sOutput
-			sOutput=""
-		end if
-		
-		
-		
-		
-		if GenerateDSA(cDataObjects, bClicked, sOutput) then
-			sAll = sAll + NewLine() + NewLine() + sOutput
-		end if
-		
-		
-		
-		
-		Clipboard = sAll
-		
-		
-		
-		
-	end select
-	
-	
-	
-	
-	//select case iPlanChoice
-	//case 1
-	// Add objects to current plan
-	//end select
-	
-	
-	
-	
-	debug "ResultsDialog End"
-end function
-
-
-
-
-function ProcessData(ByRef sData as string) as Collection
-	dim iStartIndex, iEndIndex, iDataCount, i as integer = 0
-	dim asAsteroid(-1) as string
-	dim sMinorBody as string
-	dim cMinorObjects as new Collection
-	
-	
-	
-	
-	debug "ProcessData Start"
-	
-	
-	
-	
-	// Find the amount of objects returned, if any.
-	iStartIndex = Instr(sData,"n_second_pass")
-	if iStartIndex > 0 then
-		iEndIndex = Instr(iStartIndex,sData,",")
-		iDataCount = Val(Trim(Mid(sData, iStartIndex+16,iEndIndex-iStartIndex-16)))
-		
-		
-		
-		
-		Debug "Minor Body Count=",iDataCount
-		// Find the start of the data block
-		iStartIndex = Instr(iEndIndex, sData, "[")
-		for i=0 to iDataCount-1
-			iStartIndex = Instr(iStartIndex+1, sData, "[")
-			iEndIndex = Instr(iStartIndex, sData, "]")
-			sMinorBody = ReplaceAll(Mid(sData, iStartIndex+1, iEndIndex-1-iStartIndex),"""","")
-			sMinorBody = ReplaceAll(sMinorBody,"\","")
-			sMinorBody = ReplaceAll(sMinorBody,"'"," ")
-			sMinorBody = ReplaceAll(sMinorBody,":"," ")
-			cMinorObjects.Add(SplitComma(sMinorBody))
-			debug i," ",sMinorBody
-		next
-	end if
-	
-	
-	
-	
-	debug "ProcessData End"
-	
-	
-	
-	
-	return cMinorObjects
-end function
-
-
-
-
-sub AsteroidsFOVSearch()
-	dim obj as APPlanObject = Plan().SelectedObject
-	dim iLocation as integer
-	dim iMinMagnitude as integer = 0
-	dim dblDiagonal as double
-	dim bCancel as boolean = false
-	dim dblQueryRuntimeSecs as double = 0
-	dim sQuery as string = ""
-	dim sData as string = ""
-	dim cData as Collection
-	// Check we have a site selected for the plan
-	if Plan.CurrentSite=nil then
-		Speak("No site selected.")
-		return
-	end if
-	if NetworkConnected() = false then
-		Speak("No network connection!")
-		return
-	End if
-	// Display Query dialog - returns parameters to create JPL query
-	if not QueryDialog(iLocation, iMinMagnitude, dblDiagonal) then
-		// User pressed cancel, so finish script
-		return
-	end if
-	if iLocation=0 then
-		// If the telescope is connected then use the telescope's RA/DEC coordinates
-		if Plan.TelescopeConnected then
-			sQuery = CreateJPLSmallBodyIDQuery(Plan.CurrentRA, Plan.CurrentDec, iMinMagnitude, dblDiagonal)
-		else
-			Speak("Telescope is not connected.")
-			return
-		end if
-	else
-		// If an object is selected then use the objects RA/Dec coordinates
-		if obj <> nil then
-			sQuery = CreateJPLSmallBodyIDQuery(obj.RA, obj.Dec, iMinMagnitude, dblDiagonal)
-		else
-			Speak("No object selected.")
-			return
-		End if
-	end if
-	// Call the JPL web service
-	if not CallJPLSmallBodyIdentificationAPI(sQuery, sData, dblQueryRuntimeSecs) then
-		return
-	end if
-	cData = ProcessData(sData)
-	Call ResultsDialog(cData, sQuery, iMinMagnitude, dblDiagonal, dblQueryRuntimeSecs)
-	// Add to Plan - Will lookup each name in the JPL Catalogue and add that object to plan. If the minor planet cannot be found then the object is added from the query.
-	// The user needs to be shown how many asteroids are from JPL Catalog and how many are really just dummy objects.
-end sub
-
-
+// END OF PLANETARY MOONS
 sub EncodeURI(ByRef url as string)
 	url = ReplaceAll(url,"'","%27")
 	url = ReplaceAll(url," ","%20")
 end sub
 
-
-
-
 function FormatNumber(sInput as String, iDecpts as integer) as string
 	dim dblInput as double = 0
-	
-	
-	
-	
 	dblInput= CDbl(sInput)
-	
-	
-	
-	
 	return DoubleToStr(dblInput, iDecpts)
-	
-	
-	
-	
 end function
-
-
-
 
 function CometHorizonsCommand(sName as string) as string
 	dim sCometName as string = ""
 	Dim iBracketEnd, iSlashPos as integer = 0
 	
-	
-	
-	
 	Debug "CometHorizonsCommand(), Name=", sName
-	
-	
-	
 	
 	if sName = "" then
 		return ""
 	end if
 	
-	
-	
-	
 	dim iFirstCharacter as integer = Asc(Left(sName,1))
-	
-	
-	
 	
 	select case iFirstCharacter
 	case 40
@@ -759,49 +880,23 @@ function CometHorizonsCommand(sName as string) as string
 		Debug "CometHorizonsCommand(), MPC/JPL Starting with letter"
 		sCometName = Trim(Mid(sName,1,Instr(sName,"(")-1))
 	end select
-	
-	
-	
-	
 	debug "Comet Name=", sCometName
-	
-	
-	
 	
 	// The CAP directive returns last apparition before current date. Stops a list of apparitions being returned.
 	return "DES=" + sCometName + "%3BCAP%3B"
-	
-	
-	
-	
 end function
-
-
-
 
 function AsteroidHorizonsCommand(sName as string, sCatalogue as string) as string
 	dim sAsteroidName as string = ""
 	dim iBracketEnd, iSlashPos as integer = 0
 	
-	
-	
-	
 	Debug "AsteroidHorizonsCommand(), In Name=", sName, " Cat=", sCatalogue
-	
-	
-	
 	
 	if sName = "" then
 		return ""
 	end if
 	
-	
-	
-	
 	dim iFirstCharacter as integer = Asc(Left(sName,1))
-	
-	
-	
 	
 	select case sCatalogue
 	case "MPCORB","JPLUnnumbered","MPCDistant","MPCNEA","MPCPHA","MPCUnusual"
@@ -820,82 +915,34 @@ function AsteroidHorizonsCommand(sName as string, sCatalogue as string) as strin
 		sAsteroidName = Left(sName,Instr(sName," ")-1) +"%3B"
 	end select
 	
-	
-	
-	
 	Debug "AsteroidHorizonsCommand(), Out Name=", sAsteroidName
-	
-	
-	
 	
 	return sAsteroidName
 	
-	
-	
-	
 end function
-
-
-
-
-function SharpCapDSAFormat(IDs as String, Name as String, Type as String, RA as String, Dec as String, VMag as String, optional RMax as String = "", optional RMin  as String = "", optional PosAngle as string = "") as string
-	
-	
-	
-	
-	//Create the SharpCap Format - fields sep = |
-	// IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
-	// More information - https://forums.sharpcap.co.uk/viewtopic.php?p=27143#p27143
-	
-	
-	
-	
-	return IDs + "|" + Name + "|" + Type + "|" + RA + "|" + Dec + "|" + VMag + "|" + RMax + "|" + RMin + "|" + PosAngle
-end function
-
-
-
 
 function  ProcessHorizonsData(sName as String, sType as String, ByRef sData as String) as string
 	dim sEphemeris, sRADEC, sMag, sIlum, sDistanceAU, sRelVelocity, sLightTime, sConstellation, sSharpCap as string = ""
 	dim iStart, iEnd as Integer
 	
-	
-	
-	
 	// Find the ephemeris section in the returned data
 	iStart= Instr(sData,"$$SOE")
 	iEnd = Instr(sData,"$$EOE")
-	
-	
-	
 	
 	// Check that we found the emphemeris data - if not return blank.
 	if iStart = 0 or iEnd = 0 then
 		return ""
 	end if
 	
-	
-	
-	
 	// Jump 36 characters to the start of the coordinates field
 	sEphemeris = Mid(sData, iStart+36,iEnd-iStart-36)
 	
-	
-	
-	
 	debug "JPL Ephemeris=", sEphemeris
-	
-	
-	
 	
 	// The Horizons data looks like fixed field lengths. There is variable padding spaces between the fields most probably to accomodate different units/precision.
 	// The quick solution was to create a string array split on the spaces and then remove the empty fields.
 	// In the Horizons app manual it says you can output fields delimited by commas. There is no mention how to do this in the API docs. Query JPL?
 	dim sDA() as string = Split(sEphemeris," ")
-	
-	
-	
 	
 	// Remove all the empty array members to leave the data fields
 	dim iCount as integer =0
@@ -907,9 +954,6 @@ function  ProcessHorizonsData(sName as String, sType as String, ByRef sData as S
 		end if
 	Wend
 	
-	
-	
-	
 	// Format the data fields into the required variables
 	sRADEC = sDA(0) +" " + sDA(1) + " " + sDA(2) + " " + sDA(3) + " " + sDA(4) + " " + sDA(5)
 	sMag = FormatNumber(sDA(6),2)
@@ -919,28 +963,13 @@ function  ProcessHorizonsData(sName as String, sType as String, ByRef sData as S
 	sLightTime = FormatNumber(sDA(11),2)
 	sConstellation = sDA(12)
 	
-	
-	
-	
 	debug "JPL Data: RADDEC=",sRADEC," Mag=",sMag," Ilumination%=",sIlum," Distance(au)=",sDistanceAU," Rel Velocity (km/s)=",sRelVelocity," LightTime(min)=",sLightTime," Const=",sConstellation
-	
-	
-	
 	
 	return SharpCapDSAFormat(sName, "LT=" + sLightTime + "min, Dist=" + sDistanceAU  + "au", sType + " (JPL Horizons)", sRADEC, "", sMag)
 	
-	
-	
-	
 end function
 
-
-
-
 function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as string
-	
-	
-	
 	
 	// JPL Horizon strings used to build the object query
 	// More information - https://ssd-api.jpl.nasa.gov/doc/horizons.html
@@ -949,19 +978,10 @@ function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as 
 	dim sHorizonsTime as String = ""
 	dim sHorizonsObjectID as String=""
 	
-	
-	
-	
 	// The returned Horizons data
 	dim sHorizonsData as String = ""
 	
-	
-	
-	
 	debug "QueryJPLHorizons(), Type=", Type
-	
-	
-	
 	
 	// Create the command depending on type Minor or Comet
 	if Type="Minor" then
@@ -972,46 +992,22 @@ function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as 
 		sHorizonsObjectID = "&COMMAND='" + CometHorizonsCommand(ID) + "'"
 	end if
 	
-	
-	
-	
 	//Lat/Lng of observer. Altitiude of observer is in KMs so convert from AP's meters.
 	sHorizonLocation = "&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='" + Str(Plan.CurrentSite.Longitude) + "," + Str(Plan.CurrentSite.Latitude) + "," + Str(Plan.CurrentSite.Altitude/1000) + "'"
-	
-	
-	
 	
 	// Get the plans current time in UTC. Will be replaced with Plan().GMTDateTime
 	//dim dtStartDate as Date = new Date(Plan().UTC) // Use this line for pre-2.4b13 versions
 	dim dtStartDate as Date = new Date(Plan().GMTDateTime)
 	
-	
-	
-	
 	sHorizonsTime = "&TLIST='" + dtStartDate.SQLDateTime() + "'"
-	
-	
-	
 	
 	dim sHorizonsQuery as String = sHorizonsRequest + sHorizonLocation + sHorizonsTime + sHorizonsObjectID
 	
-	
-	
-	
 	debug "Query=",sHorizonsQuery
-	
-	
-	
 	
 	EncodeURI(sHorizonsQuery)
 	
-	
-	
-	
 	debug "Encoded Query=",sHorizonsQuery
-	
-	
-	
 	
 	// Issue the call the JPL Horizons Web Service - 20 second timeout - Would really like to know the return code
 	sHorizonsData = Web.HTTPGet(sHorizonsQuery, 20)
@@ -1021,64 +1017,87 @@ function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as 
 		return ""
 	end if
 	
-	
-	
-	
 	// DEBUG - Will write the query and returned data to a file for debugging
 	//dim a as APTextFile = APTextFile.WriteFile("JPLHorizonsDebug","txt")
 	//a.WriteLine(sHorizonsQuery)
 	//a.WriteLine(sHorizonsData)
 	
-	
-	
-	
 	return  ProcessHorizonsData(ID, Type, sHorizonsData)
 	
-	
-	
-	
 end function
-
-
-
 
 function ProcessOtherObjects(Obj as APPlanObject) as string
 	return SharpCapDSAFormat(Obj.ID, Obj.Name, Obj.Type, FormatRA(obj.RA,True,"hmsa") + " " + FormatDec(obj.Dec,True,"dmsa"),"",str(obj.Magnitude))
 end function
 
+function SharpCapDSAFormat(obj as APPlanObject) as string
+	if obj<>nil then
+		return SharpCapDSAFormat(obj.ID, obj.Name, obj.Type, Str(obj.RA), Str(obj.Dec), Str(obj.Magnitude))
+	end if
+	
+	return ""
+end function
 
-
+function SharpCapDSAFormat(IDs as String, Name as String, Type as String, RA as String, Dec as String, VMag as String, optional RMax as String = "", optional RMin  as String = "", optional PosAngle as string = "") as string
+	
+	//Create the SharpCap Format - fields sep = |
+	// IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
+	// More information - https://forums.sharpcap.co.uk/viewtopic.php?p=27143#p27143
+	
+	return IDs + "|" + Name + "|" + Type + "|" + RA + "|" + Dec + "|" + VMag + "|" + RMax + "|" + RMin + "|" + PosAngle
+end function
 
 sub SharpCapDSA()
-	dim obj as APPlanObject = Plan().SelectedObject
-	dim sOut as string
-	// Check we have an object selected in the plan
-	if obj=nil then
-		Speak("No object selected")
-		return
-	end if
+	dim obj as APPlanObject
+	dim sOut, sDSA as string
+	dim bFirst as boolean = true
+	
 	// Check we have a site selected for the plan
 	if Plan.CurrentSite=nil then
 		Speak("No site selected.")
 		return
 	end if
-	select case obj.Type
-	case "Minor","Comet"
-		//Check we are connected to the internet as we need the JPL Horizons web service
-		if NetworkConnected()=False then
-			Speak("No network connection!")
-			return
-		end if
-		sOut = QueryJPLHorizons(obj.ID, obj.Type, obj.GetValueAsString("Catalogue"))
-		debug "JPL DSA=",sOut
-	else
-		// For all other objects use AstroPlanners data to create DSA format
-		// Tested succesfully on quasars
-		sOut = ProcessOtherObjects(obj)
-		debug "AP DSA=",sOut
-	end select
-	if sOut<>"" then
-		Clipboard = sOut
+	
+	if Plan.nSelectedObjects = 0 then
+		Speak("No object selected")
+		return
+	end if
+	Debug "Selected objects",Plan.nSelectedObjects
+	// Generate DSA for all selected objects in the plan
+	for each obj in Plan.SelectedObjects()
+		Debug "Object ID",obj.ID
+		select case obj.Type
+		case "Minor","Comet"
+			//Check we are connected to the internet as we need the JPL Horizons web service
+			if NetworkConnected()=False then
+				Speak("No network connection!")
+				return
+			end if
+			sOut = QueryJPLHorizons(obj.ID, obj.Type, obj.GetValueAsString("Catalogue"))
+			debug "JPL DSA=",sOut
+			if bFirst then
+				sDSA = sOut
+				bFirst = false
+			else
+				sDSA = sDSA + EndOfLine() + sOut
+			end if
+		else
+			// For all other objects use AstroPlanners data to create DSA format
+			// Tested succesfully on quasars
+			sOut = ProcessOtherObjects(obj)
+			debug "AP DSA=",sOut
+			if bFirst then
+				sDSA = sOut
+				bFirst = false
+			else
+				sDSA = sDSA + EndOfLine() + sOut
+			end if
+		end select
+		
+	next
+	
+	if sDSA <> "" then
+		Clipboard = sDSA
 		Speak("DSA completed")
 	else
 		Speak("DSA Failed")
@@ -1086,149 +1105,267 @@ sub SharpCapDSA()
 	
 end sub
 
-function SetTargetFileInfo() as integer
+// Search Objects carries out a radius search around the currently selected object
+sub SearchObjects(iOption as integer, Params as string, ByRef Result as JSON)
 	
-	dim iResult as integer = -1
-	dim fObjectInfo as APTextFile = nil
-	dim obj as APPlanObject = Plan().SelectedObject
-	dim sInfo, sName, sType, sDisplayName, sDistance as string = ""
-	dim sName1, sName2 as string = ""
-	
-	// How many characters of the objects name to display.
-	dim iMaxNameLength as integer = 50
-	
-	// The file to write the selected object's information.
-	dim sFilename as string = SharpCapPath() + "ObjectInfo.txt"
-	
-	Debug "Target File=",sFilename
-	
-	if obj=nil then
-		Speak("No object selected")  // if no object selected
-		return iResult
+	if Plan.SelectedObject = nil then
+		return
 	end if
 	
-	// Add the object ID to the information string
-	sInfo = obj.ID
+	dim oSearch as APSearch = new APSearch
+	Debug "Do search", DoubleToStr(Plan.SelectedObject().RA), DoubleToStr(Plan.SelectedObject().Dec)
 	
-	// Get User-defined fields for name and distance of selected object
-	sDisplayName = obj.GetValueAsString("Display")
-	sDistance = obj.GetValueAsString("Distance")
+	// Get search filters
+	dim Magnitude as double = 999
+	dim bNoMag as boolean = false
+	dim sPA() as string = Split(Params,"|")
+	Debug Params, UBound(sPA)
 	
-	// Decide which name field to use
-	if Len(sDisplayName)>0 and sDisplayName<>"???" then
-		sName=sDisplayName
-	else
-		// The default name field often contains multiple synonyms seperated by commas.
-		// Check and only display 2 names at most.
-		if Instr(obj.Name,",")>0 then
-			sName1=NthField(obj.Name,",",1)
-			sName2=NthField(obj.Name,",",2)
-			// If the length of using two names exceeds maximum specifed then use first name only
-			if Len(sName1)+Len(sName2)+1>iMaxNameLength then
-				sName=sName1
-			else
-				sName=sName1 + ", " + sName2
-			end if
-		else
-			sName=obj.Name
-		end if
+	if sPA(0) <> "" then Magnitude = CDbl(sPA(0))
+	if sPA(2) = "1" then bNoMag = true
+	
+	// Add a magnitude bounds if we have set a magnitude and don't want objects without a magnitude.
+	if sPA(0) <> "" and not bNoMag then
+		oSearch.AddBound(APSearch.item_Magnitude, APSearch.rel_LE, Magnitude)
 	end if
 	
-	// Constrain the name's length to the required characters
-	if Len(sName)>iMaxNameLength then
-		sName=Left(obj.Name,iMaxNameLength)+"..."
-	end if
-	
-	// Add the optional other names, if they are present.
-	if Len(Ltrim(sName))>0 then
-		sInfo = sInfo + ", " + sName
-	end if
-	
-	sInfo = sInfo + " ("
-	
-	// If a distance field exists then add to information
-	if Len(sDistance)>0 and sDistance<>"???" then
-		sInfo = sInfo + sDistance + " - "
-	end if
-	
-	// Get the Objects constellation (abbreviation) and lookup the full name
-	dim objCon as Constellation = Constellation.GetConstellation(obj.Constellation)
-	sInfo = sInfo + objCon.Name
-	
-	// Add object type information
-	sType=obj.Type
-	if Len(sType)>0 then
-		// Change the type to a more readable form
-		select case sType
-		case "P Neb"
-			sType="Planetary Nebula"
-		case "Open"
-			sType="Open Cluster"
-		case "Open+D Neb"
-			sType="Open Cluster + Dark Nebula"
-		case "Neb"
-			sType="Nebula"
-		case "SNR"
-			sType="Supernova Remnant"
-		case "D Neb"
-			sType="Dark Nebula"
-		case "Open+Asterism"
-			sType="Open Cluster + Asterism"
-		case "Dbl+Asterism"
-			sType="Double Star + Asterism"
-		case "GalClus"
-			sType="Galaxy Cluster"
-		case "E Neb"
-			sType="Emission Nebula"
+	if sPA(1) <> "" then
+		select case sPA(1)
+		case "All"
+			oSearch.FindAll()
+		case "Star"
+			oSearch.AddType(APSearch.type_Star)
+			oSearch.AddType(APSearch.type_BeStar)
+			oSearch.AddType(APSearch.type_BrownDwarf)
+			oSearch.AddType(APSearch.type_CarbonStar)
+			//	oSearch.AddType(APSearch.type_Multiple)
+			oSearch.AddType(APSearch.type_RedDwarf)
+			//	oSearch.AddType(APSearch.type_Triple)
+			//	oSearch.AddType(APSearch.type_Variable)
+			oSearch.AddType(APSearch.type_WhiteDwarf)
+			oSearch.AddType(APSearch.type_WolfRayetStar)
+			//	oSearch.AddType(APSearch.type_Double)
+		case "Galaxy"
+			oSearch.AddType(APSearch.type_Galaxy)
+		case "Quasar"
+			oSearch.AddType(APSearch.type_Quasar)
+		case "Double"
+			oSearch.AddType(APSearch.type_Double)
+			oSearch.AddType(APSearch.type_Triple)
+			oSearch.AddType(APSearch.type_Multiple)
+		case "Variable"
+			oSearch.AddType(APSearch.type_Variable)
+		case "Cluster"
+			oSearch.AddType(APSearch.type_Globular)
+			oSearch.AddType(APSearch.type_Open)
+			oSearch.AddType(APSearch.type_StarCloud)
+		case "Nebula"
+			oSearch.AddType(APSearch.type_BrightNeb)
+			oSearch.AddType(APSearch.type_DarkNeb)
+			oSearch.AddType(APSearch.type_DiffuseNeb)
+			oSearch.AddType(APSearch.type_EmissionNeb)
+			oSearch.AddType(APSearch.type_HerbigHaro)
+			oSearch.AddType(APSearch.type_HIIRegion)
+			oSearch.AddType(APSearch.type_MolecularCloud)
+			oSearch.AddType(APSearch.type_Nebula)
+			oSearch.AddType(APSearch.type_Nebulosity)
+			oSearch.AddType(APSearch.type_PlanetaryNeb)
+			oSearch.AddType(APSearch.type_ReflectionNeb)
 		end select
-		sInfo = sInfo + " - " + sType + ")"
-	else
-		sInfo = sInfo + ")"
 	end if
 	
-	Debug "Before write", sFilename
+	oSearch.MaxResults = 2000
 	
-	// Write the information string to a file, for display in EEACtrl app and used by SharpCap to set Target name for live stack
-	fObjectInfo = APTextFile.WriteFileUsingPath(sFilename,true)
-	if fObjectInfo <> nil then
-		fObjectInfo.Write(sInfo)
-		fObjectInfo.Close
-		iResult = 1 //SUCCESS
-		Debug "After write- Success"
+	if sPA(4) <> "999" then
+		oSearch.WithinDistance(CDbl(sPA(3)), CDbl(sPA(4)), CDbl(sPA(5)))
 	else
-		Debug "ObjectInfo File Creation Failed!"
-		iResult = -2
-		return iResult
+		oSearch.WithinDistance(CDbl(sPA(3)), Plan.SelectedObject().RA, Plan.SelectedObject().Dec)
 	end if
 	
+	call oSearch.Search(true)
 	
-	return iResult
+	Debug "Search Count=", oSearch.nObjects
+	if oSearch.nObjects > 0 then
+		dim i,cnt as integer = 0
+		dim doc as string = "{""Objects"":["
+		dim oCatObj as APCatalogObject
+		
+		for i=1 to oSearch.nObjects
+			oCatObj = oSearch.GetObject(i)
+			
+			Debug oCatObj.ID, oCatObj.Magnitude
+			if bNoMag and Magnitude <> 999 then
+				if oCatObj.Magnitude <> 999 and oCatObj.Magnitude > Magnitude then
+					Debug "Continue"
+					continue
+				end if
+			end if
+			
+			if cnt>0 then
+				doc = doc + ","
+			end if
+			
+			dim oConst as Constellation = Constellation.GetConstellation(oCatObj.RA, oCatObj.Dec)
+			
+			dim sDistance, sGalaxyType as string
+			
+			// HyperLEDA extra data
+			if oCatObj.Catalog = "HyperLEDA Galaxy Catalogue" And (oCatObj.Type = "Galaxy" or oCatObj.Type="Quasar" or oCatObj.Type="GalGrp") then
+				dim iStart as integer = Instr(oCatObj.CatalogNotes,"Type: ")
+				dim iEnd as integer
+				
+				if iStart > 0 then
+					
+					iEnd = Instr(iStart+6,oCatObj.CatalogNotes,",")
+					
+					if iEnd=0 then iEnd = Len(oCatObj.CatalogNotes)
+					
+					sGalaxyType = Trim(Mid(oCatObj.CatalogNotes, iStart+6, iEnd-(iStart+6)))
+				end if
+				
+				iStart = Instr(oCatObj.CatalogNotes,"RV: ")
+				if iStart > 0 then
+					iEnd = Instr(iStart+4,oCatObj.CatalogNotes,"km")
+					sDistance = Trim(Mid(oCatObj.CatalogNotes, iStart+4, iEnd-(iStart+4)))
+				end if
+				
+			end if
+			
+			// Quasar Active Galactic Nuclei Catalogue extra data
+			if oCatObj.Catalog = "Quasar and Active Galactic Nuclei Catalogue" then
+				dim iStart as integer = Instr(oCatObj.CatalogNotes,"z=")
+				if iStart > 0 then
+					dim dblDistance as double = CDbl(Trim(Mid(oCatObj.CatalogNotes, iStart + 2)))
+					// Convert z to km/s
+					dblDistance = dblDistance * 299792.458
+					sDistance = DoubleToStr(dblDistance,0)
+				end if
+			end if
+			
+			doc = doc + CreateJSONObject(oCatObj.ID, oCatObj.Name, oCatObj.Type, oCatObj.Size, oConst.Abbreviation, oCatObj.Catalog, sDistance, sGalaxyType, oCatObj.PosAngle, oCatObj.Magnitude, oCatObj.RA, oCatObj.Dec,0.0)
+			cnt = cnt + 1
+		next i
+		
+		doc = doc + "]}"
+		Debug "doc=",doc
+		Result.Load(doc)
+		Debug "Search doc=",Result.ToString
+	end if
+end sub
+
+// GetObjects Option 1=First selected, 2=All selected, 3=Object of type=ObjType,4=All objects in plan.
+// {"Cmd":2,"Option":1,"ObjType":"extMinor"}
+sub GetObjects(iOption as integer, sType as string, ByRef Result as JSON)
+	dim Objects() as APPlanObject
+	Debug "GetObjects:  Option=", iOption, " Type=", sType
+	// Fetch the required objects into an array
+	select case iOption
+	case 1	// First selected
+		if Plan.SelectedObject <> nil then
+			Objects.Append Plan.SelectedObject()
+		end if
+		break
+	case 2	// All selected
+		Objects = Plan.SelectedObjects()
+		break
+	case 3	// Objects of specified type
+		dim tmpObj as APPlanObject
+		for each tmpObj in Plan.Objects()
+			if tmpObj.Type = sType then
+				Objects.Append tmpObj
+			end if
+		next
+		break
+	case  4 // All objects
+		Objects = Plan.Objects()
+		break
+	end select
 	
+	Debug "GetObjects: Count=", Objects.UBound+1
+	
+	// Create a JSON doc of objects
+	if Objects.UBound >= 0 then
+		dim Ob as APPlanObject
+		dim doc as string = "{""Objects"":["
+		dim bFirst as boolean = true
+		
+		for each Ob in Objects
+			// Add object to JSON
+			if not bFirst then
+				doc = doc + ","
+			else
+				bFirst = false
+			end if
+			
+			doc = doc +CreateJSONObject(Ob.ID, Ob.Name, Ob.Type, Ob.Size, Ob.Constellation, Ob.Catalog, Ob.GetValueAsString("Distance"), "", Ob.PosAngle, Ob.Magnitude, Ob.RA, Ob.Dec, Ob.ParallacticAngle)
+		next
+		doc = doc + "]}"
+		Debug doc
+		Result.Load(doc)
+	end if
+end sub
+
+function CreateJSONObject(ID as string, Name as string, Type as string, Size as string, Constellation as string, Catalog as string, Distance as string, GalaxyType as string, PosAngle as double, Magnitude as double, RA as double, Dec as double, ParallacticAngle as double) as string
+	dim sJSON  as string =""
+	sJSON = sJSON + "{""ID"":""" + ReplaceAll(ID,"""","\""") + ""","  + """Name"":""" + ReplaceAll(Name,"""","\""") + ""","  + """Type"":""" + Type + ""","
+	sJSON = sJSON + """Size"":""" + Size + ""","  + """Constellation"":""" + Constellation + ""","  + """Catalogue"":""" + Catalog + ""","
+	sJSON = sJSON + """Distance"":""" + Distance + ""","
+	sJSON = sJSON + """GalaxyType"":""" + GalaxyType + ""","
+	sJSON = sJSON + """PosAngle"":" + DoubleToStr(PosAngle) + ","  + """Magnitude"":" + DoubleToStr(Magnitude) + ","
+	sJSON = sJSON + """RA2000"":" + DoubleToStr(RA) + ","  + """Dec2000"":" + DoubleToStr(Dec) + ","  + """ParallacticAngle"":" + DoubleToStr(ParallacticAngle) + "}"
+	return sJSON
 end function
 
-// Return the selected (if any) objects ID, RA and Dec
-function SelectedObjects(sStatus as string) as JSON
-	dim obj as APPlanObject = Plan().SelectedObject
-	dim jsonObjects as new JSON
-	dim sResults as string= "" //"{""Status"":""ok"",""id"":""m48"",""RA"":""5.0"",""Dec"":""-5.0"",""Type"":""Open Cluster""}"
-	
-	if obj<>nil then
-		sResults = "{""Status"":""" + sStatus + """,""id"":""" + obj.ID + """,""RA"":""" + Str(obj.RA) + """,""Dec"":""" + Str(obj.Dec) + """,""Type"":""" +  obj.Type + """}"
-		Debug "SelectedObjectJSON: ", sResults
-		jsonObjects.Load(sResults)
-	end if
-	
-	return jsonObjects
+function FindPlanObject(ID as string) as APPlanObject
+	dim obj as APPlanObject
+	for each obj in Plan.Objects()
+		if obj.ID = ID then
+			return obj
+		end if
+	next
+	return nil
 end function
 
+// PutObjects Option 1=Add objects, 2=Update objects
+// {"Cmd":1,"Option":1,"Objects":[{"Name":"M45","RA":16.4567},{"Name":"NGC456","RA":14.4567}]}
+sub PutObjects(iOption as integer, ByRef oCmd as JSON)
+	dim a,b as JSON = new JSON()
+	dim obj as APPlanObject
+	
+	a = oCmd.Child("Objects")
+	
+	dim i as integer
+	for i=0 to a.Count-1
+		b =a.Child(i)
+		Debug b.Child("ID"), b.Child("Name"), b.Child("Type"), b.Child("Size"), b.Child("RA2000"), b.Child("Dec2000")
+		if iOption = 1 then
+			// Add object to plan
+			obj = Plan.NewObject()
+			obj.ID = b.Child("ID")
+			obj.Name = b.Child("Name")
+			obj.Type = b.child("Type")
+			obj.Size = b.Child("Size")
+			obj.PosAngle = b.Child("PosAngle")
+		elseif iOption = 2 then
+			// Find object in plan to update
+			obj = FindPlanObject(b.Child("ID"))
+		end if
+		if  not (obj is nil) then
+			// Common add and update parameters
+			obj.RA = b.child("RA2000")
+			obj.Dec = b.child("Dec2000")
+			obj.Magnitude = b.child("Magnitude")
+		end if
+	next i
+end sub
 
 sub SetSession()
-	
 	dim dtNow as Date = Plan().LocalDateTime
 	
 	Debug "Sess Cnt:", APSession.Count
 	
-	if APSession.Count >0 then
+	// Check for an exisiting session in the last hour
+	if APSession.Count > 0 then
 		dim oSession as APSession = APSession.Session(APSession.Count)
 		dim dtSessEnd as Date = oSession.Finish
 		
@@ -1237,17 +1374,20 @@ sub SetSession()
 			dtNow = dtNow + 3600
 			oSession.Finish = dtNow.TotalSeconds
 			
-			Debug "Sess EXISTED"
-		else
-			// There was NO session within the last hour. Create a new one.
-			dim oNewSession as APSession = APSession.NewSession(Plan().LocalDateTime)
-			oNewSession.Finish = dtNow + 3600
-			oNewSession.Site = APResource.Default(APResource.rsrc_Site).Name
-			ONewSession.Observer = APResource.Default(APResource.rsrc_Observer).Name
-			
-			Debug "Sess NEW SESSION"
+			Debug "Exisiting Session - Start=",new Date(oSession.Start)," End=", new Date(oSession.Finish), "Ended=", oSession.Ended, "NoObs=", oSession.nObservations
+			return
 		end if
 	end if
+	
+	// There was NO session within the last hour. Create a new one.
+	dim oNewSession as APSession = APSession.NewSession(Plan().LocalDateTime)
+	
+	oNewSession.Finish = dtNow + 3600
+	oNewSession.Site = APResource.Default(APResource.rsrc_Site).Name
+	ONewSession.Observer = APResource.Default(APResource.rsrc_Observer).Name
+	
+	Debug "New Session - Start=",new Date(oNewSession.Start)," End=", new Date(oNewSession.Finish), "Ended=", oNewSession.Ended, "NoObs=", oNewSession.nObservations
+	
 end sub
 
 function GetObjectIDFromString(Target as string) as string
@@ -1255,7 +1395,6 @@ function GetObjectIDFromString(Target as string) as string
 	dim sObjectID as string =""
 	
 	if Target<>"" then
-		
 		dim CommaPos as integer = Instr(Target,",")
 		dim BracketPos as integer = Instr(Target,"(")
 		
@@ -1266,17 +1405,14 @@ function GetObjectIDFromString(Target as string) as string
 		end if
 		
 		sObjectID =  Left(Target,EndofID)
-		
 	end if
 	
 	return sObjectID
-	
 end function
 
 // Searches for the object to apply the observation
 // Stops the user from having to have the correct object selected
 function GetPlanObjectForObs(id as string) as APPlanObject
-	
 	Debug "GetPlanObjectForObs Target:", id
 	
 	id = GetObjectIDFromString(id)
@@ -1286,8 +1422,10 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 	if id<>""  then
 		dim i as integer
 		dim obj as APPlanObject
+		
 		for i=1 to Plan.nItems
 			obj = Plan().Obj(i)
+			
 			Debug "GetPlanObjectForObs Plan: ", obj.ID, " Display: ", obj.GetValueAsString("Display")
 			
 			// Check the ID and the user defined field Display
@@ -1299,7 +1437,6 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 		
 		// The object has dissapeared from the plan!
 		Debug "GetPlanObjectForObs: NOT FOUND!"
-		
 		return nil
 	else
 		if Plan().nSelectedObjects>0 then
@@ -1312,21 +1449,109 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 	end if
 end function
 
-sub LogObs(AppendCurrent as boolean, Param1 as string, Param2 as string, Param3 as string)
+sub AppendObservationNote(ByRef Obs as APObservation, ByRef Obj as APPlanObject, ImageInfo as string)
+	dim aInfo() as string = SplitComma(ImageInfo)
+	dim dtDate as Date = new Date(Plan().GMTDateTime)
+	dim sLine as string = dtDate.LongDate + " " + dtDate.LongTime + " (UTC)"
 	
+	sLine = sLine + ", " + Obs.Telescope + " + " + Obs.Imager
+	sLine = sLine + " : Subs: " + aInfo(0) + ", Sub Exp: " + aInfo(2) + " sec, Total Exp: " + aInfo(1) + " sec"
+	
+	sLine = sLine + ", Alt: " + AngleFormatted(Obj.Altitude,1) + ", Az: " + AngleFormatted(Obj.Azimuth,1) + ", Airmass: " + DoubleToStr(Obj.AirMass,1) + ", App Mag: " + DoubleToStr(Obj.ApparentMagnitude,1)
+	
+	Debug "AppendObservationNote: ", sLine
+	
+	if Obs.Notes = "" then
+		Obs.Notes = sLine
+	else
+		Obs.Notes = Obs.Notes + EndOfLine() + sLine
+	end if
+	
+end sub
+
+sub PopulateObjectFields(ByRef Obs as APObservation, ByRef Obj as APPlanObject)
+	
+	// Create a dictionary of object fields
+	dim dicOF as new Dictionary
+	
+	// Looks like Object Field keys must be the same as Paul uses.
+	dicOF.Value("Alt") = AngleFormatted(obj.Altitude,2)
+	dicOF.Value("Az") = AngleFormatted(obj.Azimuth,2)
+	dicOF.Value("RA") = FormatRA(obj.RA,2)
+	dicOF.Value("Dec") = FormatDec(obj.Dec,2)
+	
+	dicOF.Value("Air Mass") = DoubleToStr(obj.AirMass,2)
+	dicOF.Value("Extinct") = DoubleToStr(obj.Extinction,2)
+	dicOF.Value("Con") = obj.Constellation
+	dicOF.Value("Sun") = AngleFormatted(obj.SunDistance,2)
+	dicOF.Value("Moon") = AngleFormatted(obj.MoonDistance,2)
+	dicOF.Value("Vis") = obj.Visible
+	dicOF.Value("Par") = AngleFormatted(obj.ParallacticAngle,2)
+	
+	dicOF.Value("App Mag") = DoubleToStr(obj.ApparentMagnitude,2)
+	dicOF.Value("SB") = DoubleToStr(obj.SurfaceBrightness,2)
+	
+	// Assign the object fields to the observation
+	Obs.ObjectFields = dicOF
+	
+end sub
+
+function AppendToAssociatedObjects() as boolean
+	Dim dlg as new Dialog
+	return dlg.YesNo("Add observation to associated objects?")
+end function
+
+// Logs an observation - Creates a new session (if needed) will append to an existing observation. Will also add or append the observation to all
+// associated objects.
+sub LogObservations(Option as integer, ObjectInfo as string, ImgSettingsPath as string, ImgPath as string, ImagInfo as string)
+	dim Objects() as APPlanObject
 	dim obj as APPlanObject
-	dim oAttachment as APObservationAttachment
 	
-	// Find the object to add or append the observation
-	obj = GetPlanObjectForObs(Param1)
-	
+	Debug "LogObservations"
+	// Find the object in the plan
+	obj = GetPlanObjectForObs(ObjectInfo)
 	if obj<>nil then
-		
+		Debug "LogObservations: Object found"
+		// Create a new session (if needed)
 		SetSession()
 		
+		// Check if the object is associated
+		Objects = obj.AssociatedObjects(true)
+		
+		dim bAssociated as boolean= false
+		if UBound(Objects)>0 then
+			// Prompt the user if this observation should be applied to all associated objects as well.
+			bAssociated = AppendToAssociatedObjects()
+		end if
+		
+		if bAssociated and UBound(Objects)> 0 then
+			// Add or append an observation to the main object and any associated objects.
+			Debug "Associated objects=", UBound(Objects)
+			dim i as integer
+			for i=0 to UBound(Objects)
+				Debug "LogObservations: Object=", Objects(i).ID
+				LogObs(Objects(i), Option, true, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo)
+			next i
+			Speak("Observations for " + Str(UBound(Objects)+1) + " objects logged.")
+		else
+			Debug "LogObservations: Selected object only"
+			// Add or append an observation to the object (no associated objects)
+			LogObs(obj, Option, false, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo)
+		end if
+	else
+		Speak("Object not found in plan")
+	end if
+	
+end sub
+
+sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInfo as string, ImgSettingsPath as string, ImgPath as string, ImagInfo as string)
+	dim oAttachment as APObservationAttachment
+	dim OrgOption as integer = Option
+	
+	if obj<>nil then
 		dim oObs as APObservation
 		
-		if AppendCurrent then
+		if Option = 2 or Option = 3 then
 			if obj.nObservations() > 0 then
 				oObs = obj.Observation(obj.nObservations())
 				
@@ -1336,147 +1561,189 @@ sub LogObs(AppendCurrent as boolean, Param1 as string, Param2 as string, Param3 
 				
 				// Add 1 hour to the plan date time
 				ObsDateTime = ObsDateTime + 3600
-				
 				if PlanDateTime > ObsDateTime then
 					// The plan is more than 1 hour after the last observation so create a new observation
-					AppendCurrent = false
+					Option = 1
 					Debug "LogObs: Last observation was more than 1 hour ago"
 				end if
 			else
 				Debug "LogObs: No observations for object"
-				AppendCurrent = false
+				Option = 1
 			end if
 		end if
 		
-		if not AppendCurrent then
+		if Option = 1 then
+			
+			// Create a new observation
 			oObs = obj.NewObservation(Plan.LocalDateTime, 0)
-			oObs.Plan = Plan().Name
+			
+			// Specify default telescope
+			if TelescopeResource.Default <> nil then
+				oObs.Telescope = TelescopeResource.Default.Name
+			end if
+			
+			// Specify default imager
+			if ImagerResource.Default<>nil then
+				oObs.Imager = ImagerResource.Default.Name
+			end if
+			
+			// Specify default filter used (if any)
+			if FilterResource.Default<>nil then
+				oObs.Filter = FilterResource.Default.Name
+			end if
 			
 			Debug "Plan:",Plan().Name,"ID:", oObs.ID,"Name:",oObs.Name,"Const:",oObs.Constellation
+			
+			// CHANGED to use plans new FilePath property 2.4b23
+			oObs.Plan = Plan().FilePath
+			
+			// On first observation create the Object Fields as shown in the Observation UI Object Fields tab
+			// If subsequent images are appended then some of the properties are recorded in the Observation Notes field
+			// along with the basic image properties for the attachment.
+			PopulateObjectFields(oObs, obj)
+			
 		else
 			Debug "LogObs: Observation to append"
 		end if
 		
 		oAttachment = oObs.AddAttachment()
-		oAttachment.Path = Param3
+		oAttachment.Path = ImgPath
 		
-		dim oSettingsFile as APTextFile = APTextFile.ReadFileUsingPath(Param2)
-		
-		if oSettingsFile<>nil then
+		if OrgOption = 1 or OrgOption = 2 then
+			dim oSettingsFile as APTextFile = APTextFile.ReadFileUsingPath(ImgSettingsPath)
 			
-			oAttachment.Description = oSettingsFile.ReadAll()
-			oObs.Save()
-			
-			if AppendCurrent then
-				Speak("Observation for," + oObs.ID + " appended")
+			if oSettingsFile<>nil then
+				oAttachment.Description = oSettingsFile.ReadAll()
+				
+				// Append some basic information to the observation notes about the attachment and the objects basic properties at this time.
+				AppendObservationNote(oObs, obj, ImagInfo)
+				
+				oObs.Save()
+				
+				// Only speak if a single object observation is being created/appended
+				if not Silent then
+					if Option = 2 then
+						Speak("Observation," + oObs.ID + " appended")
+					else
+						Speak("Observation," + oObs.ID + " created")
+					end if
+				end if
 			else
-				Speak("Observation for," + oObs.ID + " created")
+				Speak("Cannot read image settings file")
 			end if
 		else
-			Speak("Cannot read image settings file")
+			// Another attachment so add the attachment description and save
+			oAttachment.Description = ImagInfo
+			oObs.Save()
+			
+			if not Silent then
+				Speak("Attachment added")
+			end if
+			
 		end if
 	else
 		Speak("Object not found in plan")
 	end if
 end sub
 
-// WARNING, DANGER - this is going to attempt to move a physical object.
-// NOTE - This code will not be released! 
-function SlewTelescope() as JSON
+// WARNING - this is going to attempt to move a physical object.
+sub SlewTelescope()
 	dim iResult as integer = -2
-	dim sStatus as string = ""
+	
 	dim obj as APPlanObject = Plan().SelectedObject
-	
-	Speak("Telescope slewing.")
-	
 	if obj<>nil then
 		Debug "Telescope Slew Start"
-	end if	
-	
-	return nil
-end function
+		
+		iResult = obj.SlewTo()
+		// If the slew started then display a progress dialog. The user can cancel the slew.
+		if iResult = 0 then
+			Speak("Telescope slewing " + DoubleToStr(obj.TelescopeDistance,0) + " degrees")
+			
+			iResult = Plan().SlewWait()
+			select case iResult
+			case 0
+				Speak("Slewing completed.")
+			case -1
+				Speak("Slewing time out.")
+			case -2
+				Speak("Slewing, aborted.")
+			end select
+		else
+			select case iResult
+			case 0 // SUCCESS
+				Speak("Slewing completed.")
+			case -1 // Telescope not connected
+				Speak("No telescope connected.")
+			case 2 // Object below horizon
+				Speak("Object below horizon.")
+			case 3 // Outside telescope slewing limits
+				Speak("Object outside slew limits.")
+			case 4 // Blocked by user horizon
+				Speak("Object blocked by user horizon.")
+			end select
+		end if
+	else
+		Debug "Telescope Slew no object!"
+		Speak("No object selected.")
+	end if
+end sub
 
 sub main()
-	DebugOff()
 	
-	dim sCmd as string = ""
-	dim sParams as string = ""
+	dim iCmd, iOption as integer = 0
 	dim result as new JSON()
 	
-	// Get the incoming parameters
-	dim params as JSON = WebServer.LaunchParameters
+	DebugOff()
 	
-	if params  <> nil then
-		//Debug "JSON=",params.ToString
+	// Get the incoming parameters
+	dim oCmd as JSON = WebServer.LaunchParameters
+	Debug "JSON in=",oCmd.ToString
+	iCmd = oCmd.Lookup("Cmd", 0)
+	iOption = oCmd.Lookup("Option",0)
+	
+	select case iCmd
+	case 0
+		if iOption=1 then
+			Plan.SortObjectList(46,false) // Sort on observability column
+		end if
+		break
+	case 1
+		Debug "Cmd: GetObjects"
+		GetObjects(iOption,oCmd.Lookup("ObjType",""), result)
+		break
+	case 2
+		Debug "Cmd: PutObjects"
+		PutObjects(iOption, oCmd)
+	case 3
+		Debug "Cmd: LogObservation"
+		// LogObservation Option 1=Add observation, 2=Append observation
+		// {"Cmd":3,"Option":1,"ID":"M45","Info":"gain 200|sub 3s|temp 2","ImagePath":"D:\path\image.png","ImageInfoPath":"D:\path\info.txt"}
 		
-		sCmd  =  params.Lookup("cmd",0)
-		//Debug "Cmd=",sCmd
-		
-		// Param 1: Target Name
-		dim sParam1 as string = Web.DecodeURLComponent(params.Lookup("param1",""))
-		// Param 2: Image settings path
-		dim sParam2 as string = Web.DecodeURLComponent(params.Lookup("param2",""))
-		// Param 3: Image path
-		dim sParam3 as string = Web.DecodeURLComponent(params.Lookup("param3",""))
-		
-		//Debug "Param1=", sParam1," Param2=", sParam2," Param3=", sParam3
-		
-		select case sCmd
-		case "0"
-			break
-		case "1"
-			Debug "Cmd: SelectedObjects"
-			result = SelectedObjects("ok")
-			break
-		case "2"
-			Debug "Cmd: SetTarget"
-			if SetTargetFileInfo() = 1 then
-				result = SelectedObjects("ok")
-			end if
-			break
-		case "3"
-			Debug "Cmd:SharpCapDSA"
-			SharpCapDSA()
-			break
-		case "4"
-			Debug "Cmd:AsteroidFOVSearch"
-			AsteroidsFOVSearch()
-			break
-		case "5"
-			Debug "Cmd:PlanetaryMoons"
-			PlanetaryMoons()
-			break
-		case "6"
-			Debug "Cmd:Log"
-			if sParam1<>"" and sParam2<>"" and sParam3<>"" then
-				LogObs(false, sParam1, sParam2, sParam3)
-			else
-				Debug "Cmd: Log - Params error"
-			end if
-			break
-		case "7"
-			Debug "Cmd:LogAppend"
-			if sParam1<>"" and sParam2<>"" and sParam3<>"" then
-				LogObs(true, sParam1, sParam2, sParam3)
-			else
-				Debug "Cmd: LogAppend - Params error"
-			end if
-			break
-		case "8"
-			// Target & Slew to object
-			Debug "Cmd:Target&Slew"
-			if SetTargetFileInfo() = 1 then
-				
-				Debug "Cmd:Slew"
-				// Return a JSON with code and selected object details.
-				result = SlewTelescope()
-			end if
-			break
-		end select
-		
-		// Pass the results back to the calling user
-		WebServer.ReturnResults(result)
-		
-		result.Clear()
-	end if
+		dim sObjectInfo as string = Web.DecodeURLComponent(oCmd.Lookup("ObjectInfo",""))
+		dim sImgSettingsPath as string = Web.DecodeURLComponent(oCmd.Lookup("ImgSettingsPath",""))
+		dim sImgPath as string = Web.DecodeURLComponent(oCmd.Lookup("ImgPath",""))
+		dim sImgInfo as string = Web.DecodeURLComponent(oCmd.Lookup("ImgInfo",""))
+		Debug "Cmd: LogObservation", iOption, sObjectInfo, sImgSettingsPath, sImgPath, sImgInfo
+		LogObservations(iOption, sObjectInfo, sImgSettingsPath, sImgPath, sImgInfo)
+		break
+	case 4
+		Debug "Cmd: SlewTelescope"
+		SlewTelescope()
+	case 5
+		SearchObjects(iOption,oCmd.Lookup("Params",""), result)
+		break
+	case 6
+		SharpCapDSA() // script
+		break
+	case 7
+		PLM()	// Planetary Moons (script)
+	case 8
+		AFOVS() // Asteroid Field of View Search (script)
+	end select
+	//Debug result
+	// Pass the results back to the calling user
+	Debug "JSON out=",result.ToString
+	WebServer.ReturnResults(result)
+	result.Clear()
+	
 end sub
