@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmEAACP));
             this.btnTarget = new System.Windows.Forms.Button();
             this.btnView = new System.Windows.Forms.Button();
@@ -90,6 +91,7 @@
             this.btnSAMPDisconnect = new System.Windows.Forms.Button();
             this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
+            this.cbNoSharpCap = new System.Windows.Forms.CheckBox();
             this.cbTSAutoFOVI = new System.Windows.Forms.CheckBox();
             this.cbAPAutoSort = new System.Windows.Forms.CheckBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -138,10 +140,12 @@
             this.btnSNN = new System.Windows.Forms.Button();
             this.tabpTheSky = new System.Windows.Forms.TabPage();
             this.btnAzAltFOVI = new System.Windows.Forms.Button();
+            this.tabpKStars = new System.Windows.Forms.TabPage();
             this.lblObserveTime = new System.Windows.Forms.Label();
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
-            this.tabpKStars = new System.Windows.Forms.TabPage();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btnSlew = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -560,7 +564,6 @@
             // 
             // btnAddAlignmentPoint
             // 
-            this.btnAddAlignmentPoint.Enabled = false;
             this.btnAddAlignmentPoint.Location = new System.Drawing.Point(114, 160);
             this.btnAddAlignmentPoint.Name = "btnAddAlignmentPoint";
             this.btnAddAlignmentPoint.Size = new System.Drawing.Size(121, 27);
@@ -909,6 +912,7 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.cbNoSharpCap);
             this.tpConfig.Controls.Add(this.cbTSAutoFOVI);
             this.tpConfig.Controls.Add(this.cbAPAutoSort);
             this.tpConfig.Controls.Add(this.groupBox4);
@@ -922,6 +926,18 @@
             this.tpConfig.TabIndex = 2;
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
+            // 
+            // cbNoSharpCap
+            // 
+            this.cbNoSharpCap.AutoSize = true;
+            this.cbNoSharpCap.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
+            this.cbNoSharpCap.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.cbNoSharpCap.Location = new System.Drawing.Point(11, 272);
+            this.cbNoSharpCap.Name = "cbNoSharpCap";
+            this.cbNoSharpCap.Size = new System.Drawing.Size(111, 23);
+            this.cbNoSharpCap.TabIndex = 37;
+            this.cbNoSharpCap.Text = "No SharpCap";
+            this.cbNoSharpCap.UseVisualStyleBackColor = true;
             // 
             // cbTSAutoFOVI
             // 
@@ -1107,6 +1123,7 @@
             // 
             // tabpStellarium
             // 
+            this.tabpStellarium.Controls.Add(this.btnSlew);
             this.tabpStellarium.Controls.Add(this.cbStellariumMinorBodyMarkers);
             this.tabpStellarium.Controls.Add(this.cbStellariumShowSSO);
             this.tabpStellarium.Controls.Add(this.cbStellariumShowStars);
@@ -1172,11 +1189,12 @@
             this.btnFOVOptions.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVOptions.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVOptions.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVOptions.Location = new System.Drawing.Point(56, 116);
+            this.btnFOVOptions.Location = new System.Drawing.Point(49, 116);
             this.btnFOVOptions.Name = "btnFOVOptions";
             this.btnFOVOptions.Size = new System.Drawing.Size(44, 32);
             this.btnFOVOptions.TabIndex = 40;
             this.btnFOVOptions.Text = "Opt";
+            this.toolTip1.SetToolTip(this.btnFOVOptions, "Search Options");
             this.btnFOVOptions.UseVisualStyleBackColor = false;
             this.btnFOVOptions.Click += new System.EventHandler(this.btnFOVOptions_Click);
             // 
@@ -1191,6 +1209,7 @@
             this.btnFOVClear.Size = new System.Drawing.Size(44, 32);
             this.btnFOVClear.TabIndex = 39;
             this.btnFOVClear.Text = "X";
+            this.toolTip1.SetToolTip(this.btnFOVClear, "Clear markers and labels");
             this.btnFOVClear.UseVisualStyleBackColor = false;
             this.btnFOVClear.Click += new System.EventHandler(this.btnFOVClear_Click);
             // 
@@ -1202,9 +1221,10 @@
             this.btnFOVSearch.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnFOVSearch.Location = new System.Drawing.Point(4, 84);
             this.btnFOVSearch.Name = "btnFOVSearch";
-            this.btnFOVSearch.Size = new System.Drawing.Size(97, 32);
+            this.btnFOVSearch.Size = new System.Drawing.Size(88, 32);
             this.btnFOVSearch.TabIndex = 38;
             this.btnFOVSearch.Text = "FOV ?";
+            this.toolTip1.SetToolTip(this.btnFOVSearch, "FOV Search");
             this.btnFOVSearch.UseVisualStyleBackColor = false;
             this.btnFOVSearch.Click += new System.EventHandler(this.btnFOVSearch_Click);
             // 
@@ -1215,11 +1235,12 @@
             this.btnStellariumClearMarkers.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnStellariumClearMarkers.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnStellariumClearMarkers.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnStellariumClearMarkers.Location = new System.Drawing.Point(100, 116);
+            this.btnStellariumClearMarkers.Location = new System.Drawing.Point(96, 116);
             this.btnStellariumClearMarkers.Name = "btnStellariumClearMarkers";
             this.btnStellariumClearMarkers.Size = new System.Drawing.Size(44, 32);
             this.btnStellariumClearMarkers.TabIndex = 37;
             this.btnStellariumClearMarkers.Text = "X Ma";
+            this.toolTip1.SetToolTip(this.btnStellariumClearMarkers, "Clear Markers");
             this.btnStellariumClearMarkers.UseVisualStyleBackColor = false;
             this.btnStellariumClearMarkers.Click += new System.EventHandler(this.btnStellariumClearMarkers_Click);
             // 
@@ -1235,6 +1256,7 @@
             this.btnAllCats.Size = new System.Drawing.Size(97, 32);
             this.btnAllCats.TabIndex = 36;
             this.btnAllCats.Text = "Std DSO";
+            this.toolTip1.SetToolTip(this.btnAllCats, "DSO selector");
             this.btnAllCats.UseVisualStyleBackColor = false;
             this.btnAllCats.Click += new System.EventHandler(this.btnAllCats_Click_1);
             // 
@@ -1547,6 +1569,16 @@
             this.btnAzAltFOVI.UseVisualStyleBackColor = false;
             this.btnAzAltFOVI.Click += new System.EventHandler(this.btnAzAltFOVI_Click_1);
             // 
+            // tabpKStars
+            // 
+            this.tabpKStars.Location = new System.Drawing.Point(4, 26);
+            this.tabpKStars.Name = "tabpKStars";
+            this.tabpKStars.Padding = new System.Windows.Forms.Padding(3);
+            this.tabpKStars.Size = new System.Drawing.Size(205, 151);
+            this.tabpKStars.TabIndex = 4;
+            this.tabpKStars.Text = "KStars";
+            this.tabpKStars.UseVisualStyleBackColor = true;
+            // 
             // lblObserveTime
             // 
             this.lblObserveTime.AutoSize = true;
@@ -1568,15 +1600,20 @@
             this.workerTelescopeStatus.DoWork += new System.ComponentModel.DoWorkEventHandler(this.workerTelescopeStatus_DoWork);
             this.workerTelescopeStatus.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.workerTelescopeStatus_ProgressChanged);
             // 
-            // tabpKStars
+            // btnSlew
             // 
-            this.tabpKStars.Location = new System.Drawing.Point(4, 26);
-            this.tabpKStars.Name = "tabpKStars";
-            this.tabpKStars.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpKStars.Size = new System.Drawing.Size(205, 151);
-            this.tabpKStars.TabIndex = 4;
-            this.tabpKStars.Text = "KStars";
-            this.tabpKStars.UseVisualStyleBackColor = true;
+            this.btnSlew.BackColor = System.Drawing.Color.Gold;
+            this.btnSlew.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSlew.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSlew.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSlew.Location = new System.Drawing.Point(143, 116);
+            this.btnSlew.Name = "btnSlew";
+            this.btnSlew.Size = new System.Drawing.Size(58, 32);
+            this.btnSlew.TabIndex = 44;
+            this.btnSlew.Text = "SlewS";
+            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object");
+            this.btnSlew.UseVisualStyleBackColor = false;
+            this.btnSlew.Click += new System.EventHandler(this.btnSlew_Click);
             // 
             // frmEAACP
             // 
@@ -1755,6 +1792,9 @@
         private System.Windows.Forms.Button btnAPASCOMTest;
         private System.Windows.Forms.CheckBox cbStellariumMinorBodyMarkers;
         private System.Windows.Forms.TabPage tabpKStars;
+        private System.Windows.Forms.CheckBox cbNoSharpCap;
+        private System.Windows.Forms.Button btnSlew;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 

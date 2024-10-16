@@ -26,6 +26,7 @@ namespace EAACtrl
         {
 
             string KStarsParams = sDBUSParams + "setRaDecJ2000 " + "double:" + RA.ToString() + " double:" + Dec.ToString();
+            //string KStarsParams = sDBUSParams + "lookTowards string:'M 11'";
             // Create a new process start info
             ProcessStartInfo startInfo = new ProcessStartInfo(sDBusSend, KStarsParams);
             startInfo.UseShellExecute = false;

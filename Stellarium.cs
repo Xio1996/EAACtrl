@@ -938,5 +938,40 @@ namespace EAACtrl
             return apObject;
         }
 
+        public void MarkTelescopePosition(string sRA, string sDec, int autoDeleteTimeoutMs)
+        {
+            string result = "";
+
+            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/direct";
+
+            string sCode = "MarkerMgr.markerEquatorial(\"" + sRA + "\",\"" + sDec + "\",true,true,\"crossed-circle\",\"#ffff00\",20,true," + autoDeleteTimeoutMs.ToString() + ",false);";
+
+            NameValueCollection nvcParams = new NameValueCollection();
+            nvcParams.Add("code", sCode);
+
+            WebClient lwebClient = new WebClient();
+
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
+
+
+                TimeSpan ts = stopwatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = "ClearObjects " + " (" + elapsedTime + ")\r\n";
+            }
+            catch (Exception)
+            {
+                sMsg = "MarkTelescopePosition ERROR \r\n";
+            }
+            finally
+            {
+                lwebClient.Dispose();
+            }
+        }
+
     }
 }

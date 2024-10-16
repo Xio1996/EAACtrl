@@ -19,6 +19,7 @@ using System.Drawing;
 using System.Windows.Forms.VisualStyles;
 using System.Threading;
 using ASCOM.DriverAccess;
+using System.Xml.Linq;
 
 namespace EAACtrl
 {
@@ -139,35 +140,44 @@ namespace EAACtrl
         private void MQTTConnect()
         {
             bool bConnect = false;
-
-            if (mqttSharpCap == null)
+            try
             {
-                WriteMessage("MQTT Initialise\r\n");
-                mqttSharpCap = new MqttClient(mqttBroker);
-                mqttClientID = Guid.NewGuid().ToString();
-                mqttSharpCap.MqttMsgPublishReceived += SharpCap_MqttMsgReceived;
+                if (mqttSharpCap == null)
+                {
+                    WriteMessage("MQTT Initialise\r\n");
+                    mqttSharpCap = new MqttClient(mqttBroker);
+                    mqttClientID = Guid.NewGuid().ToString();
+                    mqttSharpCap.MqttMsgPublishReceived += SharpCap_MqttMsgReceived;
 
-                bConnect = true;
+                    bConnect = true;
+                }
+                else if (!mqttSharpCap.IsConnected)
+                {
+                    bConnect = true;
+                }
+
+                if (bConnect)
+                {
+                    WriteMessage("MQTT connect...\r\n");
+                    mqttSharpCap.Connect(mqttClientID);
+                    mqttSharpCap.Subscribe(new string[] { "SharpCap/out" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+                    WriteMessage("MQTT connected: Broker " + mqttBroker + " on 1883, Protocol " + mqttSharpCap.ProtocolVersion.ToString() + "\r\n");
+                }
             }
-            else if (!mqttSharpCap.IsConnected)
+            catch (Exception ex)
             {
-                bConnect = true;
-            }
-
-            if (bConnect)
-            {
-                WriteMessage("MQTT connect...\r\n");
-                mqttSharpCap.Connect(mqttClientID);
-                mqttSharpCap.Subscribe(new string[] { "SharpCap/out" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-                WriteMessage("MQTT connected: Broker " + mqttBroker + " on 1883, Protocol " + mqttSharpCap.ProtocolVersion.ToString() + "\r\n");
+                WriteMessage("MQTTConnect ERROR - " + ex.Message + "\r\n");
             }
         }
         private void SharpCapCmd(string cmd)
         {
-            MQTTConnect();
+            if (!cbNoSharpCap.Checked)
+            { 
+                MQTTConnect();
 
-            WriteMessage("SharpCapCmd: " + cmd + "\r\n");
-            mqttSharpCap.Publish("SharpCap/command", Encoding.UTF8.GetBytes(cmd));
+                WriteMessage("SharpCapCmd: " + cmd + "\r\n");
+                mqttSharpCap.Publish("SharpCap/command", Encoding.UTF8.GetBytes(cmd));
+            }
         }
 
         private void OnTimedEvent2(Object source, ElapsedEventArgs e)
@@ -331,13 +341,24 @@ namespace EAACtrl
                 this.Width = 240;
                 //frmEAACP.ActiveForm.Width = 240;
                 btnExpand.Text = ">>";
+                if (EAATelescope.Connected)
+                {
+                    StopTelescopeStatus();
+                }
             }
             else
             {
                 frmEAACP.ActiveForm.Width = 617;
                 btnExpand.Text = "<<";
+                if (EAATelescope.Connected)
+                {
+                    if (tcExtra.SelectedIndex == 1)
+                    {
+                        StellCount = 0;
+                        StartTelescopeStatus();
+                    }
+                }
             }
-
             bExpanded = !bExpanded;
         }
 
@@ -1478,6 +1499,8 @@ namespace EAACtrl
             StartObserveClock();
         }
 
+
+        private int StellCount = 0;
         private void DisplayTelescopeInformation()
         {
             if (EAATelescope.Connect())
@@ -1496,12 +1519,32 @@ namespace EAACtrl
 
                 if (EAATelescope.Slewing)
                 {
+                    StellCount = 0;
                     lblTeleStatus.Text = "Slewing";
+                    // Stellarium 
+                    if (tabPlanetarium.SelectedIndex == 0)
+                    {
+                        Stellarium.MarkTelescopePosition(lblTeleRA2000.Text, lblTeleDec2000.Text, 1000);
+                    }
                 }
                 else if (EAATelescope.Tracking)
                 {
                     lblTeleStatus.Text = "Tracking";
-                    //lblTeleStatus.Text = "Tracking " + EAATelescope.TrackingRate;
+                    // Stellarium 
+                    if (tabPlanetarium.SelectedIndex == 0)
+                    {
+                        if (StellCount == 4)
+                        {
+                            StellCount = 0; ;
+                        }
+
+                        if (StellCount==0)
+                        {
+                            Stellarium.MarkTelescopePosition(lblTeleRA2000.Text, lblTeleDec2000.Text, 2000);
+                        }
+
+                        StellCount++;
+                    }
                 }
             }
         }
@@ -1526,18 +1569,22 @@ namespace EAACtrl
                     lblTeleEquCoordType.Text = EAATelescope.EquatorialSystem.ToString();
                     Speak("Telescope connected");
                     StartTelescopeStatus();
-                   
+                    WriteMessage("Telescope: Connected\r\n");
+
                 }
                 else
                 {
-                    StopTelescopeStatus();
+                    //StopTelescopeStatus();
                     cbConnect.Checked = false;
 
                 }
             }
             else 
-            { 
+            {
+                StopTelescopeStatus();
                 EAATelescope.Disconnect();
+                WriteMessage("Telescope: Disconnected\r\n");
+
             }
         }
 
@@ -1556,7 +1603,7 @@ namespace EAACtrl
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(3000);
+                    System.Threading.Thread.Sleep(500);
                     worker.ReportProgress(i++);
                 }
             }
@@ -1585,6 +1632,7 @@ namespace EAACtrl
             {
                 if (tcExtra.SelectedIndex == 1)
                 {
+                    StellCount = 0;
                     StartTelescopeStatus();
                 }
                 else
@@ -1728,6 +1776,41 @@ namespace EAACtrl
         {
             Stellarium.SetStelProperty("actionShow_Planets_ShowMinorBodyMarkers", cbStellariumMinorBodyMarkers.Checked.ToString());
             WriteMessage(Stellarium.Message);
+        }
+
+        private void btnSlew_Click(object sender, EventArgs e)
+        {
+            // Fetch currently selected object in Stellarium
+            APCmdObject obj = Stellarium.StellariumGetSelectedObjectInfo();
+            if (obj != null)
+            {
+                DialogResult dialogResult = MessageBox.Show("Confirm telescope SLEW?", "EAACtrl", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    WriteMessage("Slew confirmed by user.\r\n");
+                    //APSlewTelescope();
+
+                    AstroCalc astroCalc = new AstroCalc();
+                    astroCalc.J2000ToJNOW(obj.RA2000, obj.Dec2000, out double RANow, out double DecNow);
+                    if (EAATelescope.Slew(RANow, DecNow))
+                    {
+                        WriteMessage("Slewing to Stellarium object...\r\n");
+                    }
+                    else
+                    {
+                        WriteMessage("Slew Stellarium - command failed!\r\n");
+                    }
+
+                }
+                else
+                {
+                    WriteMessage("Slew Stellarium - cancelled by user.\r\n");
+                }
+            }
+            else
+            {
+                Speak("No stellarium object selected");
+            }
         }
     }
 

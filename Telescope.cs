@@ -221,6 +221,18 @@ namespace EAACtrl
                 }
                 return false;
             }
+            set
+            {
+                sMsg = "";
+                try
+                {
+                    Telescope.Connected = value;    
+                }
+                catch (Exception e)
+                {
+                    sMsg = "Telescope: set connection failed - " + e.Message;
+                }
+            }
         }
 
         public string DriverVersion
