@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ASCOM.Astrometry;
 using ASCOM.Utilities;
+using CefSharp.Structs;
 
 namespace EAACtrl
 {
@@ -52,6 +53,60 @@ namespace EAACtrl
             Dec2000 = T.DecJ2000;
 
             T.Dispose();
+        }
+
+        public bool J2000ToAltAz(double RA, double Dec, out double Altitude, out double Azimuth)
+        {
+            bool bResult = false;
+            Altitude = 999; Azimuth = 999;
+
+            try
+            {
+                ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();
+                ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
+
+                T.SiteLatitude = Properties.Settings.Default.SiteLat;
+                T.SiteLongitude = Properties.Settings.Default.SiteLng;
+                T.SiteElevation = Properties.Settings.Default.SiteElev;
+                T.SiteTemperature = 20.0;
+                T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                T.SetJ2000(RA, Dec);
+                
+                Altitude = T.ElevationTopocentric;
+                Azimuth = T.AzimuthTopocentric;
+
+                bResult = true;
+            }
+            catch {}
+
+            return bResult;
+        }
+
+        public bool JNOWToAltAz(double RA, double Dec, out double Altitude, out double Azimuth)
+        {
+            bool bResult = false;
+            Altitude = 999; Azimuth = 999;
+
+            try
+            {
+                ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();
+                ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
+
+                T.SiteLatitude = Properties.Settings.Default.SiteLat;
+                T.SiteLongitude = Properties.Settings.Default.SiteLng;
+                T.SiteElevation = Properties.Settings.Default.SiteElev;
+                T.SiteTemperature = 20.0;
+                T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                T.SetTopocentric(RA, Dec);
+
+                Altitude = T.ElevationTopocentric;
+                Azimuth = T.AzimuthTopocentric;
+
+                bResult = true;
+            }
+            catch { }
+
+            return bResult;
         }
 
 

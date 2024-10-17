@@ -338,7 +338,7 @@ namespace EAACtrl
         {
             if (bExpanded)
             {
-                this.Width = 240;
+                this.Width = 250;
                 //frmEAACP.ActiveForm.Width = 240;
                 btnExpand.Text = ">>";
                 if (EAATelescope.Connected)
@@ -348,7 +348,7 @@ namespace EAACtrl
             }
             else
             {
-                frmEAACP.ActiveForm.Width = 617;
+                frmEAACP.ActiveForm.Width = 630;
                 btnExpand.Text = "<<";
                 if (EAATelescope.Connected)
                 {
@@ -576,7 +576,7 @@ namespace EAACtrl
                         WriteMessage(Stellarium.Message);
                         if (cbImagerZoom.Checked)
                         {
-                            Stellarium.SetStellariumFOV(1);
+                            Stellarium.SetStellariumFOV(0.66);
                             WriteMessage(Stellarium.Message);
                         }
                     }
@@ -1517,6 +1517,12 @@ namespace EAACtrl
                 lblTeleRA2000.Text = APHelper.RADecimalHoursToHMS(RA2000, @"hh\hmm\mss\.ff\s");
                 lblTeleDec2000.Text = APHelper.DecDecimalToDMS(Dec2000);
 
+                if (AstroCalc.JNOWToAltAz(RANOW, DecNOW, out double Alt, out double Azi))
+                {
+                    lblAlt.Text = Alt.ToString("F3") + "°";
+                    lblAzi.Text = Azi.ToString("F3") + "°";
+                }
+
                 if (EAATelescope.Slewing)
                 {
                     StellCount = 0;
@@ -1784,23 +1790,41 @@ namespace EAACtrl
             APCmdObject obj = Stellarium.StellariumGetSelectedObjectInfo();
             if (obj != null)
             {
-                DialogResult dialogResult = MessageBox.Show("Confirm telescope SLEW?", "EAACtrl", MessageBoxButtons.YesNo);
+                DialogResult dialogResult = MessageBox.Show("Confirm telescope SLEW?", "EAACtrl", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    WriteMessage("Slew confirmed by user.\r\n");
-                    //APSlewTelescope();
+                    WriteMessage("Slew Stellarium - Slew confirmed by user.\r\n");
 
+                    if (AstroCalc.J2000ToAltAz(obj.RA2000, obj.Dec2000, out double Alt, out double Az))
+                    {
+                        // Warn if slewing to an object below the local horizon.
+                        if (Alt < 0)
+                        {
+                            dialogResult = MessageBox.Show("WARNING Object is " + Alt.ToString("F3") + "° below horizon. Confirm slew?", "EAACtrl", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                            if (dialogResult == DialogResult.No)
+                            {
+                                WriteMessage("Slew Stellarium: Below horizon, slew cancelled by user.\r\n");
+                                return;
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        WriteMessage("Slew Stellarium: Alt-Az calculation failed.\r\n");
+                        Speak("Slew error");
+                        return;
+                    }
+                    
                     AstroCalc astroCalc = new AstroCalc();
                     astroCalc.J2000ToJNOW(obj.RA2000, obj.Dec2000, out double RANow, out double DecNow);
                     if (EAATelescope.Slew(RANow, DecNow))
                     {
-                        WriteMessage("Slewing to Stellarium object...\r\n");
+                        WriteMessage("Slew Stellarium - Slewing...\r\n");
                     }
                     else
                     {
                         WriteMessage("Slew Stellarium - command failed!\r\n");
                     }
-
                 }
                 else
                 {
@@ -1811,6 +1835,12 @@ namespace EAACtrl
             {
                 Speak("No stellarium object selected");
             }
+        }
+
+        private void btnImagerView_Click(object sender, EventArgs e)
+        {
+            Stellarium.SetStellariumFOV(0.66);
+            WriteMessage(Stellarium.Message);
         }
     }
 

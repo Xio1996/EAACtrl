@@ -128,7 +128,7 @@ namespace EAACtrl
             return result;
         }
 
-        public string SetStellariumFOV(int iFOV)
+        public string SetStellariumFOV(double iFOV)
         {
             string result = "";
 

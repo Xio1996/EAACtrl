@@ -110,6 +110,8 @@
             this.tbMessages = new System.Windows.Forms.TextBox();
             this.tabPlanetarium = new System.Windows.Forms.TabControl();
             this.tabpStellarium = new System.Windows.Forms.TabPage();
+            this.btnImagerView = new System.Windows.Forms.Button();
+            this.btnSlew = new System.Windows.Forms.Button();
             this.cbStellariumMinorBodyMarkers = new System.Windows.Forms.CheckBox();
             this.cbStellariumShowSSO = new System.Windows.Forms.CheckBox();
             this.cbStellariumShowStars = new System.Windows.Forms.CheckBox();
@@ -145,7 +147,11 @@
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnSlew = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.lblAzi = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.lblAlt = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -173,7 +179,7 @@
             this.btnTarget.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnTarget.Location = new System.Drawing.Point(5, 4);
             this.btnTarget.Name = "btnTarget";
-            this.btnTarget.Size = new System.Drawing.Size(104, 32);
+            this.btnTarget.Size = new System.Drawing.Size(104, 27);
             this.btnTarget.TabIndex = 2;
             this.btnTarget.Text = "Target";
             this.btnTarget.UseVisualStyleBackColor = false;
@@ -185,7 +191,7 @@
             this.btnView.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnView.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnView.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnView.Location = new System.Drawing.Point(5, 118);
+            this.btnView.Location = new System.Drawing.Point(5, 97);
             this.btnView.Name = "btnView";
             this.btnView.Size = new System.Drawing.Size(136, 32);
             this.btnView.TabIndex = 1;
@@ -198,7 +204,7 @@
             this.cbImagerZoom.AutoSize = true;
             this.cbImagerZoom.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbImagerZoom.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbImagerZoom.Location = new System.Drawing.Point(143, 123);
+            this.cbImagerZoom.Location = new System.Drawing.Point(143, 102);
             this.cbImagerZoom.Name = "cbImagerZoom";
             this.cbImagerZoom.Size = new System.Drawing.Size(71, 23);
             this.cbImagerZoom.TabIndex = 3;
@@ -212,9 +218,9 @@
             this.btnFind.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnFind.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFind.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFind.Location = new System.Drawing.Point(5, 42);
+            this.btnFind.Location = new System.Drawing.Point(5, 35);
             this.btnFind.Name = "btnFind";
-            this.btnFind.Size = new System.Drawing.Size(104, 32);
+            this.btnFind.Size = new System.Drawing.Size(104, 27);
             this.btnFind.TabIndex = 7;
             this.btnFind.Text = "SC Find";
             this.btnFind.UseVisualStyleBackColor = false;
@@ -229,7 +235,7 @@
             this.btnCapture.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnCapture.Location = new System.Drawing.Point(115, 4);
             this.btnCapture.Name = "btnCapture";
-            this.btnCapture.Size = new System.Drawing.Size(104, 32);
+            this.btnCapture.Size = new System.Drawing.Size(104, 27);
             this.btnCapture.TabIndex = 8;
             this.btnCapture.Text = "Observe";
             this.btnCapture.UseVisualStyleBackColor = false;
@@ -242,9 +248,9 @@
             this.btnLog.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLog.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnLog.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLog.Location = new System.Drawing.Point(5, 80);
+            this.btnLog.Location = new System.Drawing.Point(5, 66);
             this.btnLog.Name = "btnLog";
-            this.btnLog.Size = new System.Drawing.Size(104, 32);
+            this.btnLog.Size = new System.Drawing.Size(104, 27);
             this.btnLog.TabIndex = 9;
             this.btnLog.Text = "Log";
             this.btnLog.UseVisualStyleBackColor = false;
@@ -257,9 +263,9 @@
             this.btnLogPlus.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLogPlus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnLogPlus.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLogPlus.Location = new System.Drawing.Point(115, 80);
+            this.btnLogPlus.Location = new System.Drawing.Point(115, 66);
             this.btnLogPlus.Name = "btnLogPlus";
-            this.btnLogPlus.Size = new System.Drawing.Size(104, 32);
+            this.btnLogPlus.Size = new System.Drawing.Size(104, 27);
             this.btnLogPlus.TabIndex = 15;
             this.btnLogPlus.Text = "Log+";
             this.btnLogPlus.UseVisualStyleBackColor = false;
@@ -272,7 +278,7 @@
             this.btnExpand.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnExpand.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnExpand.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnExpand.Location = new System.Drawing.Point(177, 343);
+            this.btnExpand.Location = new System.Drawing.Point(193, 343);
             this.btnExpand.Name = "btnExpand";
             this.btnExpand.Size = new System.Drawing.Size(37, 32);
             this.btnExpand.TabIndex = 18;
@@ -283,7 +289,7 @@
             // txtStatusMsg
             // 
             this.txtStatusMsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtStatusMsg.Location = new System.Drawing.Point(225, 347);
+            this.txtStatusMsg.Location = new System.Drawing.Point(237, 347);
             this.txtStatusMsg.Name = "txtStatusMsg";
             this.txtStatusMsg.Size = new System.Drawing.Size(369, 21);
             this.txtStatusMsg.TabIndex = 19;
@@ -298,7 +304,7 @@
             "Profile 1",
             "Profile 2",
             "Profile 3"});
-            this.cbCaptureProfile.Location = new System.Drawing.Point(115, 45);
+            this.cbCaptureProfile.Location = new System.Drawing.Point(115, 36);
             this.cbCaptureProfile.Name = "cbCaptureProfile";
             this.cbCaptureProfile.Size = new System.Drawing.Size(104, 25);
             this.cbCaptureProfile.TabIndex = 20;
@@ -311,10 +317,10 @@
             this.tcExtra.Controls.Add(this.tpConfig);
             this.tcExtra.Controls.Add(this.tpDev);
             this.tcExtra.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.tcExtra.Location = new System.Drawing.Point(223, 6);
+            this.tcExtra.Location = new System.Drawing.Point(234, 6);
             this.tcExtra.Name = "tcExtra";
             this.tcExtra.SelectedIndex = 0;
-            this.tcExtra.Size = new System.Drawing.Size(376, 331);
+            this.tcExtra.Size = new System.Drawing.Size(376, 335);
             this.tcExtra.TabIndex = 22;
             this.tcExtra.SelectedIndexChanged += new System.EventHandler(this.tcExtra_SelectedIndexChanged);
             // 
@@ -547,14 +553,15 @@
             this.tpTelescope.Location = new System.Drawing.Point(4, 26);
             this.tpTelescope.Name = "tpTelescope";
             this.tpTelescope.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTelescope.Size = new System.Drawing.Size(368, 301);
+            this.tpTelescope.Size = new System.Drawing.Size(368, 305);
             this.tpTelescope.TabIndex = 4;
             this.tpTelescope.Text = "Telescope";
             this.tpTelescope.UseVisualStyleBackColor = true;
             // 
             // btnAPASCOMTest
             // 
-            this.btnAPASCOMTest.Location = new System.Drawing.Point(7, 196);
+            this.btnAPASCOMTest.Enabled = false;
+            this.btnAPASCOMTest.Location = new System.Drawing.Point(7, 267);
             this.btnAPASCOMTest.Name = "btnAPASCOMTest";
             this.btnAPASCOMTest.Size = new System.Drawing.Size(125, 27);
             this.btnAPASCOMTest.TabIndex = 49;
@@ -564,7 +571,7 @@
             // 
             // btnAddAlignmentPoint
             // 
-            this.btnAddAlignmentPoint.Location = new System.Drawing.Point(114, 160);
+            this.btnAddAlignmentPoint.Location = new System.Drawing.Point(114, 186);
             this.btnAddAlignmentPoint.Name = "btnAddAlignmentPoint";
             this.btnAddAlignmentPoint.Size = new System.Drawing.Size(121, 27);
             this.btnAddAlignmentPoint.TabIndex = 48;
@@ -574,7 +581,7 @@
             // 
             // btnStabilise
             // 
-            this.btnStabilise.Location = new System.Drawing.Point(6, 160);
+            this.btnStabilise.Location = new System.Drawing.Point(6, 186);
             this.btnStabilise.Name = "btnStabilise";
             this.btnStabilise.Size = new System.Drawing.Size(102, 27);
             this.btnStabilise.TabIndex = 47;
@@ -594,6 +601,11 @@
             // 
             // gbTelescopeInfo
             // 
+            this.gbTelescopeInfo.Controls.Add(this.label6);
+            this.gbTelescopeInfo.Controls.Add(this.lblAzi);
+            this.gbTelescopeInfo.Controls.Add(this.label11);
+            this.gbTelescopeInfo.Controls.Add(this.lblAlt);
+            this.gbTelescopeInfo.Controls.Add(this.label13);
             this.gbTelescopeInfo.Controls.Add(this.lblTeleStatus);
             this.gbTelescopeInfo.Controls.Add(this.label8);
             this.gbTelescopeInfo.Controls.Add(this.label4);
@@ -608,7 +620,7 @@
             this.gbTelescopeInfo.Controls.Add(this.label3);
             this.gbTelescopeInfo.Location = new System.Drawing.Point(7, 68);
             this.gbTelescopeInfo.Name = "gbTelescopeInfo";
-            this.gbTelescopeInfo.Size = new System.Drawing.Size(355, 87);
+            this.gbTelescopeInfo.Size = new System.Drawing.Size(355, 112);
             this.gbTelescopeInfo.TabIndex = 43;
             this.gbTelescopeInfo.TabStop = false;
             this.gbTelescopeInfo.Text = "Telescope Information";
@@ -616,7 +628,7 @@
             // lblTeleStatus
             // 
             this.lblTeleStatus.AutoSize = true;
-            this.lblTeleStatus.Location = new System.Drawing.Point(65, 63);
+            this.lblTeleStatus.Location = new System.Drawing.Point(65, 85);
             this.lblTeleStatus.Name = "lblTeleStatus";
             this.lblTeleStatus.Size = new System.Drawing.Size(13, 17);
             this.lblTeleStatus.TabIndex = 12;
@@ -625,7 +637,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 63);
+            this.label8.Location = new System.Drawing.Point(7, 85);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(49, 17);
             this.label8.TabIndex = 11;
@@ -1114,15 +1126,16 @@
             this.tabPlanetarium.Controls.Add(this.tabpTheSky);
             this.tabPlanetarium.Controls.Add(this.tabpKStars);
             this.tabPlanetarium.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
-            this.tabPlanetarium.Location = new System.Drawing.Point(3, 156);
+            this.tabPlanetarium.Location = new System.Drawing.Point(3, 135);
             this.tabPlanetarium.Name = "tabPlanetarium";
             this.tabPlanetarium.SelectedIndex = 0;
-            this.tabPlanetarium.Size = new System.Drawing.Size(213, 181);
+            this.tabPlanetarium.Size = new System.Drawing.Size(229, 206);
             this.tabPlanetarium.TabIndex = 30;
             this.tabPlanetarium.SelectedIndexChanged += new System.EventHandler(this.tabPlanetarium_SelectedIndexChanged);
             // 
             // tabpStellarium
             // 
+            this.tabpStellarium.Controls.Add(this.btnImagerView);
             this.tabpStellarium.Controls.Add(this.btnSlew);
             this.tabpStellarium.Controls.Add(this.cbStellariumMinorBodyMarkers);
             this.tabpStellarium.Controls.Add(this.cbStellariumShowSSO);
@@ -1141,19 +1154,50 @@
             this.tabpStellarium.Location = new System.Drawing.Point(4, 26);
             this.tabpStellarium.Name = "tabpStellarium";
             this.tabpStellarium.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpStellarium.Size = new System.Drawing.Size(205, 151);
+            this.tabpStellarium.Size = new System.Drawing.Size(221, 176);
             this.tabpStellarium.TabIndex = 0;
             this.tabpStellarium.Text = "Stellarium";
             this.tabpStellarium.UseVisualStyleBackColor = true;
             // 
+            // btnImagerView
+            // 
+            this.btnImagerView.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnImagerView.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnImagerView.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnImagerView.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnImagerView.Location = new System.Drawing.Point(184, 7);
+            this.btnImagerView.Name = "btnImagerView";
+            this.btnImagerView.Size = new System.Drawing.Size(36, 32);
+            this.btnImagerView.TabIndex = 45;
+            this.btnImagerView.Text = "IV";
+            this.toolTip1.SetToolTip(this.btnImagerView, "Imager view");
+            this.btnImagerView.UseVisualStyleBackColor = false;
+            this.btnImagerView.Click += new System.EventHandler(this.btnImagerView_Click);
+            // 
+            // btnSlew
+            // 
+            this.btnSlew.BackColor = System.Drawing.Color.Gold;
+            this.btnSlew.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSlew.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSlew.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSlew.Location = new System.Drawing.Point(158, 139);
+            this.btnSlew.Name = "btnSlew";
+            this.btnSlew.Size = new System.Drawing.Size(58, 32);
+            this.btnSlew.TabIndex = 44;
+            this.btnSlew.Text = "SlewS";
+            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object");
+            this.btnSlew.UseVisualStyleBackColor = false;
+            this.btnSlew.Click += new System.EventHandler(this.btnSlew_Click);
+            // 
             // cbStellariumMinorBodyMarkers
             // 
             this.cbStellariumMinorBodyMarkers.AutoSize = true;
-            this.cbStellariumMinorBodyMarkers.Location = new System.Drawing.Point(108, 82);
+            this.cbStellariumMinorBodyMarkers.Location = new System.Drawing.Point(156, 42);
             this.cbStellariumMinorBodyMarkers.Name = "cbStellariumMinorBodyMarkers";
-            this.cbStellariumMinorBodyMarkers.Size = new System.Drawing.Size(101, 23);
+            this.cbStellariumMinorBodyMarkers.Size = new System.Drawing.Size(62, 23);
             this.cbStellariumMinorBodyMarkers.TabIndex = 43;
-            this.cbStellariumMinorBodyMarkers.Text = "MB markers";
+            this.cbStellariumMinorBodyMarkers.Text = "MBM";
+            this.toolTip1.SetToolTip(this.cbStellariumMinorBodyMarkers, "Minor body markers");
             this.cbStellariumMinorBodyMarkers.UseVisualStyleBackColor = true;
             this.cbStellariumMinorBodyMarkers.CheckedChanged += new System.EventHandler(this.cbStellariumMinorBodyMarkers_CheckedChanged);
             // 
@@ -1162,7 +1206,7 @@
             this.cbStellariumShowSSO.AutoSize = true;
             this.cbStellariumShowSSO.Checked = true;
             this.cbStellariumShowSSO.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbStellariumShowSSO.Location = new System.Drawing.Point(108, 61);
+            this.cbStellariumShowSSO.Location = new System.Drawing.Point(100, 61);
             this.cbStellariumShowSSO.Name = "cbStellariumShowSSO";
             this.cbStellariumShowSSO.Size = new System.Drawing.Size(84, 23);
             this.cbStellariumShowSSO.TabIndex = 42;
@@ -1175,7 +1219,7 @@
             this.cbStellariumShowStars.AutoSize = true;
             this.cbStellariumShowStars.Checked = true;
             this.cbStellariumShowStars.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbStellariumShowStars.Location = new System.Drawing.Point(108, 41);
+            this.cbStellariumShowStars.Location = new System.Drawing.Point(100, 42);
             this.cbStellariumShowStars.Name = "cbStellariumShowStars";
             this.cbStellariumShowStars.Size = new System.Drawing.Size(59, 23);
             this.cbStellariumShowStars.TabIndex = 41;
@@ -1189,7 +1233,7 @@
             this.btnFOVOptions.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVOptions.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVOptions.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVOptions.Location = new System.Drawing.Point(49, 116);
+            this.btnFOVOptions.Location = new System.Drawing.Point(44, 108);
             this.btnFOVOptions.Name = "btnFOVOptions";
             this.btnFOVOptions.Size = new System.Drawing.Size(44, 32);
             this.btnFOVOptions.TabIndex = 40;
@@ -1204,12 +1248,12 @@
             this.btnFOVClear.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVClear.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVClear.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVClear.Location = new System.Drawing.Point(4, 116);
+            this.btnFOVClear.Location = new System.Drawing.Point(-1, 108);
             this.btnFOVClear.Name = "btnFOVClear";
             this.btnFOVClear.Size = new System.Drawing.Size(44, 32);
             this.btnFOVClear.TabIndex = 39;
             this.btnFOVClear.Text = "X";
-            this.toolTip1.SetToolTip(this.btnFOVClear, "Clear markers and labels");
+            this.toolTip1.SetToolTip(this.btnFOVClear, "Clear search results");
             this.btnFOVClear.UseVisualStyleBackColor = false;
             this.btnFOVClear.Click += new System.EventHandler(this.btnFOVClear_Click);
             // 
@@ -1219,7 +1263,7 @@
             this.btnFOVSearch.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVSearch.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVSearch.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVSearch.Location = new System.Drawing.Point(4, 84);
+            this.btnFOVSearch.Location = new System.Drawing.Point(-1, 76);
             this.btnFOVSearch.Name = "btnFOVSearch";
             this.btnFOVSearch.Size = new System.Drawing.Size(88, 32);
             this.btnFOVSearch.TabIndex = 38;
@@ -1232,12 +1276,11 @@
             // 
             this.btnStellariumClearMarkers.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.btnStellariumClearMarkers.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnStellariumClearMarkers.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnStellariumClearMarkers.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnStellariumClearMarkers.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnStellariumClearMarkers.Location = new System.Drawing.Point(96, 116);
+            this.btnStellariumClearMarkers.Location = new System.Drawing.Point(2, 143);
             this.btnStellariumClearMarkers.Name = "btnStellariumClearMarkers";
-            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(44, 32);
+            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(54, 30);
             this.btnStellariumClearMarkers.TabIndex = 37;
             this.btnStellariumClearMarkers.Text = "X Ma";
             this.toolTip1.SetToolTip(this.btnStellariumClearMarkers, "Clear Markers");
@@ -1251,7 +1294,7 @@
             this.btnAllCats.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnAllCats.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnAllCats.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnAllCats.Location = new System.Drawing.Point(5, 43);
+            this.btnAllCats.Location = new System.Drawing.Point(0, 42);
             this.btnAllCats.Name = "btnAllCats";
             this.btnAllCats.Size = new System.Drawing.Size(97, 32);
             this.btnAllCats.TabIndex = 36;
@@ -1266,11 +1309,12 @@
             this.btnCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnCV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnCV.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnCV.Location = new System.Drawing.Point(162, 7);
+            this.btnCV.Location = new System.Drawing.Point(149, 7);
             this.btnCV.Name = "btnCV";
             this.btnCV.Size = new System.Drawing.Size(36, 32);
             this.btnCV.TabIndex = 35;
             this.btnCV.Text = "CV";
+            this.toolTip1.SetToolTip(this.btnCV, "Constellation view");
             this.btnCV.UseVisualStyleBackColor = false;
             this.btnCV.Click += new System.EventHandler(this.btnCV_Click_1);
             // 
@@ -1280,11 +1324,12 @@
             this.btnNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnNV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnNV.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnNV.Location = new System.Drawing.Point(123, 7);
+            this.btnNV.Location = new System.Drawing.Point(113, 7);
             this.btnNV.Name = "btnNV";
             this.btnNV.Size = new System.Drawing.Size(37, 32);
             this.btnNV.TabIndex = 34;
             this.btnNV.Text = "NV";
+            this.toolTip1.SetToolTip(this.btnNV, "Naked eye view");
             this.btnNV.UseVisualStyleBackColor = false;
             this.btnNV.Click += new System.EventHandler(this.btnNV_Click_1);
             // 
@@ -1294,11 +1339,12 @@
             this.btnS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnS.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnS.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnS.Location = new System.Drawing.Point(64, 7);
+            this.btnS.Location = new System.Drawing.Point(56, 7);
             this.btnS.Name = "btnS";
             this.btnS.Size = new System.Drawing.Size(28, 32);
             this.btnS.TabIndex = 33;
             this.btnS.Text = "S";
+            this.toolTip1.SetToolTip(this.btnS, "Southern Sky");
             this.btnS.UseVisualStyleBackColor = false;
             this.btnS.Click += new System.EventHandler(this.btnS_Click_1);
             // 
@@ -1308,11 +1354,12 @@
             this.btnE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnE.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnE.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnE.Location = new System.Drawing.Point(93, 7);
+            this.btnE.Location = new System.Drawing.Point(84, 7);
             this.btnE.Name = "btnE";
             this.btnE.Size = new System.Drawing.Size(28, 32);
             this.btnE.TabIndex = 32;
             this.btnE.Text = "E";
+            this.toolTip1.SetToolTip(this.btnE, "Eastern Sky");
             this.btnE.UseVisualStyleBackColor = false;
             this.btnE.Click += new System.EventHandler(this.btnE_Click_1);
             // 
@@ -1322,11 +1369,12 @@
             this.btnW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnW.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnW.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnW.Location = new System.Drawing.Point(35, 7);
+            this.btnW.Location = new System.Drawing.Point(28, 7);
             this.btnW.Name = "btnW";
             this.btnW.Size = new System.Drawing.Size(28, 32);
             this.btnW.TabIndex = 31;
             this.btnW.Text = "W";
+            this.toolTip1.SetToolTip(this.btnW, "Western sky");
             this.btnW.UseVisualStyleBackColor = false;
             this.btnW.Click += new System.EventHandler(this.btnW_Click_1);
             // 
@@ -1336,11 +1384,12 @@
             this.btnN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnN.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnN.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnN.Location = new System.Drawing.Point(6, 7);
+            this.btnN.Location = new System.Drawing.Point(0, 7);
             this.btnN.Name = "btnN";
             this.btnN.Size = new System.Drawing.Size(28, 32);
             this.btnN.TabIndex = 30;
             this.btnN.Text = "N";
+            this.toolTip1.SetToolTip(this.btnN, "Northern sky");
             this.btnN.UseVisualStyleBackColor = false;
             this.btnN.Click += new System.EventHandler(this.btnN_Click_1);
             // 
@@ -1355,7 +1404,7 @@
             this.tabSkyChart.Location = new System.Drawing.Point(4, 26);
             this.tabSkyChart.Name = "tabSkyChart";
             this.tabSkyChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSkyChart.Size = new System.Drawing.Size(205, 151);
+            this.tabSkyChart.Size = new System.Drawing.Size(205, 176);
             this.tabSkyChart.TabIndex = 3;
             this.tabSkyChart.Text = "CdC";
             this.tabSkyChart.UseVisualStyleBackColor = true;
@@ -1454,7 +1503,7 @@
             this.tabpSN.Controls.Add(this.btnSNN);
             this.tabpSN.Location = new System.Drawing.Point(4, 26);
             this.tabpSN.Name = "tabpSN";
-            this.tabpSN.Size = new System.Drawing.Size(205, 151);
+            this.tabpSN.Size = new System.Drawing.Size(205, 176);
             this.tabpSN.TabIndex = 2;
             this.tabpSN.Text = "SN 8.1";
             this.tabpSN.UseVisualStyleBackColor = true;
@@ -1549,7 +1598,7 @@
             this.tabpTheSky.Location = new System.Drawing.Point(4, 26);
             this.tabpTheSky.Name = "tabpTheSky";
             this.tabpTheSky.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpTheSky.Size = new System.Drawing.Size(205, 151);
+            this.tabpTheSky.Size = new System.Drawing.Size(205, 176);
             this.tabpTheSky.TabIndex = 1;
             this.tabpTheSky.Text = "TheSky";
             this.tabpTheSky.UseVisualStyleBackColor = true;
@@ -1574,7 +1623,7 @@
             this.tabpKStars.Location = new System.Drawing.Point(4, 26);
             this.tabpKStars.Name = "tabpKStars";
             this.tabpKStars.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpKStars.Size = new System.Drawing.Size(205, 151);
+            this.tabpKStars.Size = new System.Drawing.Size(205, 176);
             this.tabpKStars.TabIndex = 4;
             this.tabpKStars.Text = "KStars";
             this.tabpKStars.UseVisualStyleBackColor = true;
@@ -1600,27 +1649,57 @@
             this.workerTelescopeStatus.DoWork += new System.ComponentModel.DoWorkEventHandler(this.workerTelescopeStatus_DoWork);
             this.workerTelescopeStatus.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.workerTelescopeStatus_ProgressChanged);
             // 
-            // btnSlew
+            // label6
             // 
-            this.btnSlew.BackColor = System.Drawing.Color.Gold;
-            this.btnSlew.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSlew.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSlew.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSlew.Location = new System.Drawing.Point(143, 116);
-            this.btnSlew.Name = "btnSlew";
-            this.btnSlew.Size = new System.Drawing.Size(58, 32);
-            this.btnSlew.TabIndex = 44;
-            this.btnSlew.Text = "SlewS";
-            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object");
-            this.btnSlew.UseVisualStyleBackColor = false;
-            this.btnSlew.Click += new System.EventHandler(this.btnSlew_Click);
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(271, 65);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(38, 17);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "Local";
+            // 
+            // lblAzi
+            // 
+            this.lblAzi.AutoSize = true;
+            this.lblAzi.Location = new System.Drawing.Point(166, 65);
+            this.lblAzi.Name = "lblAzi";
+            this.lblAzi.Size = new System.Drawing.Size(13, 17);
+            this.lblAzi.TabIndex = 16;
+            this.lblAzi.Text = "-";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(135, 65);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(29, 17);
+            this.label11.TabIndex = 15;
+            this.label11.Text = "Azi:";
+            // 
+            // lblAlt
+            // 
+            this.lblAlt.AutoSize = true;
+            this.lblAlt.Location = new System.Drawing.Point(33, 65);
+            this.lblAlt.Name = "lblAlt";
+            this.lblAlt.Size = new System.Drawing.Size(13, 17);
+            this.lblAlt.TabIndex = 14;
+            this.lblAlt.Text = "-";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(7, 65);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(28, 17);
+            this.label13.TabIndex = 13;
+            this.label13.Text = "Alt:";
             // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(602, 377);
+            this.ClientSize = new System.Drawing.Size(616, 377);
             this.Controls.Add(this.lblObserveTime);
             this.Controls.Add(this.tabPlanetarium);
             this.Controls.Add(this.tcExtra);
@@ -1795,6 +1874,12 @@
         private System.Windows.Forms.CheckBox cbNoSharpCap;
         private System.Windows.Forms.Button btnSlew;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Button btnImagerView;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label lblAzi;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label lblAlt;
+        private System.Windows.Forms.Label label13;
     }
 }
 
