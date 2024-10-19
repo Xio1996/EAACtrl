@@ -118,6 +118,11 @@ namespace EAACtrl
                         break;
                     case "PlateSolveAlign":
                         WriteMessage(sMsg + "\r\n");
+
+                        if (EAATelescope.AddAlignmentPoint(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2])))
+                        {
+                            Speak("Alignment point added.");
+                        }
                         break;
                     default:
                         break;
@@ -369,7 +374,7 @@ namespace EAACtrl
 
         private void frmEAACP_Load(object sender, EventArgs e)
         {
-            this.Width = 240;
+            this.Width = 250;
             if (bOverlayVisible)
             {
                 frmTextOverlay.Show();

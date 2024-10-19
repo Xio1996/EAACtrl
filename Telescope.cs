@@ -362,6 +362,24 @@ namespace EAACtrl
             return false;
         }
 
+        // Finds the differnce between the objects RA/Dec after a slew and the telescope's actual platesolve position.
+        // If the difference is greater than a specified accuarcy a new slew coordinate is calaculated to compensate for the error.
+        public bool CentreObject(double ObjectRA, double ObjectDec, double PlateSolveRA, double PlateSolveDec)
+        {
+            bool bResult = false;
+
+            double RADiff = ObjectRA - PlateSolveRA;
+            double DecDiff = ObjectDec - PlateSolveDec;
+
+            // TODO: Need to make sure calculated RA/Dec are in valid range.
+            double SlewRA = ObjectRA + RADiff;
+            double SlewDec = ObjectDec + RADiff;
+
+            this.Slew(SlewRA, SlewDec);
+
+            return bResult;
+        }
+
         public bool AddAlignmentPoint(double SolvedRA, double SolvedDec)
         {
             bool bResult = false;

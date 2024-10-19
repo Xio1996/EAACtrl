@@ -1297,7 +1297,17 @@ sub GetObjects(iOption as integer, sType as string, ByRef Result as JSON)
 				bFirst = false
 			end if
 			
-			doc = doc +CreateJSONObject(Ob.ID, Ob.Name, Ob.Type, Ob.Size, Ob.Constellation, Ob.Catalog, Ob.GetValueAsString("Distance"), "", Ob.PosAngle, Ob.Magnitude, Ob.RA, Ob.Dec, Ob.ParallacticAngle)
+			// If the object is a comet starting with C/ or P/ then replace / with _
+			// We use the name as a folder and a / would be bad
+			dim ID as string
+			if Ob.Type = "Comet" then
+				ID = Replace(Ob.ID,"/","_")
+				Debug "Get Object: Comet=", ID
+			else
+				ID = Ob.ID
+			end if
+			
+			doc = doc +CreateJSONObject(ID, Ob.Name, Ob.Type, Ob.Size, Ob.Constellation, Ob.Catalog, Ob.GetValueAsString("Distance"), "", Ob.PosAngle, Ob.Magnitude, Ob.RA, Ob.Dec, Ob.ParallacticAngle)
 		next
 		doc = doc + "]}"
 		Debug doc
@@ -1308,7 +1318,7 @@ end sub
 function CreateJSONObject(ID as string, Name as string, Type as string, Size as string, Constellation as string, Catalog as string, Distance as string, GalaxyType as string, PosAngle as double, Magnitude as double, RA as double, Dec as double, ParallacticAngle as double) as string
 	dim sJSON  as string =""
 	sJSON = sJSON + "{""ID"":""" + ReplaceAll(ID,"""","\""") + ""","  + """Name"":""" + ReplaceAll(Name,"""","\""") + ""","  + """Type"":""" + Type + ""","
-	sJSON = sJSON + """Size"":""" + Size + ""","  + """Constellation"":""" + Constellation + ""","  + """Catalogue"":""" + Catalog + ""","
+	sJSON = sJSON + """Size"":""" + ReplaceAll(Size,"""","\""") + ""","  + """Constellation"":""" + Constellation + ""","  + """Catalogue"":""" + Catalog + ""","
 	sJSON = sJSON + """Distance"":""" + Distance + ""","
 	sJSON = sJSON + """GalaxyType"":""" + GalaxyType + ""","
 	sJSON = sJSON + """PosAngle"":" + DoubleToStr(PosAngle) + ","  + """Magnitude"":" + DoubleToStr(Magnitude) + ","
@@ -1383,8 +1393,12 @@ sub SetSession()
 	dim oNewSession as APSession = APSession.NewSession(Plan().LocalDateTime)
 	
 	oNewSession.Finish = dtNow + 3600
-	oNewSession.Site = APResource.Default(APResource.rsrc_Site).Name
-	ONewSession.Observer = APResource.Default(APResource.rsrc_Observer).Name
+	//oNewSession.Site = APResource.Default(APResource.rsrc_Site).Name
+	//oNewSession.Observer = APResource.Default(APResource.rsrc_Observer).Name
+	
+	// Changed 15-10-2024
+	oNewSession.Site = SiteResource.Default.Name
+	oNewSession.Observer = ObserverResource.Default.Name
 	
 	Debug "New Session - Start=",new Date(oNewSession.Start)," End=", new Date(oNewSession.Finish), "Ended=", oNewSession.Ended, "NoObs=", oNewSession.nObservations
 	
@@ -1396,7 +1410,7 @@ function GetObjectIDFromString(Target as string) as string
 	
 	if Target<>"" then
 		dim CommaPos as integer = Instr(Target,",")
-		dim BracketPos as integer = Instr(Target,"(")
+		dim BracketPos as integer = Instr(Target,"{")
 		
 		if CommaPos >0 and CommaPos < BracketPos then
 			EndofID = CommaPos -1
@@ -1427,6 +1441,16 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 			obj = Plan().Obj(i)
 			
 			Debug "GetPlanObjectForObs Plan: ", obj.ID, " Display: ", obj.GetValueAsString("Display")
+			
+			// For comets any / chars are repalced with _. Swap it back to find the comet in the plan
+			dim CometID as string
+			if obj.Type = "Comet" then
+				CometID = Replace(obj.ID,"/","_")
+				if id = CometID then
+					Debug "GetPlanObjectForObs: Comet Found"
+					return obj
+				end if
+			end if
 			
 			// Check the ID and the user defined field Display
 			if obj.ID=id or obj.GetValueAsString("Display")=id then
@@ -1592,9 +1616,15 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 				oObs.Filter = FilterResource.Default.Name
 			end if
 			
+			// Specify the focal length of the scope (Focal reducers and/or extension tubes) 14-10-2024
+			if OpticalAidResource.Default <> nil then
+				oObs.OpticalAid = OpticalAidResource.Default.Name
+			end if
+			
 			Debug "Plan:",Plan().Name,"ID:", oObs.ID,"Name:",oObs.Name,"Const:",oObs.Constellation
 			
 			// CHANGED to use plans new FilePath property 2.4b23
+			Debug "LogObs: Plan().FilePath=", Plan().FilePath
 			oObs.Plan = Plan().FilePath
 			
 			// On first observation create the Object Fields as shown in the Observation UI Object Fields tab
@@ -1610,6 +1640,7 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 		oAttachment.Path = ImgPath
 		
 		if OrgOption = 1 or OrgOption = 2 then
+			Debug "LogObs: ImgSettingsPath=", ImgSettingsPath
 			dim oSettingsFile as APTextFile = APTextFile.ReadFileUsingPath(ImgSettingsPath)
 			
 			if oSettingsFile<>nil then

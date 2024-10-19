@@ -151,7 +151,7 @@ namespace EAACtrl
                     sInfo += ", " + sName;
                 }
 
-                sInfo += " (";
+                sInfo += " {";
 
                 // If a distance field exists then add to information
                 if (apObj.Distance.Length > 0 && apObj.Distance != "???")
@@ -165,11 +165,11 @@ namespace EAACtrl
                 // Add object type information
                 if (apObj.Type.Length > 0)
                 {
-                    sInfo += " - " + DisplayTypeFromAPType(apObj.Type) + ")";
+                    sInfo += " - " + DisplayTypeFromAPType(apObj.Type) + "}";
                 }
                 else 
                 {
-                    sInfo += ")";
+                    sInfo += "}";
                 }
             }
             return sInfo;
