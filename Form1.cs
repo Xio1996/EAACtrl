@@ -20,6 +20,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Threading;
 using ASCOM.DriverAccess;
 using System.Xml.Linq;
+using System.Linq.Expressions;
 
 namespace EAACtrl
 {
@@ -119,10 +120,13 @@ namespace EAACtrl
                     case "PlateSolveAlign":
                         WriteMessage(sMsg + "\r\n");
 
-                        if (EAATelescope.AddAlignmentPoint(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2])))
+                        CentreObject(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2]));
+
+                       /* if (EAATelescope.AddAlignmentPoint(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2])))
                         {
                             Speak("Alignment point added.");
                         }
+                       */
                         break;
                     default:
                         break;
@@ -1846,6 +1850,45 @@ namespace EAACtrl
         {
             Stellarium.SetStellariumFOV(0.66);
             WriteMessage(Stellarium.Message);
+        }
+
+        // Finds the differnce between the objects RA/Dec after a slew and the telescope's actual platesolve position.
+        // If the difference is greater than a specified accuarcy a new slew coordinate is calaculated to compensate for the error.
+        public bool CentreObject(double PlateSolveRA, double PlateSolveDec)
+        {
+            bool bResult = false;
+            try
+            {
+                double RATele = EAATelescope.RightAscension;
+                double DecTele = EAATelescope.Declination;
+
+                WriteMessage("PSRAJ2000=" + PlateSolveRA.ToString() + " PSDecJ2000=" +  PlateSolveDec.ToString() + "\r\n");
+                WriteMessage("RATeleNOW=" + RATele.ToString() + " DecTeleNOW=" + DecTele.ToString() + "\r\n");
+
+                AstroCalc.J2000ToJNOW(PlateSolveRA, PlateSolveDec, out double RANOW, out double DecNow);
+
+                WriteMessage("PSRAJNOW=" + RANOW.ToString() + " PSRANOW=" + DecNow.ToString() + "\r\n");
+
+                double RADiff = RATele - RANOW;
+                double DecDiff = DecTele - DecNow;
+
+                WriteMessage("RADiff=" + RADiff.ToString() + " DecDiff=" + DecDiff.ToString() + "\r\n");
+
+                // TODO: Need to make sure calculated RA/Dec are in valid range.
+                double SlewRA = RATele + RADiff;
+                double SlewDec = DecTele + RADiff;
+
+                WriteMessage("SlewRA=" + SlewRA.ToString() + " SlewDec=" + SlewDec.ToString() + "\r\n");
+
+            }
+            catch (Exception ex)
+            {
+                WriteMessage("CentreObject - " + ex.Message);
+            }
+
+            //EAATelescope.Slew(SlewRA, SlewDec);
+
+            return bResult;
         }
     }
 

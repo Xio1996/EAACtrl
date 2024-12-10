@@ -62,6 +62,11 @@
             this.btnStabilise = new System.Windows.Forms.Button();
             this.btnAbort = new System.Windows.Forms.Button();
             this.gbTelescopeInfo = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.lblAzi = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.lblAlt = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             this.lblTeleStatus = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -147,11 +152,6 @@
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label6 = new System.Windows.Forms.Label();
-            this.lblAzi = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.lblAlt = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -340,7 +340,7 @@
             this.tpTools.Location = new System.Drawing.Point(4, 26);
             this.tpTools.Name = "tpTools";
             this.tpTools.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTools.Size = new System.Drawing.Size(368, 301);
+            this.tpTools.Size = new System.Drawing.Size(368, 305);
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
@@ -575,7 +575,7 @@
             this.btnAddAlignmentPoint.Name = "btnAddAlignmentPoint";
             this.btnAddAlignmentPoint.Size = new System.Drawing.Size(121, 27);
             this.btnAddAlignmentPoint.TabIndex = 48;
-            this.btnAddAlignmentPoint.Text = "Add Alignment";
+            this.btnAddAlignmentPoint.Text = "Centre Object";
             this.btnAddAlignmentPoint.UseVisualStyleBackColor = true;
             this.btnAddAlignmentPoint.Click += new System.EventHandler(this.btnAddAlignmentPoint_Click);
             // 
@@ -624,6 +624,51 @@
             this.gbTelescopeInfo.TabIndex = 43;
             this.gbTelescopeInfo.TabStop = false;
             this.gbTelescopeInfo.Text = "Telescope Information";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(271, 65);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(38, 17);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "Local";
+            // 
+            // lblAzi
+            // 
+            this.lblAzi.AutoSize = true;
+            this.lblAzi.Location = new System.Drawing.Point(166, 65);
+            this.lblAzi.Name = "lblAzi";
+            this.lblAzi.Size = new System.Drawing.Size(13, 17);
+            this.lblAzi.TabIndex = 16;
+            this.lblAzi.Text = "-";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(135, 65);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(29, 17);
+            this.label11.TabIndex = 15;
+            this.label11.Text = "Azi:";
+            // 
+            // lblAlt
+            // 
+            this.lblAlt.AutoSize = true;
+            this.lblAlt.Location = new System.Drawing.Point(33, 65);
+            this.lblAlt.Name = "lblAlt";
+            this.lblAlt.Size = new System.Drawing.Size(13, 17);
+            this.lblAlt.TabIndex = 14;
+            this.lblAlt.Text = "-";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(7, 65);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(28, 17);
+            this.label13.TabIndex = 13;
+            this.label13.Text = "Alt:";
             // 
             // lblTeleStatus
             // 
@@ -780,7 +825,7 @@
             this.tpSAMP.Location = new System.Drawing.Point(4, 26);
             this.tpSAMP.Name = "tpSAMP";
             this.tpSAMP.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSAMP.Size = new System.Drawing.Size(368, 301);
+            this.tpSAMP.Size = new System.Drawing.Size(368, 305);
             this.tpSAMP.TabIndex = 3;
             this.tpSAMP.Text = "SAMP";
             this.tpSAMP.UseVisualStyleBackColor = true;
@@ -934,7 +979,7 @@
             this.tpConfig.Location = new System.Drawing.Point(4, 26);
             this.tpConfig.Name = "tpConfig";
             this.tpConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tpConfig.Size = new System.Drawing.Size(368, 301);
+            this.tpConfig.Size = new System.Drawing.Size(368, 305);
             this.tpConfig.TabIndex = 2;
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
@@ -1102,7 +1147,7 @@
             this.tpDev.Location = new System.Drawing.Point(4, 26);
             this.tpDev.Name = "tpDev";
             this.tpDev.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDev.Size = new System.Drawing.Size(368, 301);
+            this.tpDev.Size = new System.Drawing.Size(368, 305);
             this.tpDev.TabIndex = 1;
             this.tpDev.Text = "Log";
             this.tpDev.UseVisualStyleBackColor = true;
@@ -1404,7 +1449,7 @@
             this.tabSkyChart.Location = new System.Drawing.Point(4, 26);
             this.tabSkyChart.Name = "tabSkyChart";
             this.tabSkyChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSkyChart.Size = new System.Drawing.Size(205, 176);
+            this.tabSkyChart.Size = new System.Drawing.Size(221, 176);
             this.tabSkyChart.TabIndex = 3;
             this.tabSkyChart.Text = "CdC";
             this.tabSkyChart.UseVisualStyleBackColor = true;
@@ -1503,7 +1548,7 @@
             this.tabpSN.Controls.Add(this.btnSNN);
             this.tabpSN.Location = new System.Drawing.Point(4, 26);
             this.tabpSN.Name = "tabpSN";
-            this.tabpSN.Size = new System.Drawing.Size(205, 176);
+            this.tabpSN.Size = new System.Drawing.Size(221, 176);
             this.tabpSN.TabIndex = 2;
             this.tabpSN.Text = "SN 8.1";
             this.tabpSN.UseVisualStyleBackColor = true;
@@ -1598,7 +1643,7 @@
             this.tabpTheSky.Location = new System.Drawing.Point(4, 26);
             this.tabpTheSky.Name = "tabpTheSky";
             this.tabpTheSky.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpTheSky.Size = new System.Drawing.Size(205, 176);
+            this.tabpTheSky.Size = new System.Drawing.Size(221, 176);
             this.tabpTheSky.TabIndex = 1;
             this.tabpTheSky.Text = "TheSky";
             this.tabpTheSky.UseVisualStyleBackColor = true;
@@ -1623,7 +1668,7 @@
             this.tabpKStars.Location = new System.Drawing.Point(4, 26);
             this.tabpKStars.Name = "tabpKStars";
             this.tabpKStars.Padding = new System.Windows.Forms.Padding(3);
-            this.tabpKStars.Size = new System.Drawing.Size(205, 176);
+            this.tabpKStars.Size = new System.Drawing.Size(221, 176);
             this.tabpKStars.TabIndex = 4;
             this.tabpKStars.Text = "KStars";
             this.tabpKStars.UseVisualStyleBackColor = true;
@@ -1648,51 +1693,6 @@
             this.workerTelescopeStatus.WorkerSupportsCancellation = true;
             this.workerTelescopeStatus.DoWork += new System.ComponentModel.DoWorkEventHandler(this.workerTelescopeStatus_DoWork);
             this.workerTelescopeStatus.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.workerTelescopeStatus_ProgressChanged);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(271, 65);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(38, 17);
-            this.label6.TabIndex = 17;
-            this.label6.Text = "Local";
-            // 
-            // lblAzi
-            // 
-            this.lblAzi.AutoSize = true;
-            this.lblAzi.Location = new System.Drawing.Point(166, 65);
-            this.lblAzi.Name = "lblAzi";
-            this.lblAzi.Size = new System.Drawing.Size(13, 17);
-            this.lblAzi.TabIndex = 16;
-            this.lblAzi.Text = "-";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(135, 65);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(29, 17);
-            this.label11.TabIndex = 15;
-            this.label11.Text = "Azi:";
-            // 
-            // lblAlt
-            // 
-            this.lblAlt.AutoSize = true;
-            this.lblAlt.Location = new System.Drawing.Point(33, 65);
-            this.lblAlt.Name = "lblAlt";
-            this.lblAlt.Size = new System.Drawing.Size(13, 17);
-            this.lblAlt.TabIndex = 14;
-            this.lblAlt.Text = "-";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 65);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(28, 17);
-            this.label13.TabIndex = 13;
-            this.label13.Text = "Alt:";
             // 
             // frmEAACP
             // 
