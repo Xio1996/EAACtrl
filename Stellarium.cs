@@ -764,7 +764,7 @@ namespace EAACtrl
         {
             string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
-            string sCode = "MarkerMgr.markerEquatorial(\"{sRA}\",\"{sDec}\",true,true,\"crossed-circle\",\"#ffff00\",20,true,{autoDeleteTimeoutMs},false);";
+            string sCode = $"MarkerMgr.markerEquatorial(\"{sRA}\",\"{sDec}\",true,true,\"crossed-circle\",\"#ffff00\",20,true,{autoDeleteTimeoutMs},false);";
 
             var content = new FormUrlEncodedContent(new[]
             {
