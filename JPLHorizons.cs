@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace EAACtrl
 {
     internal class JPLHorizons
     {
         private string sMsg = "";
+        private static readonly HttpClient httpClient = new HttpClient();
 
         public string Message
         {
@@ -23,11 +17,34 @@ namespace EAACtrl
             }
         }
 
+        private string GetRequest(string url)
+        {
+            string result = "";
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = httpClient.GetStringAsync(url).GetAwaiter().GetResult();
+
+                TimeSpan ts = stopwatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = $"Request to {url} {elapsedTime}\r\n";
+            }
+            catch (HttpRequestException e)
+            {
+                sMsg = $"Request {url} ERROR {e.Message}\r\n";
+                result = "exception";
+            }
+
+            return result;
+        }
+
         public double Longitude = -1.3150645;
         public double Latitude = 50.7432162;
         public double Altitude = 57.184;
 
-        // Returns the current RA/DEc of the passed object along with other object attributes
+        // Returns the current RA/Dec of the passed object along with other object attributes
         public string QueryObject(string sID)
         {
             string result = "";
@@ -38,26 +55,16 @@ namespace EAACtrl
             sWebServiceURL += "&TLIST='" + DateTime.UtcNow.ToString() + "'";
             sWebServiceURL += "&COMMAND='" + sID + "'";
 
-            WebClient lwebClient = new WebClient();
-            lwebClient.Encoding = Encoding.UTF8;
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                result = GetRequest(sWebServiceURL);
 
-                result = lwebClient.DownloadString(sWebServiceURL);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "JPL: QueryObject " + sID + " (" + elapsedTime + ")\r\n";
+                sMsg = $"JPL: QueryObject {sID}, {sMsg}\r\n";
             }
             catch (Exception)
             {
-                sMsg = "JPL:QueryObject ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
+                sMsg = $"JPL:QueryObject ERR, {sMsg} \r\n";
+                result = "exception";
             }
             return result;
         }
@@ -75,27 +82,18 @@ namespace EAACtrl
             sWebServiceURL += "&vmag-lim=" + LimitingMagnitude.ToString();
             sWebServiceURL += "&fov-ra-center=" + RA + "&fov-dec-center=" + Dec + "&fov-ra-hwidth=" + Dimension.ToString() + "&fov-dec-hwidth=" + Dimension.ToString();
 
-            WebClient lwebClient = new WebClient();
-            lwebClient.Encoding = Encoding.UTF8;
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                result = GetRequest(sWebServiceURL);
 
-                result = lwebClient.DownloadString(sWebServiceURL);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "JPL:SmallBodySearchBox RA=" + RA + " Dec=" + Dec + " Mag=" + LimitingMagnitude + " Size=" + Dimension.ToString() + " (" + elapsedTime + ")\r\n";
+                sMsg = $"JPL:SmallBodySearchBox RA={RA} Dec={Dec} Mag={LimitingMagnitude} Size={Dimension}, {sMsg}\r\n";
             }
             catch (Exception)
             {
-                sMsg = "JPL:SmallBodySearchBox ERROR \r\n";
+                sMsg = $"JPL:SmallBodySearchBox ERR, {sMsg} \r\n";
+                result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+
             return result;
         }
     }

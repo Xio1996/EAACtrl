@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Text;
 using System.Windows.Forms;
 using System.Timers;
@@ -10,17 +9,11 @@ using System.Data;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Speech.Synthesis;
-using System.Security.Cryptography;
-using System.Runtime.Remoting.Messaging;
 using System.ComponentModel;
-using System.Text.Json.Nodes;
 using System.Drawing.Imaging;
 using System.Drawing;
-using System.Windows.Forms.VisualStyles;
-using System.Threading;
-using ASCOM.DriverAccess;
-using System.Xml.Linq;
-using System.Linq.Expressions;
+using System.Net.Http;
+using System.Diagnostics;
 
 namespace EAACtrl
 {
@@ -36,6 +29,9 @@ namespace EAACtrl
         private bool bOverlayVisible = true;
         private frmTextOverlay frmTextOverlay = new frmTextOverlay();
         private int CurrentPlanetarium;
+
+        private static readonly HttpClient httpClient = new HttpClient();
+        private string sMsg = "";
 
         private MqttClient mqttSharpCap;
         private string mqttClientID = "";
@@ -530,23 +526,44 @@ namespace EAACtrl
             lblObserveTime.Text = tsCounter.ToString(); 
         }
 
+        private string GetRequest(string url)
+        {
+            string result = "";
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = httpClient.GetStringAsync(url).GetAwaiter().GetResult();
+
+                TimeSpan ts = stopwatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = $"Request to {url} {elapsedTime}\r\n";
+            }
+            catch (HttpRequestException e)
+            {
+                sMsg = $"Request {url} ERROR {e.Message}\r\n";
+                result = "exception";
+            }
+
+            return result;
+        }
+
         public string APExecuteScript(string ScriptPayload)
         {
             string result = "";
 
             string apWebServices = "http://localhost:8080?cmd=launch&auth=jrzLsmZVY33rwxyd38MS&cmdformat=json&responseformat=json&payload=";
             apWebServices += ScriptPayload;
-            WebClient lwebClient = new WebClient();
-            lwebClient.Encoding = Encoding.UTF8;
+
             try
             {
                 aTimer.Enabled = false;
                 myTimer.Enabled = false;
-                result = lwebClient.DownloadString(apWebServices);
+                result = GetRequest(apWebServices);
                 iCmdCount++;
             }
             catch (Exception){ }
-            finally{ lwebClient.Dispose(); }
 
             aTimer.Enabled = true;
             myTimer.Enabled = true;
@@ -1890,6 +1907,20 @@ namespace EAACtrl
 
             return bResult;
         }
+
+        private void btnTracking_Click(object sender, EventArgs e)
+        {
+            if (EAATelescope.Tracking)
+            {
+                EAATelescope.Tracking = false;
+                WriteMessage("Tracking OFF\r\n");
+            }
+            else
+            {
+                EAATelescope.Tracking = true;
+                WriteMessage("Tracking ON\r\n");
+            }
+        }
     }
 
     // New AP classes
@@ -1964,16 +1995,4 @@ namespace EAACtrl
         public string ImgInfo { get; set; }
     }
 
-    public class WebClient : System.Net.WebClient
-    {
-        public int Timeout { get; set; } = 120 * 1000; // Default to 120 second timeout
-
-        protected override WebRequest GetWebRequest(Uri uri)
-        {
-            WebRequest lWebRequest = base.GetWebRequest(uri);
-            lWebRequest.Timeout = Timeout;
-            ((HttpWebRequest)lWebRequest).ReadWriteTimeout = Timeout;
-            return lWebRequest;
-        }
-    }
 }

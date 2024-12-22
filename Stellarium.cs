@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace EAACtrl
 {
     internal class Stellarium
     {
+        private static readonly HttpClient httpClient = new HttpClient();
         private APHelper APHelper = new APHelper();
         private string sMsg = "";
 
@@ -68,105 +62,103 @@ namespace EAACtrl
             return (RA + 360.0) / 15.0; 
         }
 
-        public string SetStelAction(string sName)
+        private string PostRequest(string url, FormUrlEncodedContent content)
         {
             string result = "";
-
-            string sWebServiceURL = @"http://" + IPAddress + ":" + Port + "/api/stelaction/do";
-            WebClient lwebClient = new WebClient();
-
             try
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                result = lwebClient.UploadString(sWebServiceURL, "POST", "id=" + sName);
+                HttpResponseMessage response = httpClient.PostAsync(url, content).GetAwaiter().GetResult();
+                result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
                 TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SetStAction: " + sName + "(" + elapsedTime + "\r\n";
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = $"Request to {url} {elapsedTime}\r\n";
             }
-            catch (Exception e)
+            catch (HttpRequestException e)
             {
-                sMsg = "SetStAction ERROR " + e.Message + "\r\n";
+                sMsg = $"Request {url} ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
+
+            return result;
+        }
+
+        private string GetRequest(string url)
+        {
+            string result = "";
+            try
             {
-                lwebClient.Dispose();
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                result = httpClient.GetStringAsync(url).GetAwaiter().GetResult();
+ 
+                TimeSpan ts = stopwatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = $"Request to {url} {elapsedTime}\r\n";
+            }
+            catch (HttpRequestException e)
+            {
+                sMsg = $"Request {url} ERROR {e.Message}\r\n";
+                result = "exception";
             }
 
+            return result;
+        }
+
+        public string SetStelAction(string sName)
+        {
+            string result = "";
+
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/stelaction/do";
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("id", sName)
+            });
+
+            result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelAction {sName}, {sMsg}";
             return result;
         }
 
         public string SetStelProperty(string sName, string sValue)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/stelproperty/set";
 
-            string sWebServiceURL = @"http://" + IPAddress + ":" + Port + "/api/stelproperty/set";
-            WebClient lwebClient = new WebClient();
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("id", sName),
+                new KeyValuePair<string, string>("value", sValue)
+            });
 
-                result = lwebClient.UploadString(sWebServiceURL, "POST", "id=" + sName + "&value=" + sValue);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SetStProp: " + sName + ":" + sValue + "(" + elapsedTime + "\r\n";
-            }
-            catch (Exception e)
-            {
-                sMsg = "SetStProp ERROR " + e.Message + "\r\n";
-                result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelProp {sName}, {sValue}, {sMsg}";
             return result;
+
         }
 
         public string SetStellariumFOV(double iFOV)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/main/fov";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/main/fov";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("fov", iFOV.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("fov", iFOV.ToString()),
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SetStFOV " + iFOV.ToString() + "deg (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "SetStFOV ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"SetStFOV {iFOV} deg {sMsg}";
             return result;
         }
 
         public string SyncStellariumToPosition(double RA, double Dec)
         {
-            string result = "";
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/main/focus";
-            string sPos = RA.ToString() + ", " + Dec.ToString();
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/main/focus";
+            string sPos = $"{RA}, {Dec}";
 
             // Convert selected object's RA to degrees and then both RA and Dec to radians
             RA = RA * 15 * Math.PI / 180;
@@ -177,207 +169,97 @@ namespace EAACtrl
             double dblY = Math.Cos(Dec) * Math.Sin(RA);
             double dblZ = Math.Sin(Dec);
 
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("position", "[" + dblX.ToString() + "," + dblY.ToString() + "," + dblZ.ToString() + "]");
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("position", $"[{dblX},{dblY},{dblZ}]")
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelToPos {RA} : {Dec}, {sMsg}";
 
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SyncStToPos " + sPos + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "SyncStToPos ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
             return result;
         }
 
         public string StellariumToAltAzPosition(double Alt, double Az)
         {
-            string result = "";
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/main/view";
-            string sPos = Alt.ToString() + ", " + Az.ToString();
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/main/view";
+            string sPos = $"{Alt}, {Az}";
 
-            Az = 180 - Az;
-            // Convert to radians
-            Az = Az * Math.PI / 180;
+            Az = (180 - Az) * Math.PI / 180;
             Alt = Alt * Math.PI / 180;
 
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("az", Az.ToString());
-            nvcParams.Add("alt", Alt.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("az", Az.ToString()),
+                new KeyValuePair<string, string>("alt", Alt.ToString())
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SyncStToAltAz " + sPos + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "SyncStToAltAz ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelAltAz {sPos}, {sMsg}";
             return result;
         }
 
         public string StellariumMove(double X, double Y)
         {
-            string result = "";
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/main/move";
-            string sPos = X.ToString() + ", " + Y.ToString();
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/main/move";
+            string sPos = $"{X}, {Y}";
 
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("x", X.ToString());
-            nvcParams.Add("y", Y.ToString());
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("x", X.ToString()),
+                new KeyValuePair<string, string>("y", Y.ToString())
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "StMove " + sPos + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "StMove ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelMove {sPos}, {sMsg}";
             return result;
         }
 
-        public string SyncStellariumToID(string sID)
+        public string SyncStellariumToID(string ObjectID)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/main/focus";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/main/focus";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("target", sID);
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("target", ObjectID)
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SyncToID " + sID + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "SyncStToID ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient?.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelSyncToID {ObjectID}, {sMsg}";
             return result;
         }
 
         public string SyncStellariumToAPObject(string sID, string sRA, string sDec, string sType)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/direct";
+            string sInput = $"sObject=\"{sID}\";sRA=\"{sRA}\";sDec=\"{sDec}\";sType=\"{sType}\";\r\n";
+            string sCode = sInput + "objmap = core.getObjectInfo(sObject);\r\nsInfo = new String(core.mapToString(objmap));\r\nsFound=sInfo.slice(5,10);\r\n\r\nif (sFound==\"found\")\r\n{\r\n\tCustomObjectMgr.addCustomObject(sObject, sRA, sDec, true);\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n\tcore.addToSelectedObjectInfoString(\"AP Type: \" + sType,false)\r\n}\r\nelse\r\n{\r\n\tcore.output(\"Object found\");\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n}";
 
-            string sInput = "sObject=\"" + sID + "\";sRA=\"" + sRA + "\";sDec=\"" + sDec + "\";sType=\"" + sType + "\";\r\n";
-            string sCode = "objmap = core.getObjectInfo(sObject);\r\nsInfo = new String(core.mapToString(objmap));\r\nsFound=sInfo.slice(5,10);\r\n\r\nif (sFound==\"found\")\r\n{\r\n\tCustomObjectMgr.addCustomObject(sObject, sRA, sDec, true);\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n\tcore.addToSelectedObjectInfoString(\"AP Type: \" + sType,false)\r\n}\r\nelse\r\n{\r\n\tcore.output(\"Object found\");\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n}";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sInput + sCode);
-
-            WebClient lwebClient = new WebClient();
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("code", sCode)
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SyncStToAPObj " + sID + " " + sRA + ", " + sDec + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "SyncStToAPObj ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelSyncToAPObj ID={sID}, RA={sRA}, Dec={sDec}, Type={sType}, {sMsg}";
             return result;
         }
 
         public string StellariumRemoveMarker(string sMarkerName)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/direct";
+            string sInput = $"sMarker=\"{sMarkerName}\";\r\n";
+            string sCode = sInput + "if (sMarker==\"\")\r\n{\r\n\tCustomObjectMgr.removeCustomObjects();\r\n}\r\nelse\r\n{\r\n\tCustomObjectMgr.removeCustomObject(sMarker);\r\n}";
 
-            string sInput = "sMarker=\"" + sMarkerName + "\";\r\n";
-            string sCode = "if (sMarker==\"\")\r\n{\r\n\tCustomObjectMgr.removeCustomObjects();\r\n}\r\nelse\r\n{\r\n\tCustomObjectMgr.removeCustomObject(sMarker);\r\n}";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sInput + sCode);
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("code", sCode)
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "StRemoveMarker (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "StRemoveMarker ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient?.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelRemoveMarker Marker={sMarkerName}, {sMsg}";
             return result;
         }
 
@@ -657,10 +539,7 @@ namespace EAACtrl
 
         public void DrawObjects(string varObjects)
         {
-            string result = "";
-
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/run";
-
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/run";
 
             Color FontColour = Properties.Settings.Default.StFontColour;
             string hexFontColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
@@ -668,68 +547,31 @@ namespace EAACtrl
             string hexGraphicColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
 
             string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"E\",12);}";
-            
+
             File.WriteAllText(ScriptFolder + "\\drawobjects.ssc", varObjects + sCode);
 
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("id", "drawobjects.ssc");
-            WebClient lwebClient = new WebClient();
-            
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("id", "drawobjects.ssc")
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-               
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "DrawObjects " + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "DrawObjects ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelDrawObjects, {sMsg}";
         }
 
         public void ClearObjects()
         {
-            string result = "";
-
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/direct";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
             string sCode = "MarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();";
 
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sCode);
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("code", sCode)
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "ClearObjects " + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "ClearObjects ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelClearObjects {sMsg}";
         }
 
         public string StellariumGetDesignation(string Designation, string Ignore, bool FirstOnly)
@@ -785,19 +627,13 @@ namespace EAACtrl
             JsonNode oSelectedObject = null;
             APCmdObject apObject = new APCmdObject();
 
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/objects/info?format=json";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/objects/info?format=json";
+            result = GetRequest(sWebServiceURL);
+            sMsg = $"StelGetSelectedObjectInfo {sMsg}";
 
-            WebClient lwebClient = new WebClient();
-            lwebClient.Encoding = Encoding.UTF8;
-            try
+            if (result != "")
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                result = lwebClient.DownloadString(sWebServiceURL);
-                if (result != "")
-                {
                     oSelectedObject = JsonNode.Parse(result);
 
                     apObject.RA2000 = StelRAtoAPRA((double)oSelectedObject["raJ2000"]);
@@ -864,8 +700,8 @@ namespace EAACtrl
 
                     if (!bMagFound)
                     {
-                        if (oSelectedObject["bMag"]!=null)
-                        { 
+                        if (oSelectedObject["bMag"] != null)
+                        {
                             if (!double.IsNaN((double)(oSelectedObject["bmag"])))
                             {
                                 double vmag = (double)(oSelectedObject["bmag"]);
@@ -886,7 +722,7 @@ namespace EAACtrl
 
                     double dblMajorAxis = double.NaN;
                     if (oSelectedObject["axis-major-dd"] != null)
-                    { 
+                    {
                         dblMajorAxis = (double)(oSelectedObject["axis-major-dd"]);
                     }
 
@@ -921,56 +757,22 @@ namespace EAACtrl
                     }
                 }
 
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "StGetSelectedObj (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception e)
-            {
-                sMsg = "StGetSelectedObj ERROR - " + e.Message  + "\r\n";
-                apObject = null;
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
             return apObject;
         }
 
         public void MarkTelescopePosition(string sRA, string sDec, int autoDeleteTimeoutMs)
         {
-            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
-            string sWebServiceURL = "http://" + IPAddress + ":" + Port + "/api/scripts/direct";
+            string sCode = "MarkerMgr.markerEquatorial(\"{sRA}\",\"{sDec}\",true,true,\"crossed-circle\",\"#ffff00\",20,true,{autoDeleteTimeoutMs},false);";
 
-            string sCode = "MarkerMgr.markerEquatorial(\"" + sRA + "\",\"" + sDec + "\",true,true,\"crossed-circle\",\"#ffff00\",20,true," + autoDeleteTimeoutMs.ToString() + ",false);";
-
-            NameValueCollection nvcParams = new NameValueCollection();
-            nvcParams.Add("code", sCode);
-
-            WebClient lwebClient = new WebClient();
-
-            try
+            var content = new FormUrlEncodedContent(new[]
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                new KeyValuePair<string, string>("code", sCode)
+            });
 
-                result = Encoding.UTF8.GetString(lwebClient.UploadValues(sWebServiceURL, nvcParams));
-
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "ClearObjects " + " (" + elapsedTime + ")\r\n";
-            }
-            catch (Exception)
-            {
-                sMsg = "MarkTelescopePosition ERROR \r\n";
-            }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelMarkTelePos, {sMsg}";
         }
 
     }

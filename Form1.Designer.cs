@@ -152,6 +152,7 @@
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btnTracking = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -542,6 +543,7 @@
             // 
             // tpTelescope
             // 
+            this.tpTelescope.Controls.Add(this.btnTracking);
             this.tpTelescope.Controls.Add(this.btnAPASCOMTest);
             this.tpTelescope.Controls.Add(this.btnAddAlignmentPoint);
             this.tpTelescope.Controls.Add(this.btnStabilise);
@@ -1694,6 +1696,16 @@
             this.workerTelescopeStatus.DoWork += new System.ComponentModel.DoWorkEventHandler(this.workerTelescopeStatus_DoWork);
             this.workerTelescopeStatus.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.workerTelescopeStatus_ProgressChanged);
             // 
+            // btnTracking
+            // 
+            this.btnTracking.Location = new System.Drawing.Point(7, 219);
+            this.btnTracking.Name = "btnTracking";
+            this.btnTracking.Size = new System.Drawing.Size(125, 27);
+            this.btnTracking.TabIndex = 50;
+            this.btnTracking.Text = "Tracking";
+            this.btnTracking.UseVisualStyleBackColor = true;
+            this.btnTracking.Click += new System.EventHandler(this.btnTracking_Click);
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -1880,6 +1892,7 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label lblAlt;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Button btnTracking;
     }
 }
 

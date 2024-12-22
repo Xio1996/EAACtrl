@@ -491,7 +491,7 @@ namespace EAACtrl
                 }
                 catch (Exception e)
                 {
-                    sMsg = "Telsecope: Slew Failed - " + e.Message;
+                    sMsg = "Telescope: Slew Failed - " + e.Message;
                 }
             }
             return result;

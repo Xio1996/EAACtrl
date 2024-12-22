@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Net.Http;
 
 namespace EAACtrl
 {
@@ -15,6 +12,7 @@ namespace EAACtrl
         public bool SAMPConnected = false;
         public string SAMP_PrivateKey = "";
         public string Samp_hub_url = @"http://127.0.0.1:21012"; //Web Profile
+        private static readonly HttpClient httpClient = new HttpClient();
 
         private string sMsg = "";
 
@@ -24,6 +22,32 @@ namespace EAACtrl
             {
                 return sMsg;
             }
+        }
+
+        public string SampMessage(string url, string message)
+        {
+            string result = "";
+
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                var content = new StringContent(message, Encoding.UTF8, "application/xml");
+                HttpResponseMessage response = httpClient.PostAsync(url, content).GetAwaiter().GetResult();
+                result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                TimeSpan ts = stopwatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                sMsg = $"SAMP Request to {url} {elapsedTime}";
+            }
+            catch (HttpRequestException e)
+            {
+                sMsg = $"SAMP Request {url} ERROR {e.Message}";
+                result = "exception";
+            }
+
+            return result; 
         }
 
         public string SampRegister()
@@ -67,15 +91,9 @@ namespace EAACtrl
                 sMsg = "SampRegister: Web Profile, " + "URL=" + Samp_hub_url + "\r\n";
             }
 
-            WebClient lwebClient = new WebClient();
-
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPRegister);
+                result = SampMessage(Samp_hub_url, sSAMPRegister);
 
                 if (result != "")
                 {
@@ -88,26 +106,20 @@ namespace EAACtrl
 
                     SAMP_PrivateKey = result;
 
-                    TimeSpan ts = stopwatch.Elapsed;
-                    string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                    sMsg = "SampRegister: key=" + result + " (" + elapsedTime + ")\r\n";
+                    sMsg = $"SampRegister: key={result}, {sMsg}\r\n";
 
                     SAMPConnected = true;
 
                 }
                 else
                 {
-                    sMsg = "SampRegister: Can't Connect!\r\n";
+                    sMsg = $"SampRegister: Can't Connect!, {sMsg}\r\n";
                 }
             }
             catch (Exception e)
             {
-                sMsg = "SampRegister ERROR " + e.Message + "\r\n";
+                sMsg = $"SampRegister ERROR {e.Message}\r\n";
                 result = "exception";
-            }
-            finally
-            {
-                lwebClient?.Dispose();
             }
 
             return result;
@@ -124,30 +136,20 @@ namespace EAACtrl
                 sSAMPDisconnect = sSAMPDisconnect.Replace("samp.hub.unregister", "samp.webhub.unregister");
             }
 
-            WebClient lwebClient = new WebClient();
-
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPDisconnect);
+                result = SampMessage(Samp_hub_url, sSAMPDisconnect);
 
                 SAMPConnected = false;
 
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SampDisconnect (" + elapsedTime + ")\r\n";
+                sMsg = $"SampDisconnect, {sMsg}\r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SetAction ERROR " + e.Message + "\r\n";
+                sMsg = $"SampDisconnect ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+
             return result;
         }
 
@@ -166,30 +168,17 @@ namespace EAACtrl
                 sSAMPMetaData = sSAMPMetaData.Replace("samp.hub.declareMetadata", "samp.webhub.declareMetadata");
             }
 
-            WebClient lwebClient = new WebClient();
-
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPMetaData);
-
-                TimeSpan ts = stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SampMetaData (" + elapsedTime + ")\r\n";
-
+                result = SampMessage(Samp_hub_url, sSAMPMetaData);
+                sMsg = $"SampMetaData, {sMsg}\r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SampMetaData " + e.Message + "\r\n";
+                sMsg = $"SampMetaData ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+
             return result;
         }
 
@@ -207,8 +196,6 @@ namespace EAACtrl
             sSAMPCoordPointAt += "<member><name>dec</name><value>" + Dec + "</value></member>";
             sSAMPCoordPointAt += "</struct></value></member></struct></value></param></params></methodCall>";
 
-            WebClient lwebClient = new WebClient();
-
             if (!StandardProfile)
             {
                 sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
@@ -216,24 +203,13 @@ namespace EAACtrl
 
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SampCoordPointAt " + RA + "," + Dec + " (" + elapsedTime + ")\r\n";
-
+                result = SampMessage(Samp_hub_url, sSAMPCoordPointAt);
+                sMsg = $"SampCoordPointAt {RA}, {Dec}, {sMsg} \r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SampCoordPointAt " + e.Message + "\r\n";
+                sMsg = $"SampCoordPointAt ERROR {e.Message}\r\n";
                 result = "exception";
-            }
-            finally
-            {
-                lwebClient.Dispose();
             }
             return result;
         }
@@ -245,41 +221,27 @@ namespace EAACtrl
             { return "NOTCONNECTED"; }
 
             string result = "";
-            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notifyAll</methodName><params>";
-            sSAMPCoordPointAt += "<param><value>" + SAMP_PrivateKey + "</value></param>";
-            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>script.aladin.send</value></member><member><name>samp.params</name><value><struct>";
-            sSAMPCoordPointAt += "<member><name>script</name><value>" + sScriptCmd + "</value></member>";
-            sSAMPCoordPointAt += "</struct></value></member></struct></value></param></params></methodCall>";
-
-            WebClient lwebClient = new WebClient();
+            string sSAMPScript = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notifyAll</methodName><params>";
+            sSAMPScript += "<param><value>" + SAMP_PrivateKey + "</value></param>";
+            sSAMPScript += "<param><value><struct><member><name>samp.mtype</name><value>script.aladin.send</value></member><member><name>samp.params</name><value><struct>";
+            sSAMPScript += "<member><name>script</name><value>" + sScriptCmd + "</value></member>";
+            sSAMPScript += "</struct></value></member></struct></value></param></params></methodCall>";
 
             if (!StandardProfile)
             {
-                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
+                sSAMPScript = sSAMPScript.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
             }
 
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg ="SampAladinCmd " + sScriptCmd + " (" + elapsedTime + ")\r\n";
-
+                result = SampMessage(Samp_hub_url, sSAMPScript);
+                sMsg = $"SampAladinCmd {sScriptCmd}, {sMsg}\r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SampCoordPointAt " + e.Message + "\r\n";
+                sMsg = $"SampScript ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
-
             return result;
         }
 
@@ -287,35 +249,24 @@ namespace EAACtrl
         {
             string result = "";
             //string sXML = "<?xml version='1.0'?><methodCall><methodName>samp.webhub.register</methodName><params><param><value><struct><member><name>samp.name</name><value><string>EAACtrl</string></value></member></struct></value></param></params></methodCall>";
-            string sSAMPDisconnect = "<?xml version='1.0'?><methodCall><methodName>samp.hub.getRegisteredClients</methodName><params><param><value>" + SAMP_PrivateKey + "</value></param></params></methodCall>";
+            string sSAMPGetRegClients = "<?xml version='1.0'?><methodCall><methodName>samp.hub.getRegisteredClients</methodName><params><param><value>" + SAMP_PrivateKey + "</value></param></params></methodCall>";
 
             if (!StandardProfile)
             {
-                sSAMPDisconnect = sSAMPDisconnect.Replace("samp.hub.unregister", "samp.webhub.unregister");
+                sSAMPGetRegClients = sSAMPGetRegClients.Replace("samp.hub.unregister", "samp.webhub.unregister");
             }
-
-            WebClient lwebClient = new WebClient();
 
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPDisconnect);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = "SampDisconnect (" + elapsedTime + ")\r\n";
+                result = SampMessage(Samp_hub_url, sSAMPGetRegClients);
+                sMsg = $"SampGetRegClients, {sMsg}\r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SetAction ERROR " + e.Message + "\r\n";
+                sMsg = $"SAMPGetRegClients ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+
             return result;
         }
 
@@ -326,38 +277,27 @@ namespace EAACtrl
             { return "NOTCONNECTED"; }
 
             string result = "";
-            string sSAMPCoordPointAt = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notify</methodName><params>";
-            sSAMPCoordPointAt += "<param><value>" + SAMP_PrivateKey + "</value></param><param><value>c1</value></param>";
-            sSAMPCoordPointAt += "<param><value><struct><member><name>samp.mtype</name><value>coord.get.sky</value></member>";
-            sSAMPCoordPointAt += "</struct></value></param></params></methodCall>";
-
-            WebClient lwebClient = new WebClient();
+            string sSAMPGetCoordPoint = "<?xml version='1.0'?><methodCall><methodName>samp.hub.notify</methodName><params>";
+            sSAMPGetCoordPoint += "<param><value>" + SAMP_PrivateKey + "</value></param><param><value>c1</value></param>";
+            sSAMPGetCoordPoint += "<param><value><struct><member><name>samp.mtype</name><value>coord.get.sky</value></member>";
+            sSAMPGetCoordPoint += "</struct></value></param></params></methodCall>";
 
             if (!StandardProfile)
             {
-                sSAMPCoordPointAt = sSAMPCoordPointAt.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
+                sSAMPGetCoordPoint = sSAMPGetCoordPoint.Replace("samp.hub.notifyAll", "samp.webhub.notifyAll");
             }
 
             try
             {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                lwebClient.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                result = lwebClient.UploadString(Samp_hub_url, "POST", sSAMPCoordPointAt);
-
-                TimeSpan ts = stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}",ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                //sMsg = "SampAladinCmd " + sScriptCmd + " (" + elapsedTime + ")\r\n";
+                result = SampMessage(Samp_hub_url, sSAMPGetCoordPoint);
+                sMsg = $"SampGetCoordPoint, {sMsg}\r\n";
             }
             catch (Exception e)
             {
-                sMsg = "SampCoordPointAt " + e.Message + "\r\n";
+                sMsg = $"SampGetCoordPoint ERROR {e.Message}\r\n";
                 result = "exception";
             }
-            finally
-            {
-                lwebClient.Dispose();
-            }
+
             return result;
         }
 
