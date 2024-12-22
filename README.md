@@ -15,7 +15,7 @@ The EAACtrl C# app communicates with the apps using the following methods.
 
 <p><b>Skychart</b> - Uses Skychart's in-built TCP server. As Skychart does not play nicely with PowerToys the config tab also has a way of specifying an IP address and port of Skychart's location. In my case on another PC.</p>
 <p><b>SAMP Client</b> - A non-callable SAMP client interface is also implemented that allows EAACtrl to broadcast SAMP messages to clients connected to the same hub. This is useful for synchronising Aladin's view. A SAMP tab specifies the profile to use and provides other configuration and SAMP setup.</p>
-
+<p><b>KStars</b> - Uses KStars DBus interface and the dbus-send.exe.</p>
 
 The Scripts folder contains the AstroPlanner and SharpCap scripts. The SharpCap script is executed at startup and waits until EAACtrl issues a command by creating a file in the SharpCap Captures folder. TheSky Professional script is held in a string in the EAACtrl app itself.
 
