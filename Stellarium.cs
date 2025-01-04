@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace EAACtrl
 {
@@ -621,6 +622,28 @@ namespace EAACtrl
             return "";
         }
 
+        public string StellariumGetSelectedObjectName()
+        {
+            string result = "";
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/objects/info?format=text";
+            result = GetRequest(sWebServiceURL);
+            sMsg = $"StelGetSelectedObjectName {sMsg}";
+            if (result != "")
+            {
+
+                string pattern = @"<h2>(.*?)<\/h2>";
+
+                MatchCollection matches = Regex.Matches(result, pattern);
+
+                if (matches.Count > 0)
+                {
+                    result = matches[0].Groups[1].Value.Trim();
+                    return result;
+                }
+            }
+            return "";
+        }
+
         public APCmdObject StellariumGetSelectedObjectInfo()
         {
             string result = "";
@@ -663,7 +686,16 @@ namespace EAACtrl
                     }
                     else
                     {
-                        apObject.ID = "Stellarium";
+                        // No name data is returned so try and scrape it from the info text displayed on screen
+                        string sName = StellariumGetSelectedObjectName();
+                        if (sName != "")
+                        {
+                            apObject.ID = sName;
+                        }
+                        else
+                        {
+                            apObject.ID = "Stellarium";
+                        }
                     }
 
                     // Add other names to AP Name field
