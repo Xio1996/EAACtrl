@@ -1278,34 +1278,68 @@ namespace EAACtrl
             switch (cbPLGetObject.SelectedIndex)
             {
                 case 0:
-                    // Add Selected Object in Stellarium to current AP Plan
-                    apObject = Stellarium.StellariumGetSelectedObjectInfo();
-                    if (apObject != null)
+                    switch (tabPlanetarium.SelectedIndex)
                     {
-                        APPutCmd aPPutCmd = new APPutCmd();
-                        aPPutCmd.script = "EAAControl2";
-                        aPPutCmd.parameters = new APPutCmdParams();
-                        aPPutCmd.parameters.Cmd = 2;
-                        aPPutCmd.parameters.Option = 1;
-                        aPPutCmd.parameters.Objects = new List<APCmdObject> { apObject };
-                        string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APPutCmd>(aPPutCmd)));
+                        case 0:
+                            // Add Selected Object in Stellarium to current AP Plan
+                            apObject = Stellarium.StellariumGetSelectedObjectInfo();
+                            if (apObject != null)
+                            {
+                                APPutCmd aPPutCmd = new APPutCmd();
+                                aPPutCmd.script = "EAAControl2";
+                                aPPutCmd.parameters = new APPutCmdParams();
+                                aPPutCmd.parameters.Cmd = 2;
+                                aPPutCmd.parameters.Option = 1;
+                                aPPutCmd.parameters.Objects = new List<APCmdObject> { apObject };
+                                string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APPutCmd>(aPPutCmd)));
+                            }
+                            else
+                            {
+                                WriteMessage(Stellarium.Message);
+                            }
+                            break;
+                        case 2:
+                            apObject = StarryNight.GetSNSelectedObject();
+                            if (apObject != null)
+                            {
+                                APPutCmd aPPutCmd = new APPutCmd();
+                                aPPutCmd.script = "EAAControl2";
+                                aPPutCmd.parameters = new APPutCmdParams();
+                                aPPutCmd.parameters.Cmd = 2;
+                                aPPutCmd.parameters.Option = 1;
+                                aPPutCmd.parameters.Objects = new List<APCmdObject> { apObject };
+                                string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APPutCmd>(aPPutCmd)));
+
+                            }
+                            else
+                            {
+                                WriteMessage(StarryNight.Message);
+                            }
+                            break;
                     }
-                    else 
-                    {
-                        WriteMessage(Stellarium.Message);
-                    }
-                    break;
+                break;
                 case 1:
-                    apObject = Stellarium.StellariumGetSelectedObjectInfo();
-                    if (apObject != null)
+                    switch(tabPlanetarium.SelectedIndex)
                     {
-                        Clipboard.SetText(apObject.ID);
-                        Speak("Object ID copied");
+                        case 0:
+                            apObject = Stellarium.StellariumGetSelectedObjectInfo();
+                            if (apObject != null)
+                            {
+                                Clipboard.SetText(apObject.ID);
+                                Speak("Object ID copied");
+                            }
+                            break;
+                        case 2:
+                            apObject = StarryNight.GetSNSelectedObject();
+                            if (apObject != null)
+                            {
+                                Clipboard.SetText(apObject.ID);
+                                Speak("Object ID copied");
+                            }
+                            break;
                     }
                     break;
             }
-
-
          }
 
         private void tabPlanetarium_SelectedIndexChanged(object sender, EventArgs e)
