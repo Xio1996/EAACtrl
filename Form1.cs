@@ -1299,7 +1299,27 @@ namespace EAACtrl
                             }
                             break;
                         case 2:
+                            // Selected Object in Starry Night to current AP Plan
                             apObject = StarryNight.GetSNSelectedObject();
+                            if (apObject != null)
+                            {
+                                APPutCmd aPPutCmd = new APPutCmd();
+                                aPPutCmd.script = "EAAControl2";
+                                aPPutCmd.parameters = new APPutCmdParams();
+                                aPPutCmd.parameters.Cmd = 2;
+                                aPPutCmd.parameters.Option = 1;
+                                aPPutCmd.parameters.Objects = new List<APCmdObject> { apObject };
+                                string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APPutCmd>(aPPutCmd)));
+
+                            }
+                            else
+                            {
+                                WriteMessage(StarryNight.Message);
+                            }
+                            break;
+                        case 3:
+                            // Selected Object in TheSky to current AP Plan
+                            apObject = TheSky.GetTSSelectedObject();
                             if (apObject != null)
                             {
                                 APPutCmd aPPutCmd = new APPutCmd();

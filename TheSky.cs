@@ -142,5 +142,27 @@ namespace EAACtrl
 
             return null;
         }
+
+        public APCmdObject GetTSSelectedObject()
+        {
+            APCmdObject apObject = new APCmdObject();
+            Dictionary<string, string> ObjectParams = new Dictionary<string, string>();
+
+            ObjectParams = GetTSObject();
+            if (ObjectParams != null)
+            {
+                // Need to do some processing here to get the object into the correct format
+                apObject.ID = ObjectParams["Object Name"];
+                apObject.Name = ObjectParams["Object Name"];
+                apObject.Type = ObjectParams["Object Type"];
+                apObject.Catalogue = ObjectParams["Source Catalog"];
+                apObject.Magnitude = double.Parse(ObjectParams["Magnitude"]);
+                apObject.PosAngle = int.Parse(ObjectParams["PAd"]);
+                apObject.RA2000 = double.Parse(ObjectParams["RAJ2000d"]);
+                apObject.Dec2000 = double.Parse(ObjectParams["DecJ2000d"]);
+            }   
+
+            return apObject;
+        }
     }
 }
