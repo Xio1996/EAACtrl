@@ -1,10 +1,12 @@
-﻿using System;
+﻿using CefSharp.DevTools.DOMSnapshot;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace EAACtrl
 {
@@ -128,19 +130,106 @@ namespace EAACtrl
                         {
                             sPair[1] = sPair[1].Trim() + sPair[2];
                         }
-                        ObjectParams.Add(sPair[0], sPair[1]);
+                        if (!ObjectParams.ContainsKey(sPair[0]))
+                        {
+                            ObjectParams.Add(sPair[0], sPair[1]);
+                        }
                     }
                 }
 
                 return ObjectParams;
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                sMsg = "TS Target fail!\r\n";
+                sMsg = "TS Target fail " + e.Message + "\r\n";
             }
 
             return null;
+        }
+
+        private string GetAliases(ref Dictionary<string, string> ObjectParams)
+        {
+            string sAliases = "", sAlias = "";
+            int cnt = 0;
+            string[] sNameParams = { "Alias ", "Name " };
+
+            foreach (string sParam in sNameParams)
+            {
+                for (int j = 1; j < 10; j++)
+                {
+                    if (ObjectParams.TryGetValue(sParam + j.ToString(), out sAlias))
+                    {
+                        if (sAlias.Trim() != "")
+                        {
+                            if (cnt > 0)
+                            {
+                                sAliases += ", ";
+                            }
+                            sAliases += sAlias;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+
+            if (sAliases == "")
+            {
+                sAliases = ObjectParams["Object Name"];
+            }
+
+            return sAliases;
+        }
+
+        private string MakeIDsAPLike(string ID, ref Dictionary<string, string> ObjectParams)
+        {
+            if (ID.Contains("NGC "))
+            {
+                return ID.Replace("NGC ", "NGC");
+            }
+
+            if (ID.Contains("IC "))
+            {
+                return ID.Replace("IC ", "IC");
+            }
+
+            if (ID.Contains("M "))
+            {
+                return ID.Replace("M ", "M");
+            }
+
+            if (ID.Contains("HD "))
+            {
+                return ID.Replace("HD ", "HD");
+            }
+
+            if (ID.Contains("SAO "))
+            {
+                return ID.Replace("SAO ", "SAO");
+            }
+
+            if (ID.Contains("HIP "))
+            {
+                return ID.Replace("HIP ", "HIP");
+            }
+
+            if (ID.Contains("TYC "))
+            {
+                return ID.Replace("TYC ", "TYC");
+            }
+
+            if (ID.Contains("PGC "))
+            {
+                return ID.Replace("PGC ", "PGC");
+            }
+            if (ID.Contains("Gaia DR3"))
+            {
+                if (ObjectParams.TryGetValue("Catalog Identifier", out string GaiaID))
+                {
+                    return "Gaia DR3 " + GaiaID;
+                }
+            }
+            return ID;
         }
 
         public APCmdObject GetTSSelectedObject()
@@ -152,15 +241,54 @@ namespace EAACtrl
             if (ObjectParams != null)
             {
                 // Need to do some processing here to get the object into the correct format
-                apObject.ID = ObjectParams["Object Name"];
-                apObject.Name = ObjectParams["Object Name"];
-                apObject.Type = ObjectParams["Object Type"];
-                apObject.Catalogue = ObjectParams["Source Catalog"];
-                apObject.Magnitude = double.Parse(ObjectParams["Magnitude"]);
-                apObject.PosAngle = int.Parse(ObjectParams["PAd"]);
-                apObject.RA2000 = double.Parse(ObjectParams["RAJ2000d"]);
-                apObject.Dec2000 = double.Parse(ObjectParams["DecJ2000d"]);
-            }   
+                apObject.ID = MakeIDsAPLike(ObjectParams["Object Name"], ref ObjectParams);
+                apObject.Name = GetAliases(ref ObjectParams);
+
+                if (ObjectParams.TryGetValue("Object Type", out string Type))
+                {
+                    apObject.Type = Type;
+                }             
+                if (ObjectParams.TryGetValue("Source Catalog", out string Catalogue))
+                {
+                    apObject.Catalogue = Catalogue;
+                }
+                if (ObjectParams.TryGetValue("Magnitude", out string Magnitude))
+                {
+                    bool isNumber = double.TryParse(Magnitude, out double Mag);
+                    if (isNumber == true)
+                    {
+                        apObject.Magnitude = Mag;
+                    }
+                    else
+                    {
+                        apObject.Magnitude = 999;
+                    }
+                }
+                else
+                {
+                    apObject.Magnitude = 999;
+                }
+                if (ObjectParams.TryGetValue("PAd", out string PosAngle))
+                {
+                    bool isNumber = double.TryParse(PosAngle, out double PA);
+                    if (isNumber == true)
+                    {
+                        apObject.PosAngle = PA;
+                    }
+                }
+                if (ObjectParams.TryGetValue("RAJ2000d", out string RAJ2000d))
+                {
+                    apObject.RA2000 = double.Parse(RAJ2000d);
+                }
+                if (ObjectParams.TryGetValue("DecJ2000d", out string DecJ2000d))
+                {
+                    apObject.Dec2000 = double.Parse(DecJ2000d);
+                }
+            }
+            else 
+            { 
+                apObject = null; 
+            }
 
             return apObject;
         }

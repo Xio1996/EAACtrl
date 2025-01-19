@@ -2026,7 +2026,7 @@ namespace EAACtrl
         public string Catalogue { get; set; }
         public string Distance { get; set; }
         public string GalaxyType { get; set; }
-        public int PosAngle { get; set; }
+        public double PosAngle { get; set; }
         public double Magnitude { get; set; }
         public double RA2000 { get; set; }
         public double Dec2000 { get; set; }
