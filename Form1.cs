@@ -14,11 +14,16 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.ServiceProcess;
 
 namespace EAACtrl
 {
     public partial class frmEAACP : Form
     {
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         private static System.Timers.Timer aTimer;
 
         System.Windows.Forms.Timer myTimer = new System.Windows.Forms.Timer();
@@ -330,6 +335,58 @@ namespace EAACtrl
             synthesizer.Speak(Speech);
         }
 
+        private void SwitchAppToFront(string processName)
+        {
+
+            Process[] proc = Process.GetProcesses();
+            foreach (var process in proc)
+            {
+                Console.WriteLine($"Process: {process.ProcessName}, ID: {process.Id}");
+            }
+
+            Process[] processes = Process.GetProcessesByName(processName);
+            if (processes.Length > 0)
+            {
+                IntPtr hWnd = processes[0].MainWindowHandle;
+                if (hWnd != IntPtr.Zero)
+                {
+                    SetForegroundWindow(hWnd);
+                    Console.WriteLine($"{processName} brought to the front.");
+                }
+                else
+                {
+                    Console.WriteLine($"{processName} does not have a main window handle.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"{processName} is not running.");
+            }
+
+        }
+
+        private void PlanetariumSwitch()
+        {
+            switch (tabPlanetarium.SelectedIndex)
+            {
+                case 0:
+                    SwitchAppToFront("Stellarium");
+                    break;
+                case 1:
+                    SwitchAppToFront("starrynight");
+                    break;
+                case 2:
+                    SwitchAppToFront("TheSky64");
+                    break;
+                case 3:
+                    SwitchAppToFront("skychart");
+                    break;
+                case 4:
+                    SwitchAppToFront("kstars");
+                    break;
+            }
+        }
+
         private void frmEAACP_Shown(object sender, EventArgs e)
         {
             if (bExpanded)
@@ -607,7 +664,7 @@ namespace EAACtrl
                         }
                     }
                     break;
-                case 3: // TheSky
+                case 2: // TheSky
                     // Minor planets need the MPL prefix to be found as a target in TS
                     if (SelectedObject.Type == "Minor")
                     {
@@ -623,14 +680,14 @@ namespace EAACtrl
                     }
                     break;
 
-                case 2: // Starry Night
+                case 1: // Starry Night
                     if (!cbImagerZoom.Checked) {
                         dblFOV = 0.0; // Do not zoom. Keep current FOV
                     }
                     StarryNight.SetSNTargetPosition(SelectedObject.ID, SelectedObject.RA2000.ToString(), SelectedObject.Dec2000.ToString(), dblFOV);
                     WriteMessage(StarryNight.Message);
                     break;
-                case 1: // CdC (SkyChart)
+                case 3: // CdC (SkyChart)
                     if (cbImagerZoom.Checked) {  
                         dblFOV = 1.0; // Set zoom for imager
                     }
@@ -1298,7 +1355,7 @@ namespace EAACtrl
                                 WriteMessage(Stellarium.Message);
                             }
                             break;
-                        case 2:
+                        case 1:
                             // Selected Object in Starry Night to current AP Plan
                             apObject = StarryNight.GetSNSelectedObject();
                             if (apObject != null)
@@ -1317,7 +1374,7 @@ namespace EAACtrl
                                 WriteMessage(StarryNight.Message);
                             }
                             break;
-                        case 3:
+                        case 2:
                             // Selected Object in TheSky to current AP Plan
                             apObject = TheSky.GetTSSelectedObject();
                             if (apObject != null)
@@ -1365,6 +1422,7 @@ namespace EAACtrl
         private void tabPlanetarium_SelectedIndexChanged(object sender, EventArgs e)
         {
             CurrentPlanetarium = tabPlanetarium.SelectedIndex;
+            PlanetariumSwitch();
         }
 
         private string CreateSearchParams(double SearchRA, double SearchDec)
@@ -1974,6 +2032,16 @@ namespace EAACtrl
                 EAATelescope.Tracking = true;
                 WriteMessage("Tracking ON\r\n");
             }
+        }
+
+        private void btnAPtoFront_Click(object sender, EventArgs e)
+        {
+            SwitchAppToFront("AstroPlanner");
+        }
+
+        private void btnSwitchPlanatariumToFront_Click(object sender, EventArgs e)
+        {
+            PlanetariumSwitch();
         }
     }
 

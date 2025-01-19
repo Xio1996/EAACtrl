@@ -57,6 +57,7 @@
             this.btnAsteroidsFOV = new System.Windows.Forms.Button();
             this.btnObsClkStop = new System.Windows.Forms.Button();
             this.tpTelescope = new System.Windows.Forms.TabPage();
+            this.btnTracking = new System.Windows.Forms.Button();
             this.btnAPASCOMTest = new System.Windows.Forms.Button();
             this.btnAddAlignmentPoint = new System.Windows.Forms.Button();
             this.btnStabilise = new System.Windows.Forms.Button();
@@ -152,7 +153,8 @@
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnTracking = new System.Windows.Forms.Button();
+            this.btnAPtoFront = new System.Windows.Forms.Button();
+            this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -559,6 +561,16 @@
             this.tpTelescope.TabIndex = 4;
             this.tpTelescope.Text = "Telescope";
             this.tpTelescope.UseVisualStyleBackColor = true;
+            // 
+            // btnTracking
+            // 
+            this.btnTracking.Location = new System.Drawing.Point(7, 219);
+            this.btnTracking.Name = "btnTracking";
+            this.btnTracking.Size = new System.Drawing.Size(125, 27);
+            this.btnTracking.TabIndex = 50;
+            this.btnTracking.Text = "Tracking";
+            this.btnTracking.UseVisualStyleBackColor = true;
+            this.btnTracking.Click += new System.EventHandler(this.btnTracking_Click);
             // 
             // btnAPASCOMTest
             // 
@@ -1168,9 +1180,9 @@
             // tabPlanetarium
             // 
             this.tabPlanetarium.Controls.Add(this.tabpStellarium);
-            this.tabPlanetarium.Controls.Add(this.tabSkyChart);
             this.tabPlanetarium.Controls.Add(this.tabpSN);
             this.tabPlanetarium.Controls.Add(this.tabpTheSky);
+            this.tabPlanetarium.Controls.Add(this.tabSkyChart);
             this.tabPlanetarium.Controls.Add(this.tabpKStars);
             this.tabPlanetarium.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.tabPlanetarium.Location = new System.Drawing.Point(3, 135);
@@ -1696,15 +1708,35 @@
             this.workerTelescopeStatus.DoWork += new System.ComponentModel.DoWorkEventHandler(this.workerTelescopeStatus_DoWork);
             this.workerTelescopeStatus.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.workerTelescopeStatus_ProgressChanged);
             // 
-            // btnTracking
+            // btnAPtoFront
             // 
-            this.btnTracking.Location = new System.Drawing.Point(7, 219);
-            this.btnTracking.Name = "btnTracking";
-            this.btnTracking.Size = new System.Drawing.Size(125, 27);
-            this.btnTracking.TabIndex = 50;
-            this.btnTracking.Text = "Tracking";
-            this.btnTracking.UseVisualStyleBackColor = true;
-            this.btnTracking.Click += new System.EventHandler(this.btnTracking_Click);
+            this.btnAPtoFront.BackColor = System.Drawing.Color.MediumSeaGreen;
+            this.btnAPtoFront.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnAPtoFront.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnAPtoFront.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnAPtoFront.Location = new System.Drawing.Point(101, 341);
+            this.btnAPtoFront.Name = "btnAPtoFront";
+            this.btnAPtoFront.Size = new System.Drawing.Size(44, 32);
+            this.btnAPtoFront.TabIndex = 41;
+            this.btnAPtoFront.Text = "AP";
+            this.toolTip1.SetToolTip(this.btnAPtoFront, "Search Options");
+            this.btnAPtoFront.UseVisualStyleBackColor = false;
+            this.btnAPtoFront.Click += new System.EventHandler(this.btnAPtoFront_Click);
+            // 
+            // btnSwitchPlanatariumToFront
+            // 
+            this.btnSwitchPlanatariumToFront.BackColor = System.Drawing.Color.Silver;
+            this.btnSwitchPlanatariumToFront.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSwitchPlanatariumToFront.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSwitchPlanatariumToFront.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSwitchPlanatariumToFront.Location = new System.Drawing.Point(143, 341);
+            this.btnSwitchPlanatariumToFront.Name = "btnSwitchPlanatariumToFront";
+            this.btnSwitchPlanatariumToFront.Size = new System.Drawing.Size(44, 32);
+            this.btnSwitchPlanatariumToFront.TabIndex = 42;
+            this.btnSwitchPlanatariumToFront.Text = "Pl";
+            this.toolTip1.SetToolTip(this.btnSwitchPlanatariumToFront, "Search Options");
+            this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
+            this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
             // 
             // frmEAACP
             // 
@@ -1712,6 +1744,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(616, 377);
+            this.Controls.Add(this.btnSwitchPlanatariumToFront);
+            this.Controls.Add(this.btnAPtoFront);
             this.Controls.Add(this.lblObserveTime);
             this.Controls.Add(this.tabPlanetarium);
             this.Controls.Add(this.tcExtra);
@@ -1893,6 +1927,8 @@
         private System.Windows.Forms.Label lblAlt;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Button btnTracking;
+        private System.Windows.Forms.Button btnAPtoFront;
+        private System.Windows.Forms.Button btnSwitchPlanatariumToFront;
     }
 }
 
