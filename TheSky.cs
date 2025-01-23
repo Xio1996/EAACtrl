@@ -166,7 +166,7 @@ namespace EAACtrl
                             {
                                 sAliases += ", ";
                             }
-                            sAliases += sAlias;
+                            sAliases += sAlias.Trim();
                             cnt++;
                         }
                     }
@@ -175,7 +175,7 @@ namespace EAACtrl
 
             if (sAliases == "")
             {
-                sAliases = ObjectParams["Object Name"];
+                sAliases = ObjectParams["Object Name"].Trim();
             }
 
             return sAliases;
@@ -183,6 +183,7 @@ namespace EAACtrl
 
         private string MakeIDsAPLike(string ID, ref Dictionary<string, string> ObjectParams)
         {
+            ID = ID.Trim();
             if (ID.Contains("NGC "))
             {
                 return ID.Replace("NGC ", "NGC");
@@ -243,15 +244,32 @@ namespace EAACtrl
                 // Need to do some processing here to get the object into the correct format
                 apObject.ID = MakeIDsAPLike(ObjectParams["Object Name"], ref ObjectParams);
                 apObject.Name = GetAliases(ref ObjectParams);
+                
+                if (ObjectParams.TryGetValue("Source Catalog", out string Catalogue))
+                {
+                    apObject.Catalogue = Catalogue.Trim();
+                }
+                else
+                {
+                    apObject.Catalogue = "TheSky";
+                }
 
                 if (ObjectParams.TryGetValue("Object Type", out string Type))
                 {
+                    Type = Type.Trim();
+                    if (Type=="Comet") 
+                    {
+                        Type = "ext_Comet";
+                        apObject.Catalogue = "TheSky";
+                    }
+                    if (Type == "Asteroid (Small Database)")
+                    {
+                        Type = "TheSky_Asteroid";
+                        apObject.Catalogue = "TheSky_Minor";
+                    }
                     apObject.Type = Type;
                 }             
-                if (ObjectParams.TryGetValue("Source Catalog", out string Catalogue))
-                {
-                    apObject.Catalogue = Catalogue;
-                }
+
                 if (ObjectParams.TryGetValue("Magnitude", out string Magnitude))
                 {
                     bool isNumber = double.TryParse(Magnitude, out double Mag);

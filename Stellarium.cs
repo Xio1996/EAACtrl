@@ -33,7 +33,7 @@ namespace EAACtrl
             {"galaxy","Galaxy"}, {"active galaxy","ActGal"}, {"globular star cluster","Globular"}, {"open star cluster","Open"},
             {"star cluster","Open"}, {"cluster","Open"}, {"HII region","Neb"}, {"planetary nebula","P Neb"},
             {"reflection nebula","R Neb"}, {"dark nebula","DkNeb"}, {"nebula","Neb"},
-            {"double star","Dbl"},{"star","Star"},{"supernova remnant","SNR"},{"asteroid","Minor"},
+            {"double star","Dbl"},{"star","Star"},{"supernova remnant","SNR"},{"asteroid","ext_Minor"},
             {"comet","ext_Comet"},{"planet","Planet"},{"moon","Planetary Moon"},{"artificial satellite","Artificial Satellite"}
         };
 

@@ -899,7 +899,7 @@ function AsteroidHorizonsCommand(sName as string, sCatalogue as string) as strin
 	dim iFirstCharacter as integer = Asc(Left(sName,1))
 	
 	select case sCatalogue
-	case "MPCORB","JPLUnnumbered","MPCDistant","MPCNEA","MPCPHA","MPCUnusual"
+	case "MPCORB","JPLUnnumbered","MPCDistant","MPCNEA","MPCPHA","MPCUnusual","User"
 		if iFirstCharacter = 40 then
 			// MPC Numbered Asteroid Name
 			Debug "AsteroidHorizonsCommand(), MPC Starting with a (. E.g. (1) Ceres"
@@ -984,7 +984,7 @@ function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as 
 	debug "QueryJPLHorizons(), Type=", Type
 	
 	// Create the command depending on type Minor or Comet
-	if Type="Minor" then
+	if Type="Minor" or Type="ext_Minor" or Type="TheSky_Asteroid" then
 		//Take the asteroids IAU number. %3b = ; (encoded). Format for JPL & MPC numbered asteroids.
 		sHorizonsObjectID = "&COMMAND='" + AsteroidHorizonsCommand(ID,Catalogue) + "'"
 	else
@@ -1027,7 +1027,7 @@ function QueryJPLHorizons(ID as string, Type as string, Catalogue as string) as 
 end function
 
 function ProcessOtherObjects(Obj as APPlanObject) as string
-	return SharpCapDSAFormat(Obj.ID, Obj.Name, Obj.Type, FormatRA(obj.RA,True,"hmsa") + " " + FormatDec(obj.Dec,True,"dmsa"),"",str(obj.Magnitude))
+	return SharpCapDSAFormat(Obj.ID, Obj.Name, Obj.Type + " (AP)", FormatRA(obj.RA,True,"hmsa") + " " + FormatDec(obj.Dec,True,"dmsa"),"",str(obj.Magnitude))
 end function
 
 function SharpCapDSAFormat(obj as APPlanObject) as string
@@ -1067,13 +1067,17 @@ sub SharpCapDSA()
 	for each obj in Plan.SelectedObjects()
 		Debug "Object ID",obj.ID
 		select case obj.Type
-		case "Minor","Comet"
+		case "Minor","ext_Minor","TheSky_Asteroid","Comet","ext_Comet"
 			//Check we are connected to the internet as we need the JPL Horizons web service
 			if NetworkConnected()=False then
 				Speak("No network connection!")
 				return
 			end if
-			sOut = QueryJPLHorizons(obj.ID, obj.Type, obj.GetValueAsString("Catalogue"))
+			
+			dim Catalogue as string = obj.GetValueAsString("Catalogue")
+			if obj.Type = "TheSky_Asteroid" then Catalogue = "JPLNumbered"
+			
+			sOut = QueryJPLHorizons(obj.ID, obj.Type, Catalogue)
 			debug "JPL DSA=",sOut
 			if bFirst then
 				sDSA = sOut
@@ -1530,6 +1534,7 @@ end function
 sub LogObservations(Option as integer, ObjectInfo as string, ImgSettingsPath as string, ImgPath as string, ImagInfo as string)
 	dim Objects() as APPlanObject
 	dim obj as APPlanObject
+	dim ObservationDateTime as double = Plan.LocalDateTime
 	
 	Debug "LogObservations"
 	// Find the object in the plan
@@ -1554,13 +1559,13 @@ sub LogObservations(Option as integer, ObjectInfo as string, ImgSettingsPath as 
 			dim i as integer
 			for i=0 to UBound(Objects)
 				Debug "LogObservations: Object=", Objects(i).ID
-				LogObs(Objects(i), Option, true, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo)
+				LogObs(Objects(i), Option, true, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo, ObservationDateTime)
 			next i
 			Speak("Observations for " + Str(UBound(Objects)+1) + " objects logged.")
 		else
 			Debug "LogObservations: Selected object only"
 			// Add or append an observation to the object (no associated objects)
-			LogObs(obj, Option, false, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo)
+			LogObs(obj, Option, false, ObjectInfo, ImgSettingsPath, ImgPath, ImagInfo, ObservationDateTime)
 		end if
 	else
 		Speak("Object not found in plan")
@@ -1568,7 +1573,7 @@ sub LogObservations(Option as integer, ObjectInfo as string, ImgSettingsPath as 
 	
 end sub
 
-sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInfo as string, ImgSettingsPath as string, ImgPath as string, ImagInfo as string)
+sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInfo as string, ImgSettingsPath as string, ImgPath as string, ImagInfo as string, ObservationDateTime as double)
 	dim oAttachment as APObservationAttachment
 	dim OrgOption as integer = Option
 	
@@ -1599,7 +1604,7 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 		if Option = 1 then
 			
 			// Create a new observation
-			oObs = obj.NewObservation(Plan.LocalDateTime, 0)
+			oObs = obj.NewObservation(ObservationDateTime, 0)
 			
 			// Specify default telescope
 			if TelescopeResource.Default <> nil then
@@ -1724,7 +1729,7 @@ sub main()
 	dim iCmd, iOption as integer = 0
 	dim result as new JSON()
 	
-	DebugOff()
+	//DebugOff()
 	
 	// Get the incoming parameters
 	dim oCmd as JSON = WebServer.LaunchParameters
