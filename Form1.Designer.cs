@@ -97,6 +97,10 @@
             this.btnSAMPDisconnect = new System.Windows.Forms.Button();
             this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.txtStellariumPassword = new System.Windows.Forms.TextBox();
+            this.txtAPPassword = new System.Windows.Forms.TextBox();
             this.cbNoSharpCap = new System.Windows.Forms.CheckBox();
             this.cbTSAutoFOVI = new System.Windows.Forms.CheckBox();
             this.cbAPAutoSort = new System.Windows.Forms.CheckBox();
@@ -132,13 +136,6 @@
             this.btnE = new System.Windows.Forms.Button();
             this.btnW = new System.Windows.Forms.Button();
             this.btnN = new System.Windows.Forms.Button();
-            this.tabSkyChart = new System.Windows.Forms.TabPage();
-            this.btnSkyChartCV = new System.Windows.Forms.Button();
-            this.btnSkyChartNV = new System.Windows.Forms.Button();
-            this.btnSkyChartS = new System.Windows.Forms.Button();
-            this.btnSkyChartE = new System.Windows.Forms.Button();
-            this.btnSkyChartW = new System.Windows.Forms.Button();
-            this.btnSkychartN = new System.Windows.Forms.Button();
             this.tabpSN = new System.Windows.Forms.TabPage();
             this.btnSNCV = new System.Windows.Forms.Button();
             this.btnSNNV = new System.Windows.Forms.Button();
@@ -148,6 +145,13 @@
             this.btnSNN = new System.Windows.Forms.Button();
             this.tabpTheSky = new System.Windows.Forms.TabPage();
             this.btnAzAltFOVI = new System.Windows.Forms.Button();
+            this.tabSkyChart = new System.Windows.Forms.TabPage();
+            this.btnSkyChartCV = new System.Windows.Forms.Button();
+            this.btnSkyChartNV = new System.Windows.Forms.Button();
+            this.btnSkyChartS = new System.Windows.Forms.Button();
+            this.btnSkyChartE = new System.Windows.Forms.Button();
+            this.btnSkyChartW = new System.Windows.Forms.Button();
+            this.btnSkychartN = new System.Windows.Forms.Button();
             this.tabpKStars = new System.Windows.Forms.TabPage();
             this.lblObserveTime = new System.Windows.Forms.Label();
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
@@ -168,9 +172,9 @@
             this.tpDev.SuspendLayout();
             this.tabPlanetarium.SuspendLayout();
             this.tabpStellarium.SuspendLayout();
-            this.tabSkyChart.SuspendLayout();
             this.tabpSN.SuspendLayout();
             this.tabpTheSky.SuspendLayout();
+            this.tabSkyChart.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnTarget
@@ -983,6 +987,10 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.label12);
+            this.tpConfig.Controls.Add(this.label10);
+            this.tpConfig.Controls.Add(this.txtStellariumPassword);
+            this.tpConfig.Controls.Add(this.txtAPPassword);
             this.tpConfig.Controls.Add(this.cbNoSharpCap);
             this.tpConfig.Controls.Add(this.cbTSAutoFOVI);
             this.tpConfig.Controls.Add(this.cbAPAutoSort);
@@ -998,12 +1006,44 @@
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(192, 208);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(130, 17);
+            this.label12.TabIndex = 41;
+            this.label12.Text = "Stellarium Password";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(11, 208);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(87, 17);
+            this.label10.TabIndex = 40;
+            this.label10.Text = "AP Password";
+            // 
+            // txtStellariumPassword
+            // 
+            this.txtStellariumPassword.Location = new System.Drawing.Point(195, 228);
+            this.txtStellariumPassword.Name = "txtStellariumPassword";
+            this.txtStellariumPassword.Size = new System.Drawing.Size(159, 25);
+            this.txtStellariumPassword.TabIndex = 39;
+            // 
+            // txtAPPassword
+            // 
+            this.txtAPPassword.Location = new System.Drawing.Point(11, 228);
+            this.txtAPPassword.Name = "txtAPPassword";
+            this.txtAPPassword.Size = new System.Drawing.Size(159, 25);
+            this.txtAPPassword.TabIndex = 38;
+            // 
             // cbNoSharpCap
             // 
             this.cbNoSharpCap.AutoSize = true;
             this.cbNoSharpCap.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbNoSharpCap.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbNoSharpCap.Location = new System.Drawing.Point(11, 272);
+            this.cbNoSharpCap.Location = new System.Drawing.Point(11, 283);
             this.cbNoSharpCap.Name = "cbNoSharpCap";
             this.cbNoSharpCap.Size = new System.Drawing.Size(111, 23);
             this.cbNoSharpCap.TabIndex = 37;
@@ -1017,7 +1057,7 @@
             this.cbTSAutoFOVI.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbTSAutoFOVI.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbTSAutoFOVI.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbTSAutoFOVI.Location = new System.Drawing.Point(237, 246);
+            this.cbTSAutoFOVI.Location = new System.Drawing.Point(237, 261);
             this.cbTSAutoFOVI.Name = "cbTSAutoFOVI";
             this.cbTSAutoFOVI.Size = new System.Drawing.Size(111, 23);
             this.cbTSAutoFOVI.TabIndex = 36;
@@ -1031,7 +1071,7 @@
             this.cbAPAutoSort.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbAPAutoSort.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbAPAutoSort.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbAPAutoSort.Location = new System.Drawing.Point(130, 246);
+            this.cbAPAutoSort.Location = new System.Drawing.Point(130, 261);
             this.cbAPAutoSort.Name = "cbAPAutoSort";
             this.cbAPAutoSort.Size = new System.Drawing.Size(107, 23);
             this.cbAPAutoSort.TabIndex = 35;
@@ -1044,7 +1084,7 @@
             this.groupBox4.Controls.Add(this.txtScriptFolder);
             this.groupBox4.Controls.Add(this.txtStellariumPort);
             this.groupBox4.Controls.Add(this.txtStellariumAddress);
-            this.groupBox4.Location = new System.Drawing.Point(9, 123);
+            this.groupBox4.Location = new System.Drawing.Point(9, 116);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(351, 88);
             this.groupBox4.TabIndex = 34;
@@ -1085,7 +1125,7 @@
             // 
             this.groupBox3.Controls.Add(this.txtCdCPort);
             this.groupBox3.Controls.Add(this.txtCdCAddress);
-            this.groupBox3.Location = new System.Drawing.Point(9, 60);
+            this.groupBox3.Location = new System.Drawing.Point(9, 56);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(351, 58);
             this.groupBox3.TabIndex = 33;
@@ -1110,7 +1150,7 @@
             // 
             this.groupBox1.Controls.Add(this.cbSyncPlanetarium);
             this.groupBox1.Controls.Add(this.cbSlewOnTarget);
-            this.groupBox1.Location = new System.Drawing.Point(10, 6);
+            this.groupBox1.Location = new System.Drawing.Point(10, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(351, 50);
             this.groupBox1.TabIndex = 32;
@@ -1148,7 +1188,7 @@
             this.cbFOVICorr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbFOVICorr.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbFOVICorr.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbFOVICorr.Location = new System.Drawing.Point(11, 246);
+            this.cbFOVICorr.Location = new System.Drawing.Point(11, 261);
             this.cbFOVICorr.Name = "cbFOVICorr";
             this.cbFOVICorr.Size = new System.Drawing.Size(119, 23);
             this.cbFOVICorr.TabIndex = 14;
@@ -1452,106 +1492,6 @@
             this.btnN.UseVisualStyleBackColor = false;
             this.btnN.Click += new System.EventHandler(this.btnN_Click_1);
             // 
-            // tabSkyChart
-            // 
-            this.tabSkyChart.Controls.Add(this.btnSkyChartCV);
-            this.tabSkyChart.Controls.Add(this.btnSkyChartNV);
-            this.tabSkyChart.Controls.Add(this.btnSkyChartS);
-            this.tabSkyChart.Controls.Add(this.btnSkyChartE);
-            this.tabSkyChart.Controls.Add(this.btnSkyChartW);
-            this.tabSkyChart.Controls.Add(this.btnSkychartN);
-            this.tabSkyChart.Location = new System.Drawing.Point(4, 26);
-            this.tabSkyChart.Name = "tabSkyChart";
-            this.tabSkyChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSkyChart.Size = new System.Drawing.Size(221, 176);
-            this.tabSkyChart.TabIndex = 3;
-            this.tabSkyChart.Text = "CdC";
-            this.tabSkyChart.UseVisualStyleBackColor = true;
-            // 
-            // btnSkyChartCV
-            // 
-            this.btnSkyChartCV.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.btnSkyChartCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkyChartCV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkyChartCV.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkyChartCV.Location = new System.Drawing.Point(162, 7);
-            this.btnSkyChartCV.Name = "btnSkyChartCV";
-            this.btnSkyChartCV.Size = new System.Drawing.Size(36, 32);
-            this.btnSkyChartCV.TabIndex = 41;
-            this.btnSkyChartCV.Text = "CV";
-            this.btnSkyChartCV.UseVisualStyleBackColor = false;
-            this.btnSkyChartCV.Click += new System.EventHandler(this.btnSkyChartCV_Click);
-            // 
-            // btnSkyChartNV
-            // 
-            this.btnSkyChartNV.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.btnSkyChartNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkyChartNV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkyChartNV.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkyChartNV.Location = new System.Drawing.Point(123, 7);
-            this.btnSkyChartNV.Name = "btnSkyChartNV";
-            this.btnSkyChartNV.Size = new System.Drawing.Size(37, 32);
-            this.btnSkyChartNV.TabIndex = 40;
-            this.btnSkyChartNV.Text = "NV";
-            this.btnSkyChartNV.UseVisualStyleBackColor = false;
-            this.btnSkyChartNV.Click += new System.EventHandler(this.btnSkyChartNV_Click);
-            // 
-            // btnSkyChartS
-            // 
-            this.btnSkyChartS.BackColor = System.Drawing.Color.PaleGreen;
-            this.btnSkyChartS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkyChartS.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkyChartS.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkyChartS.Location = new System.Drawing.Point(64, 7);
-            this.btnSkyChartS.Name = "btnSkyChartS";
-            this.btnSkyChartS.Size = new System.Drawing.Size(28, 32);
-            this.btnSkyChartS.TabIndex = 39;
-            this.btnSkyChartS.Text = "S";
-            this.btnSkyChartS.UseVisualStyleBackColor = false;
-            this.btnSkyChartS.Click += new System.EventHandler(this.btnSkyChartS_Click);
-            // 
-            // btnSkyChartE
-            // 
-            this.btnSkyChartE.BackColor = System.Drawing.Color.PaleGreen;
-            this.btnSkyChartE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkyChartE.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkyChartE.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkyChartE.Location = new System.Drawing.Point(93, 7);
-            this.btnSkyChartE.Name = "btnSkyChartE";
-            this.btnSkyChartE.Size = new System.Drawing.Size(28, 32);
-            this.btnSkyChartE.TabIndex = 38;
-            this.btnSkyChartE.Text = "E";
-            this.btnSkyChartE.UseVisualStyleBackColor = false;
-            this.btnSkyChartE.Click += new System.EventHandler(this.btnSkyChartE_Click);
-            // 
-            // btnSkyChartW
-            // 
-            this.btnSkyChartW.BackColor = System.Drawing.Color.PaleGreen;
-            this.btnSkyChartW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkyChartW.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkyChartW.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkyChartW.Location = new System.Drawing.Point(35, 7);
-            this.btnSkyChartW.Name = "btnSkyChartW";
-            this.btnSkyChartW.Size = new System.Drawing.Size(28, 32);
-            this.btnSkyChartW.TabIndex = 37;
-            this.btnSkyChartW.Text = "W";
-            this.btnSkyChartW.UseVisualStyleBackColor = false;
-            this.btnSkyChartW.Click += new System.EventHandler(this.btnSkyChartW_Click);
-            // 
-            // btnSkychartN
-            // 
-            this.btnSkychartN.BackColor = System.Drawing.Color.PaleGreen;
-            this.btnSkychartN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnSkychartN.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSkychartN.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSkychartN.Location = new System.Drawing.Point(6, 7);
-            this.btnSkychartN.Name = "btnSkychartN";
-            this.btnSkychartN.Size = new System.Drawing.Size(28, 32);
-            this.btnSkychartN.TabIndex = 36;
-            this.btnSkychartN.Text = "N";
-            this.btnSkychartN.UseVisualStyleBackColor = false;
-            this.btnSkychartN.Click += new System.EventHandler(this.btnSkychartN_Click);
-            // 
             // tabpSN
             // 
             this.tabpSN.Controls.Add(this.btnSNCV);
@@ -1677,6 +1617,106 @@
             this.btnAzAltFOVI.UseVisualStyleBackColor = false;
             this.btnAzAltFOVI.Click += new System.EventHandler(this.btnAzAltFOVI_Click_1);
             // 
+            // tabSkyChart
+            // 
+            this.tabSkyChart.Controls.Add(this.btnSkyChartCV);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartNV);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartS);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartE);
+            this.tabSkyChart.Controls.Add(this.btnSkyChartW);
+            this.tabSkyChart.Controls.Add(this.btnSkychartN);
+            this.tabSkyChart.Location = new System.Drawing.Point(4, 26);
+            this.tabSkyChart.Name = "tabSkyChart";
+            this.tabSkyChart.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSkyChart.Size = new System.Drawing.Size(221, 176);
+            this.tabSkyChart.TabIndex = 3;
+            this.tabSkyChart.Text = "CdC";
+            this.tabSkyChart.UseVisualStyleBackColor = true;
+            // 
+            // btnSkyChartCV
+            // 
+            this.btnSkyChartCV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnSkyChartCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartCV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartCV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartCV.Location = new System.Drawing.Point(162, 7);
+            this.btnSkyChartCV.Name = "btnSkyChartCV";
+            this.btnSkyChartCV.Size = new System.Drawing.Size(36, 32);
+            this.btnSkyChartCV.TabIndex = 41;
+            this.btnSkyChartCV.Text = "CV";
+            this.btnSkyChartCV.UseVisualStyleBackColor = false;
+            this.btnSkyChartCV.Click += new System.EventHandler(this.btnSkyChartCV_Click);
+            // 
+            // btnSkyChartNV
+            // 
+            this.btnSkyChartNV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnSkyChartNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartNV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartNV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartNV.Location = new System.Drawing.Point(123, 7);
+            this.btnSkyChartNV.Name = "btnSkyChartNV";
+            this.btnSkyChartNV.Size = new System.Drawing.Size(37, 32);
+            this.btnSkyChartNV.TabIndex = 40;
+            this.btnSkyChartNV.Text = "NV";
+            this.btnSkyChartNV.UseVisualStyleBackColor = false;
+            this.btnSkyChartNV.Click += new System.EventHandler(this.btnSkyChartNV_Click);
+            // 
+            // btnSkyChartS
+            // 
+            this.btnSkyChartS.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartS.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartS.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartS.Location = new System.Drawing.Point(64, 7);
+            this.btnSkyChartS.Name = "btnSkyChartS";
+            this.btnSkyChartS.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartS.TabIndex = 39;
+            this.btnSkyChartS.Text = "S";
+            this.btnSkyChartS.UseVisualStyleBackColor = false;
+            this.btnSkyChartS.Click += new System.EventHandler(this.btnSkyChartS_Click);
+            // 
+            // btnSkyChartE
+            // 
+            this.btnSkyChartE.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartE.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartE.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartE.Location = new System.Drawing.Point(93, 7);
+            this.btnSkyChartE.Name = "btnSkyChartE";
+            this.btnSkyChartE.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartE.TabIndex = 38;
+            this.btnSkyChartE.Text = "E";
+            this.btnSkyChartE.UseVisualStyleBackColor = false;
+            this.btnSkyChartE.Click += new System.EventHandler(this.btnSkyChartE_Click);
+            // 
+            // btnSkyChartW
+            // 
+            this.btnSkyChartW.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkyChartW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkyChartW.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkyChartW.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkyChartW.Location = new System.Drawing.Point(35, 7);
+            this.btnSkyChartW.Name = "btnSkyChartW";
+            this.btnSkyChartW.Size = new System.Drawing.Size(28, 32);
+            this.btnSkyChartW.TabIndex = 37;
+            this.btnSkyChartW.Text = "W";
+            this.btnSkyChartW.UseVisualStyleBackColor = false;
+            this.btnSkyChartW.Click += new System.EventHandler(this.btnSkyChartW_Click);
+            // 
+            // btnSkychartN
+            // 
+            this.btnSkychartN.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnSkychartN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnSkychartN.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnSkychartN.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSkychartN.Location = new System.Drawing.Point(6, 7);
+            this.btnSkychartN.Name = "btnSkychartN";
+            this.btnSkychartN.Size = new System.Drawing.Size(28, 32);
+            this.btnSkychartN.TabIndex = 36;
+            this.btnSkychartN.Text = "N";
+            this.btnSkychartN.UseVisualStyleBackColor = false;
+            this.btnSkychartN.Click += new System.EventHandler(this.btnSkychartN_Click);
+            // 
             // tabpKStars
             // 
             this.tabpKStars.Location = new System.Drawing.Point(4, 26);
@@ -1767,7 +1807,7 @@
             this.Name = "frmEAACP";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "EAACtrl 3.0";
+            this.Text = "EAACtrl 3.1";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmEAACP_FormClosing);
             this.Load += new System.EventHandler(this.frmEAACP_Load);
@@ -1795,9 +1835,9 @@
             this.tabPlanetarium.ResumeLayout(false);
             this.tabpStellarium.ResumeLayout(false);
             this.tabpStellarium.PerformLayout();
-            this.tabSkyChart.ResumeLayout(false);
             this.tabpSN.ResumeLayout(false);
             this.tabpTheSky.ResumeLayout(false);
+            this.tabSkyChart.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1929,6 +1969,10 @@
         private System.Windows.Forms.Button btnTracking;
         private System.Windows.Forms.Button btnAPtoFront;
         private System.Windows.Forms.Button btnSwitchPlanatariumToFront;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox txtStellariumPassword;
+        private System.Windows.Forms.TextBox txtAPPassword;
     }
 }
 

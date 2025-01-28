@@ -122,7 +122,7 @@
     <value>12, 12</value>
   </data>
   <data name="dgvSearchResults.Size" type="System.Drawing.Size, System.Drawing">
-    <value>973, 339</value>
+    <value>999, 339</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="dgvSearchResults.TabIndex" type="System.Int32, mscorlib">
@@ -138,10 +138,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;dgvSearchResults.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>14</value>
   </data>
   <data name="btnCancel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>908, 358</value>
+    <value>932, 358</value>
   </data>
   <data name="btnCancel.Size" type="System.Drawing.Size, System.Drawing">
     <value>75, 23</value>
@@ -162,13 +162,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnCancel.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>13</value>
   </data>
   <data name="btnAddToAP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>757, 358</value>
+    <value>799, 359</value>
   </data>
   <data name="btnAddToAP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>136, 23</value>
+    <value>128, 23</value>
   </data>
   <data name="btnAddToAP.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -186,17 +186,17 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnAddToAP.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>12</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="btnDrawSelection.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
   <data name="btnDrawSelection.Location" type="System.Drawing.Point, System.Drawing">
-    <value>114, 358</value>
+    <value>186, 358</value>
   </data>
   <data name="btnDrawSelection.Size" type="System.Drawing.Size, System.Drawing">
-    <value>93, 23</value>
+    <value>82, 23</value>
   </data>
   <data name="btnDrawSelection.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -214,16 +214,16 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnDrawSelection.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>11</value>
   </data>
   <data name="btnPlotAll.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
   <data name="btnPlotAll.Location" type="System.Drawing.Point, System.Drawing">
-    <value>214, 358</value>
+    <value>98, 358</value>
   </data>
   <data name="btnPlotAll.Size" type="System.Drawing.Size, System.Drawing">
-    <value>93, 23</value>
+    <value>82, 23</value>
   </data>
   <data name="btnPlotAll.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -241,7 +241,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnPlotAll.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>10</value>
   </data>
   <data name="btnOptions.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -250,7 +250,7 @@
     <value>12, 358</value>
   </data>
   <data name="btnOptions.Size" type="System.Drawing.Size, System.Drawing">
-    <value>93, 23</value>
+    <value>82, 23</value>
   </data>
   <data name="btnOptions.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -268,7 +268,250 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnOptions.ZOrder" xml:space="preserve">
+    <value>9</value>
+  </data>
+  <data name="btnClearPlot.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnClearPlot.Location" type="System.Drawing.Point, System.Drawing">
+    <value>512, 359</value>
+  </data>
+  <data name="btnClearPlot.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 23</value>
+  </data>
+  <data name="btnClearPlot.TabIndex" type="System.Int32, mscorlib">
+    <value>19</value>
+  </data>
+  <data name="btnClearPlot.Text" xml:space="preserve">
+    <value>Clear Plot</value>
+  </data>
+  <data name="&gt;&gt;btnClearPlot.Name" xml:space="preserve">
+    <value>btnClearPlot</value>
+  </data>
+  <data name="&gt;&gt;btnClearPlot.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnClearPlot.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnClearPlot.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="cbCataloguesFilter.Location" type="System.Drawing.Point, System.Drawing">
+    <value>300, 359</value>
+  </data>
+  <data name="cbCataloguesFilter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 21</value>
+  </data>
+  <data name="cbCataloguesFilter.TabIndex" type="System.Int32, mscorlib">
+    <value>18</value>
+  </data>
+  <data name="&gt;&gt;cbCataloguesFilter.Name" xml:space="preserve">
+    <value>cbCataloguesFilter</value>
+  </data>
+  <data name="&gt;&gt;cbCataloguesFilter.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbCataloguesFilter.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbCataloguesFilter.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>273, 363</value>
+  </data>
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>25, 13</value>
+  </data>
+  <data name="label1.TabIndex" type="System.Int32, mscorlib">
+    <value>17</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Plot</value>
+  </data>
+  <data name="&gt;&gt;label1.Name" xml:space="preserve">
+    <value>label1</value>
+  </data>
+  <data name="&gt;&gt;label1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="btnCentreSelected.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnCentreSelected.Location" type="System.Drawing.Point, System.Drawing">
+    <value>699, 359</value>
+  </data>
+  <data name="btnCentreSelected.Size" type="System.Drawing.Size, System.Drawing">
+    <value>93, 23</value>
+  </data>
+  <data name="btnCentreSelected.TabIndex" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="btnCentreSelected.Text" xml:space="preserve">
+    <value>Selected Centre</value>
+  </data>
+  <data name="&gt;&gt;btnCentreSelected.Name" xml:space="preserve">
+    <value>btnCentreSelected</value>
+  </data>
+  <data name="&gt;&gt;btnCentreSelected.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnCentreSelected.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnCentreSelected.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="btnRecentre.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnRecentre.Location" type="System.Drawing.Point, System.Drawing">
+    <value>601, 359</value>
+  </data>
+  <data name="btnRecentre.Size" type="System.Drawing.Size, System.Drawing">
+    <value>93, 23</value>
+  </data>
+  <data name="btnRecentre.TabIndex" type="System.Int32, mscorlib">
+    <value>15</value>
+  </data>
+  <data name="btnRecentre.Text" xml:space="preserve">
+    <value>Search Centre</value>
+  </data>
+  <data name="&gt;&gt;btnRecentre.Name" xml:space="preserve">
+    <value>btnRecentre</value>
+  </data>
+  <data name="&gt;&gt;btnRecentre.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnRecentre.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnRecentre.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="btnDSOAll.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnDSOAll.Location" type="System.Drawing.Point, System.Drawing">
+    <value>303, 391</value>
+  </data>
+  <data name="btnDSOAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>81, 23</value>
+  </data>
+  <data name="btnDSOAll.TabIndex" type="System.Int32, mscorlib">
+    <value>23</value>
+  </data>
+  <data name="btnDSOAll.Text" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="&gt;&gt;btnDSOAll.Name" xml:space="preserve">
+    <value>btnDSOAll</value>
+  </data>
+  <data name="&gt;&gt;btnDSOAll.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnDSOAll.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnDSOAll.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="btnDSOStandard.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnDSOStandard.Location" type="System.Drawing.Point, System.Drawing">
+    <value>216, 391</value>
+  </data>
+  <data name="btnDSOStandard.Size" type="System.Drawing.Size, System.Drawing">
+    <value>81, 23</value>
+  </data>
+  <data name="btnDSOStandard.TabIndex" type="System.Int32, mscorlib">
+    <value>22</value>
+  </data>
+  <data name="btnDSOStandard.Text" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="&gt;&gt;btnDSOStandard.Name" xml:space="preserve">
+    <value>btnDSOStandard</value>
+  </data>
+  <data name="&gt;&gt;btnDSOStandard.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnDSOStandard.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnDSOStandard.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="label2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 396</value>
+  </data>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>115, 13</value>
+  </data>
+  <data name="label2.TabIndex" type="System.Int32, mscorlib">
+    <value>21</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Display Stellarium DSO</value>
+  </data>
+  <data name="&gt;&gt;label2.Name" xml:space="preserve">
+    <value>label2</value>
+  </data>
+  <data name="&gt;&gt;label2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label2.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="btnDSOOff.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnDSOOff.Location" type="System.Drawing.Point, System.Drawing">
+    <value>129, 391</value>
+  </data>
+  <data name="btnDSOOff.Size" type="System.Drawing.Size, System.Drawing">
+    <value>81, 23</value>
+  </data>
+  <data name="btnDSOOff.TabIndex" type="System.Int32, mscorlib">
+    <value>20</value>
+  </data>
+  <data name="btnDSOOff.Text" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="&gt;&gt;btnDSOOff.Name" xml:space="preserve">
+    <value>btnDSOOff</value>
+  </data>
+  <data name="&gt;&gt;btnDSOOff.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnDSOOff.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnDSOOff.ZOrder" xml:space="preserve">
+    <value>3</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -277,7 +520,7 @@
     <value>6, 13</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>997, 390</value>
+    <value>1023, 423</value>
   </data>
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>CenterParent</value>

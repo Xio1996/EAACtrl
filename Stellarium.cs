@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace EAACtrl
 {
@@ -17,11 +20,11 @@ namespace EAACtrl
         private string sMsg = "";
 
         public string Message
-        { 
-            get 
-            { 
+        {
+            get
+            {
                 return sMsg;
-            } 
+            }
         }
 
         public string IPAddress = "127.0.0.1";
@@ -36,6 +39,12 @@ namespace EAACtrl
             {"double star","Dbl"},{"star","Star"},{"supernova remnant","SNR"},{"asteroid","ext_Minor"},
             {"comet","ext_Comet"},{"planet","Planet"},{"moon","Planetary Moon"},{"artificial satellite","Artificial Satellite"}
         };
+
+        private void AddBasicAuthenticationHeader(string username, string password)
+        {
+            var byteArray = Encoding.ASCII.GetBytes($"{username}:{password}");
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        }
 
         public string APTypeFromStellariumType(string ObjectType)
         {
@@ -55,12 +64,12 @@ namespace EAACtrl
         }
 
         public double StelRAtoAPRA(double RA)
-        { 
+        {
             if (RA > 0)
             {
                 return RA / 15.0;
             }
-            return (RA + 360.0) / 15.0; 
+            return (RA + 360.0) / 15.0;
         }
 
         private string PostRequest(string url, FormUrlEncodedContent content)
@@ -71,12 +80,14 @@ namespace EAACtrl
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
+                AddBasicAuthenticationHeader("", EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword));
+
                 HttpResponseMessage response = httpClient.PostAsync(url, content).GetAwaiter().GetResult();
                 result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
                 TimeSpan ts = stopwatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                sMsg = $"Request to {url} {elapsedTime}\r\n";
+                sMsg = $"Request to {url} Result={result} {elapsedTime}\r\n";
             }
             catch (HttpRequestException e)
             {
@@ -95,8 +106,10 @@ namespace EAACtrl
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
+                AddBasicAuthenticationHeader("", EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword));
+
                 result = httpClient.GetStringAsync(url).GetAwaiter().GetResult();
- 
+
                 TimeSpan ts = stopwatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
                 sMsg = $"Request to {url} {elapsedTime}\r\n";
@@ -123,6 +136,33 @@ namespace EAACtrl
 
             result = PostRequest(sWebServiceURL, content);
             sMsg = $"StelAction {sName}, {sMsg}";
+            return result;
+        }
+
+        public string GetStelProperty(string sName)
+        {
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/stelproperty/list";
+            string result = GetRequest(sWebServiceURL);
+
+            if (result != "exception")
+            {
+                JsonDocument jsonStellariumProperties = JsonDocument.Parse(result);
+                if (jsonStellariumProperties.RootElement.TryGetProperty(sName, out JsonElement property))
+                {
+                    property.TryGetProperty("value", out JsonElement value);
+
+                    if (value.ValueKind == JsonValueKind.Number)
+                    {
+                        return value.GetDouble().ToString();
+                    }
+                    else
+                    {
+                        return value.GetString();
+                    }
+                }
+            }
+
+            sMsg = $"StelProp {sName}, {sMsg}";
             return result;
         }
 
@@ -316,7 +356,7 @@ namespace EAACtrl
                         sDistance = (distance / Properties.Settings.Default.Hubble).ToString();
                     }
 
-                    listOfSearchResults.Add(new string[] { obj.ID, obj.Name, obj.Type, sMag, obj.GalaxyType, sDistance, obj.Catalogue, RA, Dec, obj.RA2000.ToString(), obj.Dec2000.ToString(), obj.Size, obj.PosAngle.ToString(), obj.Constellation});
+                    listOfSearchResults.Add(new string[] { obj.ID, obj.Name, obj.Type, sMag, obj.GalaxyType, sDistance, obj.Catalogue, RA, Dec, obj.RA2000.ToString(), obj.Dec2000.ToString(), obj.Size, obj.PosAngle.ToString(), obj.Constellation });
                 }
 
                 string objectLabel = "";
@@ -427,7 +467,6 @@ namespace EAACtrl
                 bFilterOnDistance = true;
             }
 
-
             foreach (DataRow row in varObjects.Rows)
             {
                 if (bFilterOnDistance)
@@ -461,7 +500,7 @@ namespace EAACtrl
                 }
                 if (Properties.Settings.Default.soMag)
                 {
-                     objectLabel += row["Magnitude"].ToString() + " ";
+                    objectLabel += row["Magnitude"].ToString() + " ";
                 }
                 if (Properties.Settings.Default.soType)
                 {
@@ -538,26 +577,55 @@ namespace EAACtrl
             DrawObjects(sOut);
         }
 
+        public DataTable UniqueCataloguesInSearchResults(DataTable searchResults)
+        {
+            var uniqueCatalogues = searchResults.AsEnumerable()
+                .Select(row => new { Catalogue = row.Field<string>("Catalogue") })
+                .Distinct()
+                .OrderBy(row => row.Catalogue);
+
+            DataTable resultTable = new DataTable();
+            resultTable.Columns.Add("Catalogue", typeof(string));
+
+            resultTable.Rows.Add("All Catalogues");
+
+            foreach (var row in uniqueCatalogues)
+            {
+                resultTable.Rows.Add(row.Catalogue);
+            }
+
+            return resultTable;
+        }
+
         public void DrawObjects(string varObjects)
         {
-            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/run";
-
-            Color FontColour = Properties.Settings.Default.StFontColour;
-            string hexFontColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
-            FontColour = Properties.Settings.Default.StGraphicColour;
-            string hexGraphicColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
-
-            string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"E\",12);}";
-
-            File.WriteAllText(ScriptFolder + "\\drawobjects.ssc", varObjects + sCode);
-
-            var content = new FormUrlEncodedContent(new[]
+            try
             {
+                string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/run";
+
+                Color FontColour = Properties.Settings.Default.StFontColour;
+                string hexFontColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
+                FontColour = Properties.Settings.Default.StGraphicColour;
+                string hexGraphicColor = $"#{FontColour.R:X2}{FontColour.G:X2}{FontColour.B:X2}";
+                string labelSidePos = Properties.Settings.Default.StLabelPosition, labelDistance = Properties.Settings.Default.StLabelDistance.ToString();
+
+                //string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"E\",12);}";
+                string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"" + labelSidePos + "\"," + labelDistance + ");}";
+
+                File.WriteAllText(ScriptFolder + "\\drawobjects.ssc", varObjects + sCode);
+
+                var content = new FormUrlEncodedContent(new[]
+                {
                 new KeyValuePair<string, string>("id", "drawobjects.ssc")
             });
 
-            string result = PostRequest(sWebServiceURL, content);
-            sMsg = $"StelDrawObjects, {sMsg}";
+                string result = PostRequest(sWebServiceURL, content);
+                sMsg = $"StelDrawObjects, {result}";
+            }
+            catch (Exception)
+            {
+                sMsg = $"StelDrawObjects, {sMsg}";
+            }
         }
 
         public void ClearObjects()
@@ -653,75 +721,91 @@ namespace EAACtrl
             string sWebServiceURL = $"http://{IPAddress}:{Port}/api/objects/info?format=json";
 
             result = GetRequest(sWebServiceURL);
-            sMsg = $"StelGetSelectedObjectInfo {sMsg}";
+            //sMsg = $"StelGetSelectedObjectInfo {sMsg}";
+            if (result == "exception") return null; //error
 
             if (result != "")
             {
-                    oSelectedObject = JsonNode.Parse(result);
+                oSelectedObject = JsonNode.Parse(result);
 
-                    apObject.RA2000 = StelRAtoAPRA((double)oSelectedObject["raJ2000"]);
-                    apObject.Dec2000 = (double)oSelectedObject["decJ2000"];
-                    apObject.Type = APTypeFromStellariumType((string)oSelectedObject["object-type"]);
-                    apObject.Catalogue = "Stellarium";
-                    apObject.Constellation = (string)oSelectedObject["iauConstellation"];
+                apObject.RA2000 = StelRAtoAPRA((double)oSelectedObject["raJ2000"]);
+                apObject.Dec2000 = (double)oSelectedObject["decJ2000"];
+                apObject.Type = APTypeFromStellariumType((string)oSelectedObject["object-type"]);
+                apObject.Catalogue = "Stellarium";
+                apObject.Constellation = (string)oSelectedObject["iauConstellation"];
 
-                    string soName = (string)oSelectedObject["name"];
-                    string soDesignation = (string)oSelectedObject["designations"];
-                    string soLocalisedName = (string)oSelectedObject["localized-name"];
-                    bool bUsedLocalised = false;
+                string soName = (string)oSelectedObject["name"];
+                string soDesignation = (string)oSelectedObject["designations"];
+                string soLocalisedName = (string)oSelectedObject["localized-name"];
+                bool bUsedLocalised = false;
 
-                    // Decide which name(s) we are going to use for AP ID
-                    if (soLocalisedName != "")
+                // Decide which name(s) we are going to use for AP ID
+                if (soLocalisedName != "")
+                {
+                    apObject.ID = soLocalisedName;
+                    bUsedLocalised = true;
+                }
+                else if (soName != "")
+                {
+                    apObject.ID = soName;
+                }
+                else if (soDesignation != "" && soDesignation != null)
+                {
+                    apObject.ID = StellariumGetDesignation(soDesignation, "", true);
+                }
+                else
+                {
+                    // No name data is returned so try and scrape it from the info text displayed on screen
+                    string sName = StellariumGetSelectedObjectName();
+                    if (sName != "")
                     {
-                        apObject.ID = soLocalisedName;
-                        bUsedLocalised = true;
-                    }
-                    else if (soName != "")
-                    {
-                        apObject.ID = soName;
-                    }
-                    else if (soDesignation != "" && soDesignation != null)
-                    {
-                        apObject.ID = StellariumGetDesignation(soDesignation, "", true);
+                        apObject.ID = sName;
                     }
                     else
                     {
-                        // No name data is returned so try and scrape it from the info text displayed on screen
-                        string sName = StellariumGetSelectedObjectName();
-                        if (sName != "")
+                        apObject.ID = "Stellarium";
+                    }
+                }
+
+                // Add other names to AP Name field
+                if (soDesignation != "" && soDesignation != null)
+                {
+                    apObject.Name = StellariumGetDesignation(soDesignation, apObject.ID, false);
+                }
+
+                if (bUsedLocalised)
+                {
+                    if (apObject.Name != null && apObject.Name != "")
+                    {
+                        apObject.Name += "," + soName;
+                    }
+                    else
+                    {
+                        apObject.Name = soName;
+                    }
+                }
+
+                bool bMagFound = false;
+                if (oSelectedObject["vmag"] != null)
+                {
+                    if (!double.IsNaN((double)(oSelectedObject["vmag"])))
+                    {
+                        double vmag = (double)(oSelectedObject["vmag"]);
+                        if (vmag < 99)
                         {
-                            apObject.ID = sName;
-                        }
-                        else
-                        {
-                            apObject.ID = "Stellarium";
+                            apObject.Magnitude = vmag;
+                            bMagFound = true;
                         }
                     }
+                }
 
-                    // Add other names to AP Name field
-                    if (soDesignation != "" && soDesignation != null)
+                if (!bMagFound)
+                {
+                    if (oSelectedObject["bmag"] != null)
                     {
-                        apObject.Name = StellariumGetDesignation(soDesignation, apObject.ID, false);
-                    }
-
-                    if (bUsedLocalised)
-                    {
-                        if (apObject.Name != null && apObject.Name != "")
+                        if (!double.IsNaN((double)(oSelectedObject["bmag"])))
                         {
-                            apObject.Name += "," + soName;
-                        }
-                        else
-                        {
-                            apObject.Name = soName;
-                        }
-                    }
-
-                    bool bMagFound = false;
-                    if (oSelectedObject["vmag"] != null)
-                    {
-                        if (!double.IsNaN((double)(oSelectedObject["vmag"])))
-                        {
-                            double vmag = (double)(oSelectedObject["vmag"]);
+                            double vmag = (double)(oSelectedObject["bmag"]);
                             if (vmag < 99)
                             {
                                 apObject.Magnitude = vmag;
@@ -729,65 +813,50 @@ namespace EAACtrl
                             }
                         }
                     }
+                }
 
-                    if (!bMagFound)
+                if (!bMagFound)
+                {
+                    // No magnitude data  (999 = no magnitude in AP)
+                    apObject.Magnitude = 999;
+                }
+
+                double dblMajorAxis = double.NaN;
+                if (oSelectedObject["axis-major-dd"] != null)
+                {
+                    dblMajorAxis = (double)(oSelectedObject["axis-major-dd"]);
+                }
+
+                double dblMinorAxis = double.NaN;
+
+                if (oSelectedObject["axis-minor-dd"] != null)
+                {
+                    dblMinorAxis = (double)(oSelectedObject["axis-minor-dd"]);
+                }
+
+                if (!double.IsNaN(dblMajorAxis) && !double.IsNaN(dblMinorAxis))
+                {
+                    if (dblMajorAxis > 0 && dblMinorAxis > 0)
                     {
-                        if (oSelectedObject["bMag"] != null)
+                        // Convert degrees to arcminutes
+                        apObject.Size = StDegtoArcmins(dblMajorAxis) + "x" + StDegtoArcmins(dblMinorAxis);
+                    }
+                }
+                else
+                {
+                    if (oSelectedObject["size-dd"] != null)
+                    {
+                        double dblSize = (double)oSelectedObject["size-dd"];
+                        if (!double.IsNaN(dblSize))
                         {
-                            if (!double.IsNaN((double)(oSelectedObject["bmag"])))
+                            if (dblSize > 0)
                             {
-                                double vmag = (double)(oSelectedObject["bmag"]);
-                                if (vmag < 99)
-                                {
-                                    apObject.Magnitude = vmag;
-                                    bMagFound = true;
-                                }
-                            }
-                        }
-                    }
-
-                    if (!bMagFound)
-                    {
-                        // No magnitude data  (999 = no magnitude in AP)
-                        apObject.Magnitude = 999;
-                    }
-
-                    double dblMajorAxis = double.NaN;
-                    if (oSelectedObject["axis-major-dd"] != null)
-                    {
-                        dblMajorAxis = (double)(oSelectedObject["axis-major-dd"]);
-                    }
-
-                    double dblMinorAxis = double.NaN;
-
-                    if (oSelectedObject["axis-minor-dd"] != null)
-                    {
-                        dblMinorAxis = (double)(oSelectedObject["axis-minor-dd"]);
-                    }
-
-                    if (!double.IsNaN(dblMajorAxis) && !double.IsNaN(dblMinorAxis))
-                    {
-                        if (dblMajorAxis > 0 && dblMinorAxis > 0)
-                        {
-                            // Convert degrees to arcminutes
-                            apObject.Size = StDegtoArcmins(dblMajorAxis) + "x" + StDegtoArcmins(dblMinorAxis);
-                        }
-                    }
-                    else
-                    {
-                        if (oSelectedObject["size-dd"] != null)
-                        {
-                            double dblSize = (double)oSelectedObject["size-dd"];
-                            if (!double.IsNaN(dblSize))
-                            {
-                                if (dblSize > 0)
-                                {
-                                    apObject.Size = StDegtoArcmins(dblSize);
-                                }
+                                apObject.Size = StDegtoArcmins(dblSize);
                             }
                         }
                     }
                 }
+            }
 
             return apObject;
         }
@@ -808,4 +877,5 @@ namespace EAACtrl
         }
 
     }
+
 }

@@ -15,7 +15,7 @@ using System.Drawing;
 using System.Net.Http;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.ServiceProcess;
+using CefSharp.DevTools.Database;
 
 namespace EAACtrl
 {
@@ -48,7 +48,12 @@ namespace EAACtrl
         private string TargetName = "";
         private string SelectedRA = "";
         private string SelectedDec = "";
-        
+
+        // Error handling class
+        private EAAError aAError = new EAAError();
+        private const string StellariumSpeak = "stell-airium";
+        private const string AstroPlannerSpeak = "Astrow-planner";
+
         // *** NEW Objects Feb 2024
         // AstroPlanner Helper class - replaces AP functions in EAACtrl Panel
         private APHelper APHelper = new APHelper();
@@ -88,6 +93,27 @@ namespace EAACtrl
             SelectedRA = (double.Parse(RA) * 15).ToString();
             SelectedDec = Dec;
         }
+
+        private bool IsProcessNameRunning(string name)
+        {
+            Process[] processes = Process.GetProcessesByName(name);
+            if (processes.Length > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsStellariumRunning()
+        {
+            return IsProcessNameRunning("Stellarium");
+        }
+
+        private bool IsAPRunning()
+        {
+            return IsProcessNameRunning("AstroPlanner");
+        }
+
 
         void SharpCap_MqttMsgReceived(object sender, MqttMsgPublishEventArgs e)
         {
@@ -210,7 +236,7 @@ namespace EAACtrl
                         getCmd.parameters.Option = 1;
                     }
 
-                    if (CurrentPlanetarium == 3 && cbTSAutoFOVI.Checked)
+                    if (CurrentPlanetarium == 2 && cbTSAutoFOVI.Checked)
                     {
                         TheSky.AltAzFOVICorrection();
                         theSkyFOVIUpdated = true;
@@ -286,6 +312,8 @@ namespace EAACtrl
             txtScriptFolder.Text = Properties.Settings.Default.StScriptFolder;
             Stellarium.ScriptFolder = txtScriptFolder.Text;
             lblTelescope.Text = Properties.Settings.Default.ASCOMTelescope;
+            txtAPPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.Auth);
+            txtStellariumPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword);
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -328,7 +356,7 @@ namespace EAACtrl
             workerObserveTime.WorkerSupportsCancellation = true;
         }
 
-        private void Speak(string Speech)
+        public void Speak(string Speech)
         {
             var synthesizer = new SpeechSynthesizer();
             synthesizer.SetOutputToDefaultAudioDevice();
@@ -337,12 +365,13 @@ namespace EAACtrl
 
         private void SwitchAppToFront(string processName)
         {
-
+            /*
             Process[] proc = Process.GetProcesses();
             foreach (var process in proc)
             {
                 Console.WriteLine($"Process: {process.ProcessName}, ID: {process.Id}");
             }
+            */
 
             Process[] processes = Process.GetProcessesByName(processName);
             if (processes.Length > 0)
@@ -477,7 +506,8 @@ namespace EAACtrl
             Properties.Settings.Default.TSAutoFOVI = cbTSAutoFOVI.Checked;
             Properties.Settings.Default.StScriptFolder = txtScriptFolder.Text;
             Properties.Settings.Default.ASCOMTelescope = lblTelescope.Text;
-
+            Properties.Settings.Default.StelPassword = EncryptionHelper.Encrypt(txtStellariumPassword.Text.Trim());
+            Properties.Settings.Default.Auth = EncryptionHelper.Encrypt(txtAPPassword.Text.Trim());
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -610,7 +640,7 @@ namespace EAACtrl
         {
             string result = "";
 
-            string apWebServices = "http://localhost:8080?cmd=launch&auth=jrzLsmZVY33rwxyd38MS&cmdformat=json&responseformat=json&payload=";
+            string apWebServices = $"http://localhost:8080?cmd=launch&auth={txtAPPassword.Text.Trim()}&cmdformat=json&responseformat=json&payload=";
             apWebServices += ScriptPayload;
 
             try
@@ -631,10 +661,26 @@ namespace EAACtrl
         {
             double dblFOV = -1.0;
             
+            if (!IsAPRunning())
+            {
+                Speak(AstroPlannerSpeak + " is not running");
+                return;
+            }
+
             APCmdObject SelectedObject = APGetSelectedObject();
+            if (aAError.ErrorNumber == 0 && SelectedObject == null)
+            {
+                Speak("No object selected");
+                return;
+            }
+
             if (SelectedObject == null)
             {
-                MessageBox.Show("No object selected in AstroPlanner.", "EAACtrl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (SelectedObject == null)
+            {
                 return;
             }
 
@@ -649,18 +695,34 @@ namespace EAACtrl
             switch (tabPlanetarium.SelectedIndex)
             {
                 case 0: // Stellarium
+                    
+                    if (!IsStellariumRunning())
+                    {
+                        Speak(StellariumSpeak + " is not running");
+                        return;
+                    }
+                    
                     string RA = ""; string Dec = "";
                     // Format RA/Dec to hms and dms
                     RA = APHelper.RADecimalHoursToHMS(SelectedObject.RA2000, @"hh\hmm\mss\.ff\s");
                     Dec = APHelper.DecDecimalToDMS(SelectedObject.Dec2000);
 
-                    if ("ok" == Stellarium.SyncStellariumToAPObject(SelectedObject.ID, RA, Dec, SelectedObject.Type))
+                    string sResult = "";
+                    sResult = Stellarium.SyncStellariumToAPObject(SelectedObject.ID, RA, Dec, SelectedObject.Type);
+                    if ("ok" == sResult)
                     {
-                        WriteMessage(Stellarium.Message);
-                        if (cbImagerZoom.Checked)
+                        Speak("Selected");
+                    }
+                    else
+                    {
+                        if (Stellarium.Message.Contains("HTTP 401"))
                         {
-                            Stellarium.SetStellariumFOV(0.66);
-                            WriteMessage(Stellarium.Message);
+                            Speak(StellariumSpeak + " password incorrect or not set");
+                        }
+
+                        if (Stellarium.Message == "StConnection")
+                        {
+                            Speak("Cannot connect to " + StellariumSpeak + "is remote control plugin configured?");
                         }
                     }
                     break;
@@ -889,13 +951,13 @@ namespace EAACtrl
             APExecute(7, 0);
         }
 
-// ******* NEW CODE FEB 2024
-
-// Get the currently selected object in AstroPlanner (null is none selected)
+        // Get the currently selected object in AstroPlanner (null is none selected)
         private APCmdObject APGetSelectedObject()
         {
             try
             {
+                aAError.Reset();
+
                 APGetCmd getCmd = new APGetCmd();
                 getCmd.script = "EAAControl2";
                 getCmd.parameters = new APGetCmdParams();
@@ -903,17 +965,29 @@ namespace EAACtrl
                 getCmd.parameters.Option = 1;
 
                 string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APGetCmd>(getCmd)));
+                // Corrects a bug in AP that does not close the JSON documents correctly (missing })
                 if (sOut.Contains("}]}") && !sOut.Contains("}]}}"))
                 {
                     sOut += "}";
                 }
-
-                APGetCmdResult apObjects = JsonSerializer.Deserialize<APGetCmdResult>(sOut);
-                if (apObjects.error == 0 && apObjects.results.Objects != null)
+                if (aAError.ErrorNumber != 0)
                 {
-                    return apObjects.results.Objects[0];
+                    Speak(aAError.Message);
                 }
-            } catch (Exception) {}
+                else
+                {
+                    APGetCmdResult apObjects = JsonSerializer.Deserialize<APGetCmdResult>(sOut);
+                    if (apObjects.error == 0 && apObjects.results.Objects != null)
+                    {
+                        return apObjects.results.Objects[0];
+                    }
+                    else if (apObjects.error != 0)
+                    {
+                        Speak(aAError.ErrorMapping[apObjects.error]);
+                    }
+                }
+            }
+            catch (Exception) { }
 
             return null; // Nothing selected
         }
@@ -1490,8 +1564,16 @@ namespace EAACtrl
         private void btnFOVSearch_Click(object sender, EventArgs e)
         {
             double SearchRA = 999, SearchDec = 999;
+            string SearchID="";
+
             if (Properties.Settings.Default.sfPlanetarium)
             {
+                if (!IsStellariumRunning())
+                {
+                    Speak(StellariumSpeak + " is not running");
+                    return;
+                }
+
                 APCmdObject ap = null;
                 switch (tabPlanetarium.SelectedIndex)
                 {
@@ -1500,14 +1582,40 @@ namespace EAACtrl
                         break;
                 }
 
+                if (ap == null && Stellarium.Message.Contains("401"))
+                {
+                    Speak(StellariumSpeak + " password incorrect or not set");
+                    return;
+                }
+
                 if (ap == null)
                 {
                     Speak("No object selected in planetarium");
                     return;
                 }
 
+                SearchID = ap.ID;
                 SearchRA = ap.RA2000;
                 SearchDec = ap.Dec2000;
+            }
+            else
+            {
+                if (!IsAPRunning())
+                {
+                    Speak(AstroPlannerSpeak + " is not running");
+                    return;
+                }
+
+                APCmdObject SelectedObject = APGetSelectedObject();
+                if (aAError.ErrorNumber == 0 && SelectedObject == null)
+                {
+                    Speak("No object selected in " + AstroPlannerSpeak);
+                    return;
+                }
+                
+                SearchID = SelectedObject.ID;
+                SearchRA = SelectedObject.RA2000;
+                SearchDec = SelectedObject.Dec2000;
             }
 
             if (Properties.Settings.Default.sfDatasource == 0)
@@ -1515,15 +1623,32 @@ namespace EAACtrl
                 // Store the search results for DSA and Search List display
                 List<string[]> listOfSearchResults;
 
+                Speak("Searching");
+
                 APGetCmdResult apOut = APGetObjects(5, 2, "", CreateSearchParams(SearchRA, SearchDec));
                 if (apOut == null)
                 {
                     Speak("No search results");
-                    //MessageBox.Show("No objects selected in AstroPlanner.", "EAACtrl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(Properties.Settings.Default.StScriptFolder))
+                {
+                    Speak("No " + StellariumSpeak + " script folder specified");
+                    return;
+                }
+
+                if (!Directory.Exists(Properties.Settings.Default.StScriptFolder))
+                {
+                    Speak("Invalid " + StellariumSpeak + " script folder specified");
                     return;
                 }
 
                 listOfSearchResults = Stellarium.DrawObjects(apOut);
+                if (Stellarium.Message.Contains("HTTP 401"))
+                {
+                    Speak(StellariumSpeak + " password incorrect or not set");
+                }
 
                 // Add search objects in SharpCap DSA format to the clipboard
                 if (Properties.Settings.Default.sSharpCapDSA)
@@ -1544,11 +1669,18 @@ namespace EAACtrl
                         frmOpt.EAACP = this;
                         frmOpt.TopMost = true;
                         frmOpt.Results = listOfSearchResults;
+                        frmOpt.CentreRA = SearchRA;
+                        frmOpt.CentreDec = SearchDec;
+                        frmOpt.CentreID = SearchID;
                         if (frmOpt.ShowDialog() == DialogResult.OK)
                         {
 
                         }
                     }
+                }
+                else
+                {
+                    Speak(apOut.results.Objects.Count.ToString() + " objects found");
                 }
             }
             else if (Properties.Settings.Default.sfDatasource == 1)
@@ -1617,7 +1749,18 @@ namespace EAACtrl
 
         private void btnFOVClear_Click(object sender, EventArgs e)
         {
+            if (!IsStellariumRunning())
+            {
+                Speak(StellariumSpeak + " is not running");
+                return;
+            }
+
             Stellarium.ClearObjects();
+
+            if (Stellarium.Message.Contains("HTTP 401"))
+            {
+                Speak(StellariumSpeak + " password incorrect or not set");
+            }
         }
 
         private void btnFOVOptions_Click(object sender, EventArgs e)

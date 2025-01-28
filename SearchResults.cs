@@ -18,6 +18,9 @@ namespace EAACtrl
         private List<string[]> ResultsList = null;
         private DataTable ResultsTable = null;
         DataTable dt = new DataTable();
+        DataTable dtUniqueCatalogues = new DataTable();
+        int totalResults = 0;
+        string stellariumDSOFilter;
 
         public frmEAACP EAACP;
 
@@ -42,11 +45,15 @@ namespace EAACtrl
             }
         }
 
-
+        public double CentreRA;
+        public double CentreDec;
+        public string CentreID;
 
         private void SearchResults_Load(object sender, EventArgs e)
         {
             Stellarium.ScriptFolder = Properties.Settings.Default.StScriptFolder;
+
+            stellariumDSOFilter = Stellarium.GetStelProperty("NebulaMgr.catalogFilters");
 
             if (ResultsList != null || ResultsTable != null)
             {
@@ -104,7 +111,17 @@ namespace EAACtrl
 
                     }
                 }
-                
+
+                // Fetch and display list of unique catalogues
+                cbCataloguesFilter.SelectedIndexChanged -= cbCataloguesFilter_SelectedIndexChanged;
+
+                dtUniqueCatalogues = Stellarium.UniqueCataloguesInSearchResults(dt);
+                cbCataloguesFilter.DataSource = dtUniqueCatalogues;
+                cbCataloguesFilter.DisplayMember = "Catalogue";
+
+                cbCataloguesFilter.SelectedIndexChanged += cbCataloguesFilter_SelectedIndexChanged;
+
+
                 dgvSearchResults.DataSource = dt;
                 dgvSearchResults.Columns["dRA"].Visible = false;
                 dgvSearchResults.Columns["dDec"].Visible = false;
@@ -113,9 +130,15 @@ namespace EAACtrl
                 dgvSearchResults.Columns["Constellation"].Visible = false;
 
                 dgvSearchResults.Sort(dgvSearchResults.Columns["Magnitude"], System.ComponentModel.ListSortDirection.Ascending);
-
-                this.Text = "Search Results (" + dt.Rows.Count.ToString() + ")";
+                
+                totalResults = dt.Rows.Count;
+                UpdateSearchInfo(totalResults);
             }
+        }
+
+        private void UpdateSearchInfo(int viewCount)
+        {
+            this.Text = $"Search Results: {totalResults} objects, Current View: {viewCount} objects";
         }
 
         private void btnDrawSelection_Click(object sender, EventArgs e)
@@ -170,16 +193,39 @@ namespace EAACtrl
             }
 
             Stellarium.DrawObjects(Selected);
+
+            UpdateSearchInfo(dgvSearchResults.SelectedRows.Count);
         }
 
         private void btnPlotAll_Click(object sender, EventArgs e)
         {
+            // Stop the catalogues filter from firing
+            cbCataloguesFilter.SelectedIndexChanged -= cbCataloguesFilter_SelectedIndexChanged;
+            cbCataloguesFilter.SelectedIndex = 0;
+            cbCataloguesFilter.SelectedIndexChanged += cbCataloguesFilter_SelectedIndexChanged;
+            
+            // Remove any filtering
+            dt.DefaultView.RowFilter = "";
             Stellarium.DrawObjects(dt);
+
+            UpdateSearchInfo(totalResults);
         }
 
         private void btnAddToAP_Click(object sender, EventArgs e)
         {
             List < APCmdObject > apObjects = new List < APCmdObject >();
+            
+            DialogResult result = MessageBox.Show("Adding many objects to AstroPlanner, can take sometime and cannot be cancelled. Do you wish to continue?", "Add Objects to AstroPlanner", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                return;
+            }
+
+            if (dgvSearchResults.SelectedRows.Count == 0)
+            {
+                EAACP.Speak("No objects selected");
+                return;
+            }
 
             foreach (DataGridViewRow row in dgvSearchResults.SelectedRows)
             {
@@ -212,6 +258,8 @@ namespace EAACtrl
             aPPutCmd.parameters.Objects = apObjects;
 
             string sOut = EAACP.APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APPutCmd>(aPPutCmd)));
+
+            EAACP.Speak(dgvSearchResults.SelectedRows.Count.ToString() + " Objects added");
         }
 
         private void btnOptions_Click(object sender, EventArgs e)
@@ -225,6 +273,67 @@ namespace EAACtrl
 
                 }
             }
+        }
+
+        private void cbCataloguesFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string apCatalogue = cbCataloguesFilter.Text;
+            if (apCatalogue == "All Catalogues")
+            {
+                dt.DefaultView.RowFilter = "";
+                Stellarium.DrawObjects(dt);
+                UpdateSearchInfo(totalResults);
+            }
+            else
+            {
+                DataView dv = dt.DefaultView;
+                dv.RowFilter = "Catalogue = '" + apCatalogue + "'";
+
+                Stellarium.DrawObjects(dv.ToTable());
+
+                UpdateSearchInfo(dv.ToTable().Rows.Count);
+            }
+        }
+
+        private void btnRecentre_Click(object sender, EventArgs e)
+        {
+            Stellarium.SyncStellariumToAPObject(CentreID, CentreRA.ToString(), CentreDec.ToString(), "");
+        }
+
+        private void btnCentreSelected_Click(object sender, EventArgs e)
+        {
+            if (dgvSearchResults.SelectedRows.Count > 0)
+            {
+                double RA = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dRA"].Value.ToString());
+                double Dec = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dDec"].Value.ToString());
+                Stellarium.SyncStellariumToPosition(RA, Dec);
+            }
+        }
+
+        private void btnDSOOff_Click(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "0");
+        }
+
+        private void btnDSOStandard_Click(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "7");
+        }
+
+        private void btnDSOAll_Click(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("NebulaMgr.catalogFilters", "255852279");
+        }
+
+        private void btnClearPlot_Click(object sender, EventArgs e)
+        {
+            Stellarium.ClearObjects();
+            UpdateSearchInfo(0);
+        }
+
+        private void SearchResults_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Stellarium.SetStelProperty("NebulaMgr.catalogFilters", stellariumDSOFilter);
         }
     }
 }

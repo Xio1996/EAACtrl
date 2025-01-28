@@ -195,6 +195,8 @@
     <Compile Include="APHelper.cs" />
     <Compile Include="AstroCalc.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="EAAError.cs" />
+    <Compile Include="EncryptionHelper.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
