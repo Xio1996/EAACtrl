@@ -2186,6 +2186,11 @@ namespace EAACtrl
         {
             PlanetariumSwitch();
         }
+
+        private void cbStellariumShowDSOImage_CheckedChanged(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("actionShow_DSO_Textures", cbStellariumShowDSOImage.Checked.ToString());
+        }
     }
 
     // New AP classes

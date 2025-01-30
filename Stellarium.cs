@@ -139,14 +139,34 @@ namespace EAACtrl
             return result;
         }
 
-        public string GetStelProperty(string sName)
+        private JsonDocument jsonStellariumProperties = null;
+
+        private bool GetStellariumProperties()
         {
             string sWebServiceURL = $"http://{IPAddress}:{Port}/api/stelproperty/list";
             string result = GetRequest(sWebServiceURL);
 
-            if (result != "exception")
+            if (!string.IsNullOrEmpty(result))
             {
-                JsonDocument jsonStellariumProperties = JsonDocument.Parse(result);
+                if (result != "exception")
+                {
+                    jsonStellariumProperties = JsonDocument.Parse(result);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public string GetStelProperty(string sName, bool usePersisted = false)
+        {
+            if (!usePersisted || jsonStellariumProperties == null)
+            {
+                GetStellariumProperties();
+            }
+
+            if (jsonStellariumProperties != null)
+            {
                 if (jsonStellariumProperties.RootElement.TryGetProperty(sName, out JsonElement property))
                 {
                     property.TryGetProperty("value", out JsonElement value);
@@ -163,7 +183,7 @@ namespace EAACtrl
             }
 
             sMsg = $"StelProp {sName}, {sMsg}";
-            return result;
+            return "";
         }
 
         public string SetStelProperty(string sName, string sValue)

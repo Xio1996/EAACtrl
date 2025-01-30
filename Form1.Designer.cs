@@ -159,6 +159,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
+            this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -1234,6 +1235,7 @@
             // 
             // tabpStellarium
             // 
+            this.tabpStellarium.Controls.Add(this.cbStellariumShowDSOImage);
             this.tabpStellarium.Controls.Add(this.btnImagerView);
             this.tabpStellarium.Controls.Add(this.btnSlew);
             this.tabpStellarium.Controls.Add(this.cbStellariumMinorBodyMarkers);
@@ -1754,7 +1756,7 @@
             this.btnAPtoFront.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnAPtoFront.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnAPtoFront.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnAPtoFront.Location = new System.Drawing.Point(101, 341);
+            this.btnAPtoFront.Location = new System.Drawing.Point(100, 343);
             this.btnAPtoFront.Name = "btnAPtoFront";
             this.btnAPtoFront.Size = new System.Drawing.Size(44, 32);
             this.btnAPtoFront.TabIndex = 41;
@@ -1769,7 +1771,7 @@
             this.btnSwitchPlanatariumToFront.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnSwitchPlanatariumToFront.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnSwitchPlanatariumToFront.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSwitchPlanatariumToFront.Location = new System.Drawing.Point(143, 341);
+            this.btnSwitchPlanatariumToFront.Location = new System.Drawing.Point(146, 343);
             this.btnSwitchPlanatariumToFront.Name = "btnSwitchPlanatariumToFront";
             this.btnSwitchPlanatariumToFront.Size = new System.Drawing.Size(44, 32);
             this.btnSwitchPlanatariumToFront.TabIndex = 42;
@@ -1777,6 +1779,19 @@
             this.toolTip1.SetToolTip(this.btnSwitchPlanatariumToFront, "Search Options");
             this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
             this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
+            // 
+            // cbStellariumShowDSOImage
+            // 
+            this.cbStellariumShowDSOImage.AutoSize = true;
+            this.cbStellariumShowDSOImage.Checked = true;
+            this.cbStellariumShowDSOImage.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbStellariumShowDSOImage.Location = new System.Drawing.Point(100, 82);
+            this.cbStellariumShowDSOImage.Name = "cbStellariumShowDSOImage";
+            this.cbStellariumShowDSOImage.Size = new System.Drawing.Size(98, 23);
+            this.cbStellariumShowDSOImage.TabIndex = 46;
+            this.cbStellariumShowDSOImage.Text = "DSO Image";
+            this.cbStellariumShowDSOImage.UseVisualStyleBackColor = true;
+            this.cbStellariumShowDSOImage.CheckedChanged += new System.EventHandler(this.cbStellariumShowDSOImage_CheckedChanged);
             // 
             // frmEAACP
             // 
@@ -1973,6 +1988,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox txtStellariumPassword;
         private System.Windows.Forms.TextBox txtAPPassword;
+        private System.Windows.Forms.CheckBox cbStellariumShowDSOImage;
     }
 }
 
