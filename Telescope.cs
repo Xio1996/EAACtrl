@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ASCOM.DeviceInterface;
 using ASCOM.Utilities;
 using ASCOM.DriverAccess;
-using System.Security.Cryptography;
-using System.Windows.Forms;
 
 namespace EAACtrl
 {

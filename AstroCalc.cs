@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ASCOM.Astrometry;
 using ASCOM.Utilities;
-using CefSharp.Structs;
 
 namespace EAACtrl
 {

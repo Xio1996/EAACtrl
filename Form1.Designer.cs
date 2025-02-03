@@ -120,6 +120,7 @@
             this.tbMessages = new System.Windows.Forms.TextBox();
             this.tabPlanetarium = new System.Windows.Forms.TabControl();
             this.tabpStellarium = new System.Windows.Forms.TabPage();
+            this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
             this.btnImagerView = new System.Windows.Forms.Button();
             this.btnSlew = new System.Windows.Forms.Button();
             this.cbStellariumMinorBodyMarkers = new System.Windows.Forms.CheckBox();
@@ -159,7 +160,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
-            this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -816,6 +816,7 @@
             this.lblTelescope.Size = new System.Drawing.Size(43, 17);
             this.lblTelescope.TabIndex = 41;
             this.lblTelescope.Text = "label3";
+            this.lblTelescope.Click += new System.EventHandler(this.lblTelescope_Click);
             // 
             // btnTelescope
             // 
@@ -1259,6 +1260,19 @@
             this.tabpStellarium.TabIndex = 0;
             this.tabpStellarium.Text = "Stellarium";
             this.tabpStellarium.UseVisualStyleBackColor = true;
+            // 
+            // cbStellariumShowDSOImage
+            // 
+            this.cbStellariumShowDSOImage.AutoSize = true;
+            this.cbStellariumShowDSOImage.Checked = true;
+            this.cbStellariumShowDSOImage.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbStellariumShowDSOImage.Location = new System.Drawing.Point(100, 82);
+            this.cbStellariumShowDSOImage.Name = "cbStellariumShowDSOImage";
+            this.cbStellariumShowDSOImage.Size = new System.Drawing.Size(98, 23);
+            this.cbStellariumShowDSOImage.TabIndex = 46;
+            this.cbStellariumShowDSOImage.Text = "DSO Image";
+            this.cbStellariumShowDSOImage.UseVisualStyleBackColor = true;
+            this.cbStellariumShowDSOImage.CheckedChanged += new System.EventHandler(this.cbStellariumShowDSOImage_CheckedChanged);
             // 
             // btnImagerView
             // 
@@ -1779,19 +1793,6 @@
             this.toolTip1.SetToolTip(this.btnSwitchPlanatariumToFront, "Search Options");
             this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
             this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
-            // 
-            // cbStellariumShowDSOImage
-            // 
-            this.cbStellariumShowDSOImage.AutoSize = true;
-            this.cbStellariumShowDSOImage.Checked = true;
-            this.cbStellariumShowDSOImage.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbStellariumShowDSOImage.Location = new System.Drawing.Point(100, 82);
-            this.cbStellariumShowDSOImage.Name = "cbStellariumShowDSOImage";
-            this.cbStellariumShowDSOImage.Size = new System.Drawing.Size(98, 23);
-            this.cbStellariumShowDSOImage.TabIndex = 46;
-            this.cbStellariumShowDSOImage.Text = "DSO Image";
-            this.cbStellariumShowDSOImage.UseVisualStyleBackColor = true;
-            this.cbStellariumShowDSOImage.CheckedChanged += new System.EventHandler(this.cbStellariumShowDSOImage_CheckedChanged);
             // 
             // frmEAACP
             // 

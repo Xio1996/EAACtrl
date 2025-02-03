@@ -15,7 +15,6 @@ using System.Drawing;
 using System.Net.Http;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using CefSharp.DevTools.Database;
 
 namespace EAACtrl
 {
@@ -2190,6 +2189,11 @@ namespace EAACtrl
         private void cbStellariumShowDSOImage_CheckedChanged(object sender, EventArgs e)
         {
             Stellarium.SetStelProperty("actionShow_DSO_Textures", cbStellariumShowDSOImage.Checked.ToString());
+        }
+
+        private void lblTelescope_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

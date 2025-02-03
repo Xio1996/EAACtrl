@@ -1,12 +1,7 @@
-﻿using CefSharp.DevTools.DOMSnapshot;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace EAACtrl
 {
