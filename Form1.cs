@@ -1831,7 +1831,7 @@ namespace EAACtrl
                             StellCount = 0; ;
                         }
 
-                        if (StellCount==0)
+                        if (StellCount==0 && cbStelTelePointer.Checked)
                         {
                             Stellarium.MarkTelescopePosition(lblTeleRA2000.Text, lblTeleDec2000.Text, 2000);
                         }
