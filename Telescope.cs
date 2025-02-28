@@ -432,14 +432,14 @@ namespace EAACtrl
         {
             bool result = false;
             sMsg = "";
-
-            if (Telescope == null)
-            {
-                Telescope = new Telescope(TelescopeID);
-            }
-
+            
             try
             {
+                if (Telescope == null)
+                {
+                    Telescope = new Telescope(TelescopeID);
+                }
+
                 Telescope.Connected = true;
                 result = true;
             }

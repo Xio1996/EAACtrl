@@ -313,6 +313,7 @@ namespace EAACtrl
             lblTelescope.Text = Properties.Settings.Default.ASCOMTelescope;
             txtAPPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.Auth);
             txtStellariumPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword);
+            cbStelTelePointer.Checked = Properties.Settings.Default.StTelescopePointer;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -431,23 +432,23 @@ namespace EAACtrl
                 this.Width = 250;
                 //frmEAACP.ActiveForm.Width = 240;
                 btnExpand.Text = ">>";
-                if (EAATelescope.Connected)
-                {
-                    StopTelescopeStatus();
-                }
+                //if (EAATelescope.Connected)
+                //{
+                //    StopTelescopeStatus();
+                //}
             }
             else
             {
                 frmEAACP.ActiveForm.Width = 630;
                 btnExpand.Text = "<<";
-                if (EAATelescope.Connected)
-                {
-                    if (tcExtra.SelectedIndex == 1)
-                    {
-                        StellCount = 0;
-                        StartTelescopeStatus();
-                    }
-                }
+                //if (EAATelescope.Connected)
+                //{
+                //    if (tcExtra.SelectedIndex == 1)
+                //    {
+                //        StellCount = 0;
+                //        StartTelescopeStatus();
+                //    }
+                //}
             }
             bExpanded = !bExpanded;
         }
@@ -507,6 +508,7 @@ namespace EAACtrl
             Properties.Settings.Default.ASCOMTelescope = lblTelescope.Text;
             Properties.Settings.Default.StelPassword = EncryptionHelper.Encrypt(txtStellariumPassword.Text.Trim());
             Properties.Settings.Default.Auth = EncryptionHelper.Encrypt(txtAPPassword.Text.Trim());
+            Properties.Settings.Default.StTelescopePointer = cbStelTelePointer.Checked;
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -1859,7 +1861,12 @@ namespace EAACtrl
                     // Only get this once. It is JNOW for CPWI.
                     lblTeleEquCoordType.Text = EAATelescope.EquatorialSystem.ToString();
                     Speak("Telescope connected");
-                    StartTelescopeStatus();
+
+                    if (cbStelTelePointer.Checked)
+                    {
+                        StartTelescopeStatus();
+                    }
+
                     WriteMessage("Telescope: Connected\r\n");
 
                 }
@@ -1874,6 +1881,7 @@ namespace EAACtrl
             {
                 StopTelescopeStatus();
                 EAATelescope.Disconnect();
+                Speak("Telescope disconnected");
                 WriteMessage("Telescope: Disconnected\r\n");
 
             }
@@ -1919,7 +1927,7 @@ namespace EAACtrl
 
         private void tcExtra_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (EAATelescope.Connected)
+           /* if (EAATelescope.Connected)
             {
                 if (tcExtra.SelectedIndex == 1)
                 {
@@ -1930,7 +1938,7 @@ namespace EAACtrl
                 {
                     StopTelescopeStatus();
                 }
-            }
+            } */
         }
 
         private void btnStabilise_Click(object sender, EventArgs e)
@@ -2199,6 +2207,24 @@ namespace EAACtrl
         private void lblTelescope_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void cbStelTelePointer_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cbStelTelePointer.Checked)
+            {
+                if (EAATelescope.Connected)
+                {
+                    StartTelescopeStatus();
+                }
+            }
+            else
+            {
+                if (EAATelescope.Connected)
+                {
+                    StopTelescopeStatus();
+                }
+            }
         }
     }
 

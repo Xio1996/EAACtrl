@@ -836,5 +836,17 @@ namespace EAACtrl.Properties {
                 this["Auth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StTelescopePointer {
+            get {
+                return ((bool)(this["StTelescopePointer"]));
+            }
+            set {
+                this["StTelescopePointer"] = value;
+            }
+        }
     }
 }

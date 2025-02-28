@@ -160,6 +160,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
+            this.cbStelTelePointer = new System.Windows.Forms.CheckBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -989,6 +990,7 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.cbStelTelePointer);
             this.tpConfig.Controls.Add(this.label12);
             this.tpConfig.Controls.Add(this.label10);
             this.tpConfig.Controls.Add(this.txtStellariumPassword);
@@ -1794,6 +1796,19 @@
             this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
             this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
             // 
+            // cbStelTelePointer
+            // 
+            this.cbStelTelePointer.AutoSize = true;
+            this.cbStelTelePointer.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
+            this.cbStelTelePointer.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.cbStelTelePointer.Location = new System.Drawing.Point(129, 282);
+            this.cbStelTelePointer.Name = "cbStelTelePointer";
+            this.cbStelTelePointer.Size = new System.Drawing.Size(127, 23);
+            this.cbStelTelePointer.TabIndex = 42;
+            this.cbStelTelePointer.Text = "Stel Tele Pointer";
+            this.cbStelTelePointer.UseVisualStyleBackColor = true;
+            this.cbStelTelePointer.CheckedChanged += new System.EventHandler(this.cbStelTelePointer_CheckedChanged);
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -1990,6 +2005,7 @@
         private System.Windows.Forms.TextBox txtStellariumPassword;
         private System.Windows.Forms.TextBox txtAPPassword;
         private System.Windows.Forms.CheckBox cbStellariumShowDSOImage;
+        private System.Windows.Forms.CheckBox cbStelTelePointer;
     }
 }
 
