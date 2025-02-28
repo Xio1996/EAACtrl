@@ -688,7 +688,7 @@ namespace EAACtrl
 
             if (cbImagerZoom.Checked)
             {
-               dblFOV = 1.05;
+               dblFOV = 0.66;
             }
 
             switch (tabPlanetarium.SelectedIndex)
@@ -710,6 +710,11 @@ namespace EAACtrl
                     sResult = Stellarium.SyncStellariumToAPObject(SelectedObject.ID, RA, Dec, SelectedObject.Type);
                     if ("ok" == sResult)
                     {
+                        if (cbImagerZoom.Checked)
+                        {
+                            Stellarium.SetStellariumFOV(dblFOV);
+                        }
+
                         Speak("Selected");
                     }
                     else
