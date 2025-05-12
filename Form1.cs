@@ -40,9 +40,9 @@ namespace EAACtrl
         private MqttClient mqttSharpCap;
         private string mqttClientID = "";
         // TerraNova
-        //private string mqttBroker = "192.168.0.143";
+        private string mqttBroker = "192.168.50.226";
         // Odin
-        private string mqttBroker = "192.168.0.83";
+        //private string mqttBroker = "192.168.50.125";
 
         private string TargetName = "";
         private string SelectedRA = "";
@@ -86,6 +86,59 @@ namespace EAACtrl
 
         // Astro Class
         private AstroCalc AstroCalc = new AstroCalc();
+
+        enum SessionState
+        {
+            None,
+            Target,
+            Observe,
+            Log,
+            LogPlus,
+            Find
+        }
+
+        // Observing session state
+        private static SessionState sessionState = SessionState.None;
+
+        private bool SetSessionState(SessionState state)
+        {
+            // If live stacking is active then warn this will cancel the current session
+            if (sessionState == SessionState.Observe && (state == SessionState.Observe || state == SessionState.Target || state == SessionState.Find || state == SessionState.None))
+            {
+                DialogResult result = MessageBox.Show("Do you want to cancel Live Stacking?", "Confirmation", MessageBoxButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    sessionState = state;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (state == SessionState.Log || state == SessionState.LogPlus)
+            {
+                // Only allow logging if live stacking is active
+                if (!(sessionState == SessionState.Observe))
+                {
+                    DialogResult result = MessageBox.Show("Not Live Stacking!", "Confirmation", MessageBoxButtons.OK);
+                    if (result == DialogResult.OK)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                return true;
+            }
+
+            sessionState = state;
+            return true;
+        }
 
         void StoreSelectedObject(string RA, string Dec)
         {
@@ -780,6 +833,11 @@ namespace EAACtrl
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.Target))
+            {
+                return;
+            }
+
             WriteMessage("Target start.\r\n");
             StopObserveClock();
 
@@ -798,7 +856,7 @@ namespace EAACtrl
             // Update the UI
             TargetName = APHelper.TargetDisplay(SelectedObject);
             SetOverlayText(TargetName);
-            this.Text = "EAACtrl 3.0 - " + TargetName;
+            this.Text = "EAACtrl 3.2 - " + TargetName;
             
             if (cbSyncPlanetarium.Checked)
             {
@@ -838,6 +896,11 @@ namespace EAACtrl
 
         private void btnCapture_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.Observe))
+            {
+                return;
+            }
+
             string sProfile = "";
             
             StopObserveClock();
@@ -871,8 +934,8 @@ namespace EAACtrl
                 {
                     // Copy image file to desktop PC SharpCap folder
                     string sDestImagePath = sImagePath.Replace(@"C:\", @"C:\"); // Not needed unless path on desktop changes
-                    //string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
-                    string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\ODIN\");
+                    string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
+                    //string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\ODIN\");
                     Directory.CreateDirectory(sDestImagePath.Substring(0, sDestImagePath.LastIndexOf(@"\")));
                     File.Copy(sSrcImagePath, sDestImagePath, true);
 
@@ -880,8 +943,8 @@ namespace EAACtrl
                     {
                         // Copy image settings file to desktop PC SharpCap folder
                         string sDestSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"C:\"); // Not needed unless path on desktop changes
-                        //string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
-                        string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\ODIN\");
+                        string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
+                        //string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\ODIN\");
                         Directory.CreateDirectory(sDestSettingsPath.Substring(0, sDestSettingsPath.LastIndexOf(@"\")));
                         File.Copy(sSrcSettingsPath, sDestSettingsPath, true);
 
@@ -927,15 +990,28 @@ namespace EAACtrl
 
         private void btnLog_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.Log))
+            {
+                return;
+            }
             SharpCapCmd("Log");
         }
         private void btnLogPlus_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.LogPlus))
+            {
+                return;
+            }
             SharpCapCmd("LogAppend");
         }
 
         private void btnFind_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.Find))
+            {
+                return;
+            }
+
             StopObserveClock();
 
             SharpCapCmd("Find");
@@ -1943,6 +2019,12 @@ namespace EAACtrl
 
         private void btnStabilise_Click(object sender, EventArgs e)
         {
+            // Check we are not live stacking
+            if ( !SetSessionState(SessionState.None))
+            {
+                return;
+            }
+
             EAATelescope.Stabilise();
         }
 
@@ -2079,6 +2161,11 @@ namespace EAACtrl
 
         private void btnSlew_Click(object sender, EventArgs e)
         {
+            if (!SetSessionState(SessionState.None))
+            {
+                return;
+            }
+
             // Fetch currently selected object in Stellarium
             APCmdObject obj = Stellarium.StellariumGetSelectedObjectInfo();
             if (obj != null)

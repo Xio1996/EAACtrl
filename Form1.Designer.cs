@@ -97,6 +97,7 @@
             this.btnSAMPDisconnect = new System.Windows.Forms.Button();
             this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
+            this.cbStelTelePointer = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.txtStellariumPassword = new System.Windows.Forms.TextBox();
@@ -160,7 +161,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
-            this.cbStelTelePointer = new System.Windows.Forms.CheckBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -191,6 +191,7 @@
             this.btnTarget.Size = new System.Drawing.Size(104, 27);
             this.btnTarget.TabIndex = 2;
             this.btnTarget.Text = "Target";
+            this.toolTip1.SetToolTip(this.btnTarget, "Set target object");
             this.btnTarget.UseVisualStyleBackColor = false;
             this.btnTarget.Click += new System.EventHandler(this.btnTarget_Click);
             // 
@@ -205,6 +206,7 @@
             this.btnView.Size = new System.Drawing.Size(136, 32);
             this.btnView.TabIndex = 1;
             this.btnView.Text = "Sync Planetarium";
+            this.toolTip1.SetToolTip(this.btnView, "Sync planetarium to selected AstroPlanner object");
             this.btnView.UseVisualStyleBackColor = false;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -232,6 +234,7 @@
             this.btnFind.Size = new System.Drawing.Size(104, 27);
             this.btnFind.TabIndex = 7;
             this.btnFind.Text = "SC Find";
+            this.toolTip1.SetToolTip(this.btnFind, "Set SharpCap find profile");
             this.btnFind.UseVisualStyleBackColor = false;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
             // 
@@ -247,6 +250,7 @@
             this.btnCapture.Size = new System.Drawing.Size(104, 27);
             this.btnCapture.TabIndex = 8;
             this.btnCapture.Text = "Observe";
+            this.toolTip1.SetToolTip(this.btnCapture, "Observe object");
             this.btnCapture.UseVisualStyleBackColor = false;
             this.btnCapture.Click += new System.EventHandler(this.btnCapture_Click);
             // 
@@ -262,6 +266,7 @@
             this.btnLog.Size = new System.Drawing.Size(104, 27);
             this.btnLog.TabIndex = 9;
             this.btnLog.Text = "Log";
+            this.toolTip1.SetToolTip(this.btnLog, "Create log entry");
             this.btnLog.UseVisualStyleBackColor = false;
             this.btnLog.Click += new System.EventHandler(this.btnLog_Click);
             // 
@@ -277,6 +282,7 @@
             this.btnLogPlus.Size = new System.Drawing.Size(104, 27);
             this.btnLogPlus.TabIndex = 15;
             this.btnLogPlus.Text = "Log+";
+            this.toolTip1.SetToolTip(this.btnLogPlus, "Append/Create a log entry");
             this.btnLogPlus.UseVisualStyleBackColor = false;
             this.btnLogPlus.Click += new System.EventHandler(this.btnLogPlus_Click);
             // 
@@ -572,7 +578,7 @@
             // 
             this.btnTracking.Location = new System.Drawing.Point(7, 219);
             this.btnTracking.Name = "btnTracking";
-            this.btnTracking.Size = new System.Drawing.Size(125, 27);
+            this.btnTracking.Size = new System.Drawing.Size(101, 27);
             this.btnTracking.TabIndex = 50;
             this.btnTracking.Text = "Tracking";
             this.btnTracking.UseVisualStyleBackColor = true;
@@ -581,9 +587,9 @@
             // btnAPASCOMTest
             // 
             this.btnAPASCOMTest.Enabled = false;
-            this.btnAPASCOMTest.Location = new System.Drawing.Point(7, 267);
+            this.btnAPASCOMTest.Location = new System.Drawing.Point(114, 219);
             this.btnAPASCOMTest.Name = "btnAPASCOMTest";
-            this.btnAPASCOMTest.Size = new System.Drawing.Size(125, 27);
+            this.btnAPASCOMTest.Size = new System.Drawing.Size(121, 27);
             this.btnAPASCOMTest.TabIndex = 49;
             this.btnAPASCOMTest.Text = "AP/ASCOM Test";
             this.btnAPASCOMTest.UseVisualStyleBackColor = true;
@@ -591,6 +597,7 @@
             // 
             // btnAddAlignmentPoint
             // 
+            this.btnAddAlignmentPoint.Enabled = false;
             this.btnAddAlignmentPoint.Location = new System.Drawing.Point(114, 186);
             this.btnAddAlignmentPoint.Name = "btnAddAlignmentPoint";
             this.btnAddAlignmentPoint.Size = new System.Drawing.Size(121, 27);
@@ -1010,6 +1017,19 @@
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
             // 
+            // cbStelTelePointer
+            // 
+            this.cbStelTelePointer.AutoSize = true;
+            this.cbStelTelePointer.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
+            this.cbStelTelePointer.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.cbStelTelePointer.Location = new System.Drawing.Point(129, 282);
+            this.cbStelTelePointer.Name = "cbStelTelePointer";
+            this.cbStelTelePointer.Size = new System.Drawing.Size(127, 23);
+            this.cbStelTelePointer.TabIndex = 42;
+            this.cbStelTelePointer.Text = "Stel Tele Pointer";
+            this.cbStelTelePointer.UseVisualStyleBackColor = true;
+            this.cbStelTelePointer.CheckedChanged += new System.EventHandler(this.cbStelTelePointer_CheckedChanged);
+            // 
             // label12
             // 
             this.label12.AutoSize = true;
@@ -1297,12 +1317,12 @@
             this.btnSlew.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnSlew.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnSlew.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnSlew.Location = new System.Drawing.Point(158, 139);
+            this.btnSlew.Location = new System.Drawing.Point(103, 141);
             this.btnSlew.Name = "btnSlew";
-            this.btnSlew.Size = new System.Drawing.Size(58, 32);
+            this.btnSlew.Size = new System.Drawing.Size(114, 32);
             this.btnSlew.TabIndex = 44;
-            this.btnSlew.Text = "SlewS";
-            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object");
+            this.btnSlew.Text = "Slew To Obj";
+            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object in Stellarium");
             this.btnSlew.UseVisualStyleBackColor = false;
             this.btnSlew.Click += new System.EventHandler(this.btnSlew_Click);
             // 
@@ -1350,9 +1370,9 @@
             this.btnFOVOptions.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVOptions.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVOptions.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVOptions.Location = new System.Drawing.Point(44, 108);
+            this.btnFOVOptions.Location = new System.Drawing.Point(159, 105);
             this.btnFOVOptions.Name = "btnFOVOptions";
-            this.btnFOVOptions.Size = new System.Drawing.Size(44, 32);
+            this.btnFOVOptions.Size = new System.Drawing.Size(57, 32);
             this.btnFOVOptions.TabIndex = 40;
             this.btnFOVOptions.Text = "Opt";
             this.toolTip1.SetToolTip(this.btnFOVOptions, "Search Options");
@@ -1365,11 +1385,11 @@
             this.btnFOVClear.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVClear.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVClear.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVClear.Location = new System.Drawing.Point(-1, 108);
+            this.btnFOVClear.Location = new System.Drawing.Point(103, 105);
             this.btnFOVClear.Name = "btnFOVClear";
-            this.btnFOVClear.Size = new System.Drawing.Size(44, 32);
+            this.btnFOVClear.Size = new System.Drawing.Size(54, 32);
             this.btnFOVClear.TabIndex = 39;
-            this.btnFOVClear.Text = "X";
+            this.btnFOVClear.Text = "Clr";
             this.toolTip1.SetToolTip(this.btnFOVClear, "Clear search results");
             this.btnFOVClear.UseVisualStyleBackColor = false;
             this.btnFOVClear.Click += new System.EventHandler(this.btnFOVClear_Click);
@@ -1380,11 +1400,11 @@
             this.btnFOVSearch.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
             this.btnFOVSearch.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnFOVSearch.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnFOVSearch.Location = new System.Drawing.Point(-1, 76);
+            this.btnFOVSearch.Location = new System.Drawing.Point(-1, 105);
             this.btnFOVSearch.Name = "btnFOVSearch";
-            this.btnFOVSearch.Size = new System.Drawing.Size(88, 32);
+            this.btnFOVSearch.Size = new System.Drawing.Size(103, 32);
             this.btnFOVSearch.TabIndex = 38;
-            this.btnFOVSearch.Text = "FOV ?";
+            this.btnFOVSearch.Text = "FOV Search";
             this.toolTip1.SetToolTip(this.btnFOVSearch, "FOV Search");
             this.btnFOVSearch.UseVisualStyleBackColor = false;
             this.btnFOVSearch.Click += new System.EventHandler(this.btnFOVSearch_Click);
@@ -1397,9 +1417,9 @@
             this.btnStellariumClearMarkers.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnStellariumClearMarkers.Location = new System.Drawing.Point(2, 143);
             this.btnStellariumClearMarkers.Name = "btnStellariumClearMarkers";
-            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(54, 30);
+            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(95, 30);
             this.btnStellariumClearMarkers.TabIndex = 37;
-            this.btnStellariumClearMarkers.Text = "X Ma";
+            this.btnStellariumClearMarkers.Text = "Clr Marker";
             this.toolTip1.SetToolTip(this.btnStellariumClearMarkers, "Clear Markers");
             this.btnStellariumClearMarkers.UseVisualStyleBackColor = false;
             this.btnStellariumClearMarkers.Click += new System.EventHandler(this.btnStellariumClearMarkers_Click);
@@ -1777,7 +1797,7 @@
             this.btnAPtoFront.Size = new System.Drawing.Size(44, 32);
             this.btnAPtoFront.TabIndex = 41;
             this.btnAPtoFront.Text = "AP";
-            this.toolTip1.SetToolTip(this.btnAPtoFront, "Search Options");
+            this.toolTip1.SetToolTip(this.btnAPtoFront, "AstroPlanner to front");
             this.btnAPtoFront.UseVisualStyleBackColor = false;
             this.btnAPtoFront.Click += new System.EventHandler(this.btnAPtoFront_Click);
             // 
@@ -1792,22 +1812,9 @@
             this.btnSwitchPlanatariumToFront.Size = new System.Drawing.Size(44, 32);
             this.btnSwitchPlanatariumToFront.TabIndex = 42;
             this.btnSwitchPlanatariumToFront.Text = "Pl";
-            this.toolTip1.SetToolTip(this.btnSwitchPlanatariumToFront, "Search Options");
+            this.toolTip1.SetToolTip(this.btnSwitchPlanatariumToFront, "Planetarium to front");
             this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
             this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
-            // 
-            // cbStelTelePointer
-            // 
-            this.cbStelTelePointer.AutoSize = true;
-            this.cbStelTelePointer.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
-            this.cbStelTelePointer.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbStelTelePointer.Location = new System.Drawing.Point(129, 282);
-            this.cbStelTelePointer.Name = "cbStelTelePointer";
-            this.cbStelTelePointer.Size = new System.Drawing.Size(127, 23);
-            this.cbStelTelePointer.TabIndex = 42;
-            this.cbStelTelePointer.Text = "Stel Tele Pointer";
-            this.cbStelTelePointer.UseVisualStyleBackColor = true;
-            this.cbStelTelePointer.CheckedChanged += new System.EventHandler(this.cbStelTelePointer_CheckedChanged);
             // 
             // frmEAACP
             // 
@@ -1838,7 +1845,7 @@
             this.Name = "frmEAACP";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "EAACtrl 3.1";
+            this.Text = "EAACtrl 3.2";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmEAACP_FormClosing);
             this.Load += new System.EventHandler(this.frmEAACP_Load);
