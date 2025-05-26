@@ -490,7 +490,8 @@
             "DSA (AP only)",
             "IDs (newline list)",
             "RA/Dec J2000 (CDS/Simbad)",
-            "SAMP Sky Coords (Aladin)"});
+            "SAMP Sky Coords (Aladin)",
+            "JPL Asteroid Plot (Stellarium)"});
             this.cbAPGetObjects.Location = new System.Drawing.Point(130, 9);
             this.cbAPGetObjects.Name = "cbAPGetObjects";
             this.cbAPGetObjects.Size = new System.Drawing.Size(230, 25);
@@ -1417,9 +1418,9 @@
             this.btnStellariumClearMarkers.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnStellariumClearMarkers.Location = new System.Drawing.Point(2, 143);
             this.btnStellariumClearMarkers.Name = "btnStellariumClearMarkers";
-            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(95, 30);
+            this.btnStellariumClearMarkers.Size = new System.Drawing.Size(99, 30);
             this.btnStellariumClearMarkers.TabIndex = 37;
-            this.btnStellariumClearMarkers.Text = "Clr Marker";
+            this.btnStellariumClearMarkers.Text = "Clr Markers";
             this.toolTip1.SetToolTip(this.btnStellariumClearMarkers, "Clear Markers");
             this.btnStellariumClearMarkers.UseVisualStyleBackColor = false;
             this.btnStellariumClearMarkers.Click += new System.EventHandler(this.btnStellariumClearMarkers_Click);

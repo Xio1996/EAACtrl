@@ -105,6 +105,31 @@ namespace EAACtrl
             return dms;
         }
 
+        public double DMSToDecDegrees(string hours, string minutes, string seconds)
+        {
+            if (string.IsNullOrEmpty(hours) || string.IsNullOrEmpty(minutes) || string.IsNullOrEmpty(seconds))
+            {
+                return -1; // Indicate invalid input
+            }
+
+            if (!double.TryParse(hours, out double hourValue))
+            {
+                return -1;
+            }
+
+            if (!double.TryParse(minutes, out double minuteValue))
+            {
+                return -1;
+            }
+
+            if (!double.TryParse(seconds, out double secondValue))
+            {
+                return -1;
+            }
+
+            return hourValue + (minuteValue / 60.0) + (secondValue / 3600.0);
+        }
+
         public string TargetDisplay(APCmdObject apObj)
         {
             // How many characters of the objects name to display.

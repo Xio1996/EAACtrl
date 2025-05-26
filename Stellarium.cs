@@ -294,8 +294,34 @@ namespace EAACtrl
         {
             string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
 
+            sID = sID.Replace(" ", "\\u00A0");
+
             string sInput = $"sObject=\"{sID}\";sRA=\"{sRA}\";sDec=\"{sDec}\";sType=\"{sType}\";\r\n";
             string sCode = sInput + "objmap = core.getObjectInfo(sObject);\r\nsInfo = new String(core.mapToString(objmap));\r\nsFound=sInfo.slice(5,10);\r\n\r\nif (sFound==\"found\")\r\n{\r\n\tCustomObjectMgr.addCustomObject(sObject, sRA, sDec, true);\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n\tcore.addToSelectedObjectInfoString(\"AP Type: \" + sType,false)\r\n}\r\nelse\r\n{\r\n\tcore.output(\"Object found\");\r\n\tcore.selectObjectByName(sObject,true);\r\n\tcore.moveToSelectedObject();\r\n\tStelMovementMgr.setFlagTracking(true);\r\n}";
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("code", sCode)
+            });
+
+            string result = PostRequest(sWebServiceURL, content);
+            sMsg = $"StelSyncToAPObj ID={sID}, RA={sRA}, Dec={sDec}, Type={sType}, {sMsg}";
+            return result;
+        }
+
+        public string SyncStellariumToJPLObject(string sID, string sRA, string sDec, string sDateTime, string sMag, string sDistAU, string sDistKM, string sDistLT, string sDistDelta, string sType = "JPL Horizons")
+        {
+            string sWebServiceURL = $"http://{IPAddress}:{Port}/api/scripts/direct";
+
+            string sInput = $"sObject=\"{sID}\";sRA=\"{sRA}\";sDec=\"{sDec}\";sType=\"{sType}\";\r\n";
+            string sCode = sInput + "CustomObjectMgr.addCustomObject(sObject, sRA, sDec, true);\r\ncore.selectObjectByName(sObject,true);\r\ncore.moveToSelectedObject();\r\nStelMovementMgr.setFlagTracking(true);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Source: {sType}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Ephemeris DateTime: {sDateTime}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Magnitude: {sMag}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Distance: {sDistAU}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Distance Light Time: {sDistLT}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Distance: {sDistKM}<br>\",false);\r\n";
+            sCode += $"core.addToSelectedObjectInfoString(\"Distance Delta: {sDistDelta}<br>\",false);\r\n";
 
             var content = new FormUrlEncodedContent(new[]
             {
