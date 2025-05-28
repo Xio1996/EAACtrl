@@ -42,6 +42,7 @@
             this.cbCaptureProfile = new System.Windows.Forms.ComboBox();
             this.tcExtra = new System.Windows.Forms.TabControl();
             this.tpTools = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             this.btnLogFullScreen = new System.Windows.Forms.Button();
             this.btnLogSharpCap = new System.Windows.Forms.Button();
             this.btnObsClkRst = new System.Windows.Forms.Button();
@@ -161,6 +162,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
+            this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -203,9 +205,9 @@
             this.btnView.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnView.Location = new System.Drawing.Point(5, 97);
             this.btnView.Name = "btnView";
-            this.btnView.Size = new System.Drawing.Size(136, 32);
+            this.btnView.Size = new System.Drawing.Size(104, 32);
             this.btnView.TabIndex = 1;
-            this.btnView.Text = "Sync Planetarium";
+            this.btnView.Text = "Sync Object";
             this.toolTip1.SetToolTip(this.btnView, "Sync planetarium to selected AstroPlanner object");
             this.btnView.UseVisualStyleBackColor = false;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
@@ -215,11 +217,12 @@
             this.cbImagerZoom.AutoSize = true;
             this.cbImagerZoom.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbImagerZoom.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbImagerZoom.Location = new System.Drawing.Point(143, 102);
+            this.cbImagerZoom.Location = new System.Drawing.Point(115, 93);
             this.cbImagerZoom.Name = "cbImagerZoom";
-            this.cbImagerZoom.Size = new System.Drawing.Size(71, 23);
+            this.cbImagerZoom.Size = new System.Drawing.Size(101, 23);
             this.cbImagerZoom.TabIndex = 3;
-            this.cbImagerZoom.Text = "Imager";
+            this.cbImagerZoom.Text = "Imager FOV";
+            this.toolTip1.SetToolTip(this.cbImagerZoom, "Set planetariun FOV to imager FOV");
             this.cbImagerZoom.UseVisualStyleBackColor = true;
             // 
             // btnFind
@@ -341,6 +344,7 @@
             // 
             // tpTools
             // 
+            this.tpTools.Controls.Add(this.button1);
             this.tpTools.Controls.Add(this.btnLogFullScreen);
             this.tpTools.Controls.Add(this.btnLogSharpCap);
             this.tpTools.Controls.Add(this.btnObsClkRst);
@@ -359,6 +363,16 @@
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(16, 261);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 40;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // btnLogFullScreen
             // 
@@ -1289,7 +1303,7 @@
             this.cbStellariumShowDSOImage.AutoSize = true;
             this.cbStellariumShowDSOImage.Checked = true;
             this.cbStellariumShowDSOImage.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbStellariumShowDSOImage.Location = new System.Drawing.Point(100, 82);
+            this.cbStellariumShowDSOImage.Location = new System.Drawing.Point(100, 81);
             this.cbStellariumShowDSOImage.Name = "cbStellariumShowDSOImage";
             this.cbStellariumShowDSOImage.Size = new System.Drawing.Size(98, 23);
             this.cbStellariumShowDSOImage.TabIndex = 46;
@@ -1817,12 +1831,27 @@
             this.btnSwitchPlanatariumToFront.UseVisualStyleBackColor = false;
             this.btnSwitchPlanatariumToFront.Click += new System.EventHandler(this.btnSwitchPlanatariumToFront_Click);
             // 
+            // cbSyncDateTime
+            // 
+            this.cbSyncDateTime.AutoSize = true;
+            this.cbSyncDateTime.Enabled = false;
+            this.cbSyncDateTime.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
+            this.cbSyncDateTime.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.cbSyncDateTime.Location = new System.Drawing.Point(115, 113);
+            this.cbSyncDateTime.Name = "cbSyncDateTime";
+            this.cbSyncDateTime.Size = new System.Drawing.Size(91, 23);
+            this.cbSyncDateTime.TabIndex = 43;
+            this.cbSyncDateTime.Text = "Date Time";
+            this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
+            this.cbSyncDateTime.UseVisualStyleBackColor = true;
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(616, 377);
+            this.Controls.Add(this.cbSyncDateTime);
             this.Controls.Add(this.btnSwitchPlanatariumToFront);
             this.Controls.Add(this.btnAPtoFront);
             this.Controls.Add(this.lblObserveTime);
@@ -2014,6 +2043,8 @@
         private System.Windows.Forms.TextBox txtAPPassword;
         private System.Windows.Forms.CheckBox cbStellariumShowDSOImage;
         private System.Windows.Forms.CheckBox cbStelTelePointer;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox cbSyncDateTime;
     }
 }
 

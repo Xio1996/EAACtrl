@@ -37,6 +37,82 @@
 //# Category: General
 //# MinVersion: 2.4b13
 //# Keywords: Minor Bodies, Asteroids, Search, JPL Small-Body Identification Tool
+// Object passed between AP and calling applications for Get and Put AP object
+class APCmdObject
+	dim ID as string
+	dim Name as string
+	dim Type as string
+	dim Size as string
+	dim Constellation as string
+	dim Catalogue as string
+	dim Distance as string
+	dim GalaxyType as string
+	dim PosAngle as integer
+	dim Magnitude as double
+	dim RA2000 as double
+	dim Dec2000 as double
+	dim ParallacticAngle as double
+	dim AssociatedCount as integer
+	
+	private sub CreateFromAPObject(Ob as APPlanObject)
+		ID=Ob.ID
+		Name = Ob.Name
+		Type = Ob.Type
+		Size = Ob.Size
+		Constellation = Ob.Constellation
+		Catalogue = Ob.Catalog
+		Distance = Ob.GetValueAsString("Distance")
+		GalaxyType = ""
+		PosAngle = Ob.PosAngle
+		Magnitude = Ob.Magnitude
+		RA2000 = Ob.RA
+		Dec2000 = Ob.Dec
+		ParallacticAngle = Ob.ParallacticAngle
+		AssociatedCount = Ob.AssociatedObjects().UBound+1
+	end sub
+	
+	// Used by Get and Put commands
+	sub Constructor(Ob as APPlanObject)
+		CreateFromAPObject(Ob)
+	end sub
+	
+	sub Constructor(Ob as APPlanObject, Distance as string, GalaxyType as string)
+		CreateFromAPObject(Ob)
+		self.Distance = Distance
+		self.GalaxyType = GalaxyType
+	end sub
+	
+	// Used by Search command
+	sub Constructor(CatOb as APCatalogObject, Constellation as string, Distance as string, GalaxyType as string)
+		ID = CatOb.ID
+		Name = CatOb.Name
+		Type = CatOb.Type
+		Size = CatOb.Size
+		Catalogue = CatOb.Catalog
+		self.Distance = Distance
+		self.GalaxyType = GalaxyType
+		self.Constellation = Constellation
+		PosAngle = CatOb.PosAngle
+		Magnitude = CatOb.Magnitude
+		RA2000 = CatOb.RA
+		Dec2000 = CatOb.Dec
+		ParallacticAngle = 0.0
+		AssociatedCount = 0
+	end sub
+	
+	// Serialisation of object JSON
+	public function CreateJSONObject() as string
+		dim sJSON  as string =""
+		sJSON = sJSON + "{""ID"":""" + ReplaceAll(ID,"""","\""") + ""","  + """Name"":""" + ReplaceAll(Name,"""","\""") + ""","  + """Type"":""" + Type + ""","
+		sJSON = sJSON + """Size"":""" + ReplaceAll(Size,"""","\""") + ""","  + """Constellation"":""" + Constellation + ""","  + """Catalogue"":""" + Catalogue + ""","
+		sJSON = sJSON + """Distance"":""" + Distance + ""","
+		sJSON = sJSON + """GalaxyType"":""" + GalaxyType + ""","
+		sJSON = sJSON + """PosAngle"":" + DoubleToStr(PosAngle) + ","  + """Magnitude"":" + DoubleToStr(Magnitude) + ","
+		sJSON = sJSON + """RA2000"":" + DoubleToStr(RA2000) + ","  + """Dec2000"":" + DoubleToStr(Dec2000) + ","  + """ParallacticAngle"":" + DoubleToStr(ParallacticAngle) + "," + """Associated"":" + Str(AssociatedCount) + "}"
+		return sJSON
+	end function
+	
+end class
 
 class MFMinorBodies
 	implements MultiFieldObject
@@ -1112,18 +1188,18 @@ end sub
 // Search Objects carries out a radius search around the currently selected object
 sub SearchObjects(iOption as integer, Params as string, ByRef Result as JSON)
 	
-	if Plan.SelectedObject = nil then
-		return
-	end if
-	
 	dim oSearch as APSearch = new APSearch
-	Debug "Do search", DoubleToStr(Plan.SelectedObject().RA), DoubleToStr(Plan.SelectedObject().Dec)
 	
 	// Get search filters
 	dim Magnitude as double = 999
 	dim bNoMag as boolean = false
 	dim sPA() as string = Split(Params,"|")
-	Debug Params, UBound(sPA)
+	Debug "SearchObjects:",Params, UBound(sPA)
+	
+	// If no RA/Dec and no selected object then nothing to search
+	if sPA(4)="999" and Plan.nSelectedObjects = 0 then
+		return
+	end if
 	
 	if sPA(0) <> "" then Magnitude = CDbl(sPA(0))
 	if sPA(2) = "1" then bNoMag = true
@@ -1246,7 +1322,10 @@ sub SearchObjects(iOption as integer, Params as string, ByRef Result as JSON)
 				end if
 			end if
 			
-			doc = doc + CreateJSONObject(oCatObj.ID, oCatObj.Name, oCatObj.Type, oCatObj.Size, oConst.Abbreviation, oCatObj.Catalog, sDistance, sGalaxyType, oCatObj.PosAngle, oCatObj.Magnitude, oCatObj.RA, oCatObj.Dec,0.0)
+			dim Ob as APCmdObject = new APCmdObject(oCatObj, oConst.Abbreviation, sDistance, sGalaxyType)
+			doc = doc + Ob.CreateJSONObject()
+			
+			//doc = doc + CreateJSONObject(oCatObj.ID, oCatObj.Name, oCatObj.Type, oCatObj.Size, oConst.Abbreviation, oCatObj.Catalog, sDistance, sGalaxyType, oCatObj.PosAngle, oCatObj.Magnitude, oCatObj.RA, oCatObj.Dec,0.0)
 			cnt = cnt + 1
 		next i
 		
@@ -1682,6 +1761,45 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 	end if
 end sub
 
+sub AstroPlannerStatus(iOption as integer, ByRef result as JSON)
+	dim APUTCDateTime as Date = Plan().GMTDateTime
+	dim APLocalDateTime as Date = Plan().LocalDateTime
+	
+	dim APFixedDate as string = "false"
+	if Plan.FixedDate then APFixedDate = "true"
+	
+	dim doc as string = "{"
+	doc = doc + """PlanName"":""" + Plan().Name + ""","
+	doc = doc + """Items"":" + Str(Plan().nItems) + ","
+	doc = doc + """FixedDate"":" + APFixedDate + ","
+	doc = doc + """DateTimeUTC"":""" + APUTCDateTime.SQLDateTime() + ""","
+	doc = doc + """DateTimeLocal"":""" + APLocalDateTime.SQLDateTime() + """"
+	doc = doc + "}"
+	Debug "AstroPlannerStatus:",doc
+	result.Load(doc)
+end sub
+
+sub SetProperties(iOption as integer, ByRef oCmd as JSON)
+	dim a,b as JSON = new JSON()
+	dim obj as APPlanObject
+	
+	a = oCmd.Child("Properties")
+	
+	dim i as integer
+	for i=0 to a.Count-1
+		b =a.Child(i)
+		Debug b.Child("Name"), b.Child("Value")
+		dim APProperty as string = b.Child("Name")
+		dim APValue as string = b.Child("Value")
+		
+		select case APProperty
+			case "datetime"
+			Debug "DateTime", APValue
+		end select
+
+	next i
+end sub
+
 // WARNING - this is going to attempt to move a physical object.
 sub SlewTelescope()
 	dim iResult as integer = -2
@@ -1775,6 +1893,10 @@ sub main()
 		PLM()	// Planetary Moons (script)
 	case 8
 		AFOVS() // Asteroid Field of View Search (script)
+	case 9
+		AstroPlannerStatus(iOption,result)
+	case 10
+		SetProperties(iOption,oCmd)
 	end select
 	//Debug result
 	// Pass the results back to the calling user

@@ -368,6 +368,7 @@ namespace EAACtrl
             txtAPPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.Auth);
             txtStellariumPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword);
             cbStelTelePointer.Checked = Properties.Settings.Default.StTelescopePointer;
+            cbSyncDateTime.Checked = Properties.Settings.Default.SyncAPView;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -563,6 +564,7 @@ namespace EAACtrl
             Properties.Settings.Default.StelPassword = EncryptionHelper.Encrypt(txtStellariumPassword.Text.Trim());
             Properties.Settings.Default.Auth = EncryptionHelper.Encrypt(txtAPPassword.Text.Trim());
             Properties.Settings.Default.StTelescopePointer = cbStelTelePointer.Checked;
+            Properties.Settings.Default.SyncAPView = cbSyncDateTime.Checked;
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -1034,6 +1036,46 @@ namespace EAACtrl
             APExecute(7, 0);
         }
 
+        private APCmdObject APGetStatus()
+        {
+            try
+            {
+                aAError.Reset();
+
+                APGetCmd getCmd = new APGetCmd();
+                getCmd.script = "EAAControl2";
+                getCmd.parameters = new APGetCmdParams();
+                getCmd.parameters.Cmd = 9;
+                getCmd.parameters.Option = 1;
+
+                string sOut = APExecuteScript(Uri.EscapeDataString(JsonSerializer.Serialize<APGetCmd>(getCmd)));
+                // Corrects a bug in AP that does not close the JSON documents correctly (missing })
+                if (sOut.Contains("}]}") && !sOut.Contains("}]}}"))
+                {
+                    sOut += "}";
+                }
+                if (aAError.ErrorNumber != 0)
+                {
+                    Speak(aAError.Message);
+                }
+                else
+                {
+                    //APGetCmdResult apObjects = JsonSerializer.Deserialize<APGetCmdResult>(sOut);
+                    //if (apObjects.error == 0 && apObjects.results.Objects != null)
+                    //{
+                    //    return apObjects.results.Objects[0];
+                    //}
+                    //else if (apObjects.error != 0)
+                    //{
+                    //    Speak(aAError.ErrorMapping[apObjects.error]);
+                   // }
+                }
+            }
+            catch (Exception) { }
+
+            return null; // Nothing selected
+        }
+
         // Get the currently selected object in AstroPlanner (null is none selected)
         private APCmdObject APGetSelectedObject()
         {
@@ -1231,7 +1273,7 @@ namespace EAACtrl
                 APCmdObject SelectedObject = APGetSelectedObject();
                 if (SelectedObject != null)
                 {
-                    Speak("J P L query started");
+                    Speak("Query started");
                     // Need to check for Comet or Asteroid and then convert name to JPL format.
                     string jplID = APMBNameToJPLHorizonsName(SelectedObject.ID, SelectedObject.Catalogue);
 
@@ -1302,11 +1344,12 @@ namespace EAACtrl
                         
                         string ephConst = wordsArray[15].Trim();
                         string ephDistKM = (ephDistAU * 149597870.7).ToString("N0") + " km";
+                        string ephDistLD = (ephDistAU * 149597870.7/384399).ToString() + " LD"; // Lunar Distance
 
                         string ephID = $"{SelectedObject.ID} @ {ephDateTime.ToString("HH:mm:ss")} UTC";
                         ephID = ephID.Replace(" ", "\\u00A0");
                         Stellarium.SyncStellariumToJPLObject(ephID, ephRA, ephDec, ephDateTime.ToString("dd/MM/yyyy HH:mm:ss") + " UTC", ephVMag.ToString(), ephDistAU.ToString() + " AU", ephDistKM, ephDistLTHMS, ephDistDeltaKmsText);
-                        Speak("J P L completed");
+                        Speak("Selected");
                     }
                     else
                     {
@@ -2449,6 +2492,11 @@ namespace EAACtrl
 
             return APMBName;
         }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            APGetStatus();
+        }
     }
 
     // New AP classes
@@ -2521,6 +2569,26 @@ namespace EAACtrl
         public string ImgSettingsPath { get; set; }
         public string ImgPath { get; set; }
         public string ImgInfo { get; set; }
+    }
+
+    // Classes used to set proerties in AstroPlanner
+    public class APPPropertyCmd
+    {
+        public string script { get; set; }
+        public APProperties parameters { get; set; }
+    }
+
+    public class APProperties
+    {
+        public int Cmd { get; set; }
+        public int Option { get; set; }
+        public List<APProperty> Properties { get; set; }
+    }
+
+    public class APProperty
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 
 }
