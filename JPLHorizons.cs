@@ -1,9 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 
 namespace EAACtrl
 {
+    public class JPLEphemerisOrbitalElement
+    {
+        public DateTime DateTime { get; set; }
+        public double RA { get; set; }
+        public double DEC { get; set; }
+        public double APmag { get; set; }
+        public double Delta { get; set; }
+        public double DeltaDot { get; set; }
+        public double S_O_T { get; set; }
+        public double S_T_O { get; set; }
+        public double SkyMotion { get; set; }
+        public double SkyMotPA { get; set; }
+        public double RelVelAng { get; set; }
+        public double LunSkyBrt { get; set; }
+        public double SkySNR { get; set; }
+    }
+
     internal class JPLHorizons
     {
         private string sMsg = "";
@@ -43,6 +62,119 @@ namespace EAACtrl
         public double Longitude = -1.3150645;
         public double Latitude = 50.7432162;
         public double Altitude = 57.184;
+
+        public List<JPLEphemerisOrbitalElement> ProcessJPLEphemeris(string sEphemeris)
+        {
+            if (string.IsNullOrEmpty(sEphemeris))
+            {
+                sMsg = "JPL: ProcessJPLEphemeris - No ephemeris data provided.\r\n";
+                return null;
+            }
+
+            List<JPLEphemerisOrbitalElement> orbitalElements = new List<JPLEphemerisOrbitalElement>();
+
+            string[] lines = sEphemeris.Split(new string[] { "$$SOE", "$$EOE" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length > 1)
+            {
+                string dataSection = lines[1];
+                string[] dataLines = dataSection.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string line in dataLines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        string[] values = line.Split(' '); // Split by space
+                        if (values.Length >= 13) // Ensure enough values exist
+                        {
+                            try
+                            {
+                                JPLEphemerisOrbitalElement orbitalElement = new JPLEphemerisOrbitalElement
+                                {
+                                    DateTime = DateTime.ParseExact(values[0] + " " + values[1], "yyyy-MMM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+                                    RA = double.Parse(values[2], System.Globalization.CultureInfo.InvariantCulture),
+                                    DEC = double.Parse(values[3], System.Globalization.CultureInfo.InvariantCulture),
+                                    APmag = double.Parse(values[4], System.Globalization.CultureInfo.InvariantCulture),
+                                    Delta = double.Parse(values[5], System.Globalization.CultureInfo.InvariantCulture),
+                                    DeltaDot = double.Parse(values[6], System.Globalization.CultureInfo.InvariantCulture),
+                                    S_O_T = double.Parse(values[7], System.Globalization.CultureInfo.InvariantCulture),
+                                    S_T_O = double.Parse(values[8], System.Globalization.CultureInfo.InvariantCulture),
+                                    SkyMotion = double.Parse(values[9], System.Globalization.CultureInfo.InvariantCulture),
+                                    SkyMotPA = double.Parse(values[10], System.Globalization.CultureInfo.InvariantCulture),
+                                    RelVelAng = double.Parse(values[11], System.Globalization.CultureInfo.InvariantCulture),
+                                    LunSkyBrt = double.Parse(values[12], System.Globalization.CultureInfo.InvariantCulture),
+                                    SkySNR = double.Parse(values[13], System.Globalization.CultureInfo.InvariantCulture)
+                                };
+                                orbitalElements.Add(orbitalElement);
+                            }
+                            catch (FormatException ex)
+                            {
+                                Console.WriteLine($"Error parsing line: {line}.  Error: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return orbitalElements;
+        }
+
+        // Returns the current RA/Dec of the passed object along with other object attributes
+        public string Ephemeris(string objectID, DateTime queryTimeUTC)
+        {
+            string result = "";
+
+            string sWebServiceURL = " https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='1,9,20,21,29'&CSV_FORMAT='YES'&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='";
+            sWebServiceURL += $"{Longitude.ToString()},{Latitude.ToString()},{(Altitude / 1000).ToString()}'";
+            sWebServiceURL += $"&TLIST='{queryTimeUTC.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}'";
+            sWebServiceURL += $"&COMMAND='{objectID}'";
+
+            try
+            {
+                result = GetRequest(sWebServiceURL);
+
+                sMsg = $"JPL: QueryObject {objectID}, {sMsg}\r\n";
+            }
+            catch (Exception)
+            {
+                sMsg = $"JPL:QueryObject ERR, {sMsg} \r\n";
+                result = "exception";
+            }
+            return result;
+        }
+
+        public enum StepSizeUnit
+        { 
+            days,
+            hours,
+            minutes,
+            years,
+            months,
+            unitless
+        }
+
+        public string Ephemeris(string objectID, DateTime startTimeUTC, DateTime endTimeUTC, StepSizeUnit unit, int interval)
+        {
+            string result = "";
+
+            string sWebServiceURL = " https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='1,9,20,21,29'&CSV_FORMAT='YES'&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='";
+            sWebServiceURL += $"{Longitude.ToString()},{Latitude.ToString()},{(Altitude / 1000).ToString()}'";
+            //sWebServiceURL += $"&TLIST='{queryTimeUTC.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}'";
+            sWebServiceURL += $"&COMMAND='{objectID}'";
+
+            try
+            {
+                result = GetRequest(sWebServiceURL);
+
+                sMsg = $"JPL: QueryObject {objectID}, {sMsg}\r\n";
+            }
+            catch (Exception)
+            {
+                sMsg = $"JPL:QueryObject ERR, {sMsg} \r\n";
+                result = "exception";
+            }
+            return result;
+        }
 
         // Returns the current RA/Dec of the passed object along with other object attributes
         public string QueryObject(string sID)

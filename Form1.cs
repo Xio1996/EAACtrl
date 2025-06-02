@@ -41,9 +41,9 @@ namespace EAACtrl
         private MqttClient mqttSharpCap;
         private string mqttClientID = "";
         // TerraNova
-        private string mqttBroker = "192.168.50.226";
+        //private string mqttBroker = "192.168.50.226";
         // Odin
-        //private string mqttBroker = "192.168.50.125";
+        private string mqttBroker = "192.168.50.125";
 
         private string TargetName = "";
         private string SelectedRA = "";
@@ -234,6 +234,16 @@ namespace EAACtrl
                 if (mqttSharpCap == null)
                 {
                     WriteMessage("MQTT Initialise\r\n");
+                    switch (cbMQTT.SelectedIndex)
+                    {
+                        case 0: // Odin (Beelink Mini PC)
+                            mqttBroker = "192.168.50.125";
+                            break;
+                        case 1: // TerrNova (Lenovo laptop)
+                            mqttBroker = "192.168.50.226";
+                            break;
+                    }
+
                     mqttSharpCap = new MqttClient(mqttBroker);
                     mqttClientID = Guid.NewGuid().ToString();
                     mqttSharpCap.MqttMsgPublishReceived += SharpCap_MqttMsgReceived;
@@ -369,6 +379,7 @@ namespace EAACtrl
             txtStellariumPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword);
             cbStelTelePointer.Checked = Properties.Settings.Default.StTelescopePointer;
             cbSyncDateTime.Checked = Properties.Settings.Default.SyncAPView;
+            cbMQTT.SelectedIndex = Properties.Settings.Default.MQTTServer;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -565,6 +576,7 @@ namespace EAACtrl
             Properties.Settings.Default.Auth = EncryptionHelper.Encrypt(txtAPPassword.Text.Trim());
             Properties.Settings.Default.StTelescopePointer = cbStelTelePointer.Checked;
             Properties.Settings.Default.SyncAPView = cbSyncDateTime.Checked;
+            Properties.Settings.Default.MQTTServer = cbMQTT.SelectedIndex;
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -937,7 +949,17 @@ namespace EAACtrl
                 {
                     // Copy image file to desktop PC SharpCap folder
                     string sDestImagePath = sImagePath.Replace(@"C:\", @"C:\"); // Not needed unless path on desktop changes
-                    string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
+                    string sSrcImagePath = "";
+                    switch (cbMQTT.SelectedIndex)
+                    {
+                        case 0: // Odin (Beelink Mini PC)
+                            sSrcImagePath = sDestImagePath.Replace(@"C:\", @"\\ODIN\");
+                            break;
+                        case 1: // Terranova (Lenovo laptop)
+                            sSrcImagePath = sDestImagePath.Replace(@"C:\", @"\\TERRANOVA\");
+                            break;
+                    }
+                    //string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\TERRANOVA\");
                     //string sSrcImagePath = sImagePath.Replace(@"C:\", @"\\ODIN\");
                     Directory.CreateDirectory(sDestImagePath.Substring(0, sDestImagePath.LastIndexOf(@"\")));
                     File.Copy(sSrcImagePath, sDestImagePath, true);
@@ -946,7 +968,17 @@ namespace EAACtrl
                     {
                         // Copy image settings file to desktop PC SharpCap folder
                         string sDestSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"C:\"); // Not needed unless path on desktop changes
-                        string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
+                        string sSrcSettingsPath = "";
+                        switch (cbMQTT.SelectedIndex)
+                        {
+                            case 0: // Odin (Beelink Mini PC)
+                                sSrcSettingsPath = sDestSettingsPath.Replace(@"C:\", @"\\ODIN\");
+                                break;
+                            case 1: // Terranova (Lenovo laptop)
+                                sSrcSettingsPath = sDestSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
+                                break;
+                        }
+                        //string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\TERRANOVA\");
                         //string sSrcSettingsPath = sCameraSettingsPath.Replace(@"C:\", @"\\ODIN\");
                         Directory.CreateDirectory(sDestSettingsPath.Substring(0, sDestSettingsPath.LastIndexOf(@"\")));
                         File.Copy(sSrcSettingsPath, sDestSettingsPath, true);
@@ -1273,7 +1305,7 @@ namespace EAACtrl
                 APCmdObject SelectedObject = APGetSelectedObject();
                 if (SelectedObject != null)
                 {
-                    Speak("Query started");
+                    Speak("Plotting");
                     // Need to check for Comet or Asteroid and then convert name to JPL format.
                     string jplID = APMBNameToJPLHorizonsName(SelectedObject.ID, SelectedObject.Catalogue);
 
@@ -2495,7 +2527,30 @@ namespace EAACtrl
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            APGetStatus();
+            APCmdObject SelectedObject = APGetSelectedObject();
+            if (SelectedObject == null)
+            {
+                return;
+            }
+            Speak("Plotting");
+            
+            // Need to check for Comet or Asteroid and then convert name to JPL format.
+            string jplID = APMBNameToJPLHorizonsName(SelectedObject.ID, SelectedObject.Catalogue);
+
+            JPLHorizons jplHorizons = new JPLHorizons();
+            string query = jplHorizons.QueryObject(jplID);
+            if (string.IsNullOrEmpty(query))
+            {                 
+                Speak("JPL Horizons query failed");
+                return;
+            }
+
+            List<JPLEphemerisOrbitalElement>  orbitalElements = jplHorizons.ProcessJPLEphemeris(query);
+            if (orbitalElements == null || orbitalElements.Count == 0)
+            {
+                Speak("No JPL Horizons data returned for " + jplID);
+                return;
+            }
         }
     }
 

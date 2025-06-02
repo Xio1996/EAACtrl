@@ -860,5 +860,17 @@ namespace EAACtrl.Properties {
                 this["SyncAPView"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MQTTServer {
+            get {
+                return ((int)(this["MQTTServer"]));
+            }
+            set {
+                this["MQTTServer"] = value;
+            }
+        }
     }
 }

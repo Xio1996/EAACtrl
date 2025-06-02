@@ -98,6 +98,8 @@
             this.btnSAMPDisconnect = new System.Windows.Forms.Button();
             this.btnSAMPConnect = new System.Windows.Forms.Button();
             this.tpConfig = new System.Windows.Forms.TabPage();
+            this.label14 = new System.Windows.Forms.Label();
+            this.cbMQTT = new System.Windows.Forms.ComboBox();
             this.cbStelTelePointer = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -366,11 +368,11 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(16, 261);
+            this.button1.Location = new System.Drawing.Point(279, 276);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 40;
-            this.button1.Text = "button1";
+            this.button1.Text = "Dev Test";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
@@ -381,7 +383,7 @@
             this.btnLogFullScreen.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLogFullScreen.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogFullScreen.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLogFullScreen.Location = new System.Drawing.Point(207, 235);
+            this.btnLogFullScreen.Location = new System.Drawing.Point(111, 236);
             this.btnLogFullScreen.Name = "btnLogFullScreen";
             this.btnLogFullScreen.Size = new System.Drawing.Size(96, 29);
             this.btnLogFullScreen.TabIndex = 39;
@@ -396,7 +398,7 @@
             this.btnLogSharpCap.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnLogSharpCap.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogSharpCap.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnLogSharpCap.Location = new System.Drawing.Point(207, 204);
+            this.btnLogSharpCap.Location = new System.Drawing.Point(9, 236);
             this.btnLogSharpCap.Name = "btnLogSharpCap";
             this.btnLogSharpCap.Size = new System.Drawing.Size(96, 29);
             this.btnLogSharpCap.TabIndex = 38;
@@ -411,9 +413,9 @@
             this.btnObsClkRst.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnObsClkRst.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnObsClkRst.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnObsClkRst.Location = new System.Drawing.Point(9, 206);
+            this.btnObsClkRst.Location = new System.Drawing.Point(9, 205);
             this.btnObsClkRst.Name = "btnObsClkRst";
-            this.btnObsClkRst.Size = new System.Drawing.Size(96, 48);
+            this.btnObsClkRst.Size = new System.Drawing.Size(130, 28);
             this.btnObsClkRst.TabIndex = 37;
             this.btnObsClkRst.Text = "Start Observe Clock";
             this.btnObsClkRst.UseVisualStyleBackColor = false;
@@ -562,9 +564,9 @@
             this.btnObsClkStop.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnObsClkStop.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnObsClkStop.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnObsClkStop.Location = new System.Drawing.Point(111, 206);
+            this.btnObsClkStop.Location = new System.Drawing.Point(149, 205);
             this.btnObsClkStop.Name = "btnObsClkStop";
-            this.btnObsClkStop.Size = new System.Drawing.Size(90, 48);
+            this.btnObsClkStop.Size = new System.Drawing.Size(124, 28);
             this.btnObsClkStop.TabIndex = 4;
             this.btnObsClkStop.Text = "Stop Observe Clock";
             this.btnObsClkStop.UseVisualStyleBackColor = false;
@@ -1012,6 +1014,8 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.label14);
+            this.tpConfig.Controls.Add(this.cbMQTT);
             this.tpConfig.Controls.Add(this.cbStelTelePointer);
             this.tpConfig.Controls.Add(this.label12);
             this.tpConfig.Controls.Add(this.label10);
@@ -1032,6 +1036,27 @@
             this.tpConfig.Text = "Config";
             this.tpConfig.UseVisualStyleBackColor = true;
             // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(8, 242);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(85, 17);
+            this.label14.TabIndex = 44;
+            this.label14.Text = "MQTT Server";
+            // 
+            // cbMQTT
+            // 
+            this.cbMQTT.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbMQTT.FormattingEnabled = true;
+            this.cbMQTT.Items.AddRange(new object[] {
+            "Odin",
+            "TerraNova"});
+            this.cbMQTT.Location = new System.Drawing.Point(98, 238);
+            this.cbMQTT.Name = "cbMQTT";
+            this.cbMQTT.Size = new System.Drawing.Size(121, 25);
+            this.cbMQTT.TabIndex = 43;
+            // 
             // cbStelTelePointer
             // 
             this.cbStelTelePointer.AutoSize = true;
@@ -1048,7 +1073,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(192, 208);
+            this.label12.Location = new System.Drawing.Point(192, 187);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(130, 17);
             this.label12.TabIndex = 41;
@@ -1057,7 +1082,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 208);
+            this.label10.Location = new System.Drawing.Point(11, 187);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(87, 17);
             this.label10.TabIndex = 40;
@@ -1065,14 +1090,14 @@
             // 
             // txtStellariumPassword
             // 
-            this.txtStellariumPassword.Location = new System.Drawing.Point(195, 228);
+            this.txtStellariumPassword.Location = new System.Drawing.Point(195, 207);
             this.txtStellariumPassword.Name = "txtStellariumPassword";
             this.txtStellariumPassword.Size = new System.Drawing.Size(159, 25);
             this.txtStellariumPassword.TabIndex = 39;
             // 
             // txtAPPassword
             // 
-            this.txtAPPassword.Location = new System.Drawing.Point(11, 228);
+            this.txtAPPassword.Location = new System.Drawing.Point(11, 207);
             this.txtAPPassword.Name = "txtAPPassword";
             this.txtAPPassword.Size = new System.Drawing.Size(159, 25);
             this.txtAPPassword.TabIndex = 38;
@@ -1096,7 +1121,7 @@
             this.cbTSAutoFOVI.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbTSAutoFOVI.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbTSAutoFOVI.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbTSAutoFOVI.Location = new System.Drawing.Point(237, 261);
+            this.cbTSAutoFOVI.Location = new System.Drawing.Point(237, 263);
             this.cbTSAutoFOVI.Name = "cbTSAutoFOVI";
             this.cbTSAutoFOVI.Size = new System.Drawing.Size(111, 23);
             this.cbTSAutoFOVI.TabIndex = 36;
@@ -1110,7 +1135,7 @@
             this.cbAPAutoSort.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbAPAutoSort.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbAPAutoSort.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbAPAutoSort.Location = new System.Drawing.Point(130, 261);
+            this.cbAPAutoSort.Location = new System.Drawing.Point(130, 263);
             this.cbAPAutoSort.Name = "cbAPAutoSort";
             this.cbAPAutoSort.Size = new System.Drawing.Size(107, 23);
             this.cbAPAutoSort.TabIndex = 35;
@@ -1123,9 +1148,9 @@
             this.groupBox4.Controls.Add(this.txtScriptFolder);
             this.groupBox4.Controls.Add(this.txtStellariumPort);
             this.groupBox4.Controls.Add(this.txtStellariumAddress);
-            this.groupBox4.Location = new System.Drawing.Point(9, 116);
+            this.groupBox4.Location = new System.Drawing.Point(9, 104);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(351, 88);
+            this.groupBox4.Size = new System.Drawing.Size(351, 81);
             this.groupBox4.TabIndex = 34;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Stellarium (Address / Port)";
@@ -1133,7 +1158,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 58);
+            this.label1.Location = new System.Drawing.Point(8, 55);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(84, 17);
             this.label1.TabIndex = 4;
@@ -1141,21 +1166,21 @@
             // 
             // txtScriptFolder
             // 
-            this.txtScriptFolder.Location = new System.Drawing.Point(91, 54);
+            this.txtScriptFolder.Location = new System.Drawing.Point(91, 51);
             this.txtScriptFolder.Name = "txtScriptFolder";
             this.txtScriptFolder.Size = new System.Drawing.Size(252, 25);
             this.txtScriptFolder.TabIndex = 3;
             // 
             // txtStellariumPort
             // 
-            this.txtStellariumPort.Location = new System.Drawing.Point(277, 23);
+            this.txtStellariumPort.Location = new System.Drawing.Point(277, 20);
             this.txtStellariumPort.Name = "txtStellariumPort";
             this.txtStellariumPort.Size = new System.Drawing.Size(68, 25);
             this.txtStellariumPort.TabIndex = 2;
             // 
             // txtStellariumAddress
             // 
-            this.txtStellariumAddress.Location = new System.Drawing.Point(8, 23);
+            this.txtStellariumAddress.Location = new System.Drawing.Point(8, 20);
             this.txtStellariumAddress.Name = "txtStellariumAddress";
             this.txtStellariumAddress.Size = new System.Drawing.Size(263, 25);
             this.txtStellariumAddress.TabIndex = 1;
@@ -1164,23 +1189,23 @@
             // 
             this.groupBox3.Controls.Add(this.txtCdCPort);
             this.groupBox3.Controls.Add(this.txtCdCAddress);
-            this.groupBox3.Location = new System.Drawing.Point(9, 56);
+            this.groupBox3.Location = new System.Drawing.Point(9, 51);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(351, 58);
+            this.groupBox3.Size = new System.Drawing.Size(351, 53);
             this.groupBox3.TabIndex = 33;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "CdC (Address / Port)";
             // 
             // txtCdCPort
             // 
-            this.txtCdCPort.Location = new System.Drawing.Point(277, 23);
+            this.txtCdCPort.Location = new System.Drawing.Point(277, 19);
             this.txtCdCPort.Name = "txtCdCPort";
             this.txtCdCPort.Size = new System.Drawing.Size(68, 25);
             this.txtCdCPort.TabIndex = 2;
             // 
             // txtCdCAddress
             // 
-            this.txtCdCAddress.Location = new System.Drawing.Point(8, 23);
+            this.txtCdCAddress.Location = new System.Drawing.Point(8, 19);
             this.txtCdCAddress.Name = "txtCdCAddress";
             this.txtCdCAddress.Size = new System.Drawing.Size(263, 25);
             this.txtCdCAddress.TabIndex = 1;
@@ -1191,7 +1216,7 @@
             this.groupBox1.Controls.Add(this.cbSlewOnTarget);
             this.groupBox1.Location = new System.Drawing.Point(10, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(351, 50);
+            this.groupBox1.Size = new System.Drawing.Size(351, 46);
             this.groupBox1.TabIndex = 32;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Target";
@@ -1201,7 +1226,7 @@
             this.cbSyncPlanetarium.AutoSize = true;
             this.cbSyncPlanetarium.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbSyncPlanetarium.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbSyncPlanetarium.Location = new System.Drawing.Point(127, 22);
+            this.cbSyncPlanetarium.Location = new System.Drawing.Point(127, 19);
             this.cbSyncPlanetarium.Name = "cbSyncPlanetarium";
             this.cbSyncPlanetarium.Size = new System.Drawing.Size(136, 23);
             this.cbSyncPlanetarium.TabIndex = 32;
@@ -1213,7 +1238,7 @@
             this.cbSlewOnTarget.AutoSize = true;
             this.cbSlewOnTarget.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbSlewOnTarget.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbSlewOnTarget.Location = new System.Drawing.Point(7, 22);
+            this.cbSlewOnTarget.Location = new System.Drawing.Point(7, 19);
             this.cbSlewOnTarget.Name = "cbSlewOnTarget";
             this.cbSlewOnTarget.Size = new System.Drawing.Size(114, 23);
             this.cbSlewOnTarget.TabIndex = 31;
@@ -1227,7 +1252,7 @@
             this.cbFOVICorr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbFOVICorr.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10F);
             this.cbFOVICorr.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cbFOVICorr.Location = new System.Drawing.Point(11, 261);
+            this.cbFOVICorr.Location = new System.Drawing.Point(11, 263);
             this.cbFOVICorr.Name = "cbFOVICorr";
             this.cbFOVICorr.Size = new System.Drawing.Size(119, 23);
             this.cbFOVICorr.TabIndex = 14;
@@ -2045,6 +2070,8 @@
         private System.Windows.Forms.CheckBox cbStelTelePointer;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox cbSyncDateTime;
+        private System.Windows.Forms.ComboBox cbMQTT;
+        private System.Windows.Forms.Label label14;
     }
 }
 
