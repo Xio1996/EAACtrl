@@ -122,13 +122,13 @@ namespace EAACtrl
                 int iPort = Int32.Parse(Port);
 
                 sResult = TCPMessage(sAddr, iPort, sSearchCmd);
-                if (sResult.Contains("Not found!"))
-                {
+                //if (sResult.Contains("Not found!"))
+                //{
                     string sRADec = "SETRA " + RA + "\r\n";
                     sResult = TCPMessage(sAddr, iPort, sRADec);
                     sRADec = "SETDEC " + Dec + "\r\n";
                     sResult = TCPMessage(sAddr, iPort, sRADec);
-                }
+                //}
 
                 if (FOV > 0)
                 {

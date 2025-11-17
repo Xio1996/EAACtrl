@@ -60,17 +60,20 @@ namespace EAACtrl
                 dt.Columns.Add("ID");
                 dt.Columns.Add("Names");
                 dt.Columns.Add("Type");
-                dt.Columns.Add("Magnitude", typeof(double));
-                dt.Columns.Add("Distance Mpc", typeof(double));
+                dt.Columns.Add("Mag", typeof(double));
+                dt.Columns.Add("Mag2", typeof(double));
+                dt.Columns.Add("Dist Mpc", typeof(double));
                 dt.Columns.Add("Galaxy Type");
-                dt.Columns.Add("Catalogue");
+                dt.Columns.Add("Size");
+                dt.Columns.Add("Comp");
+                dt.Columns.Add("PA", typeof(double));
+                dt.Columns.Add("Sep", typeof(double));
                 dt.Columns.Add("RA");
                 dt.Columns.Add("Dec");
                 dt.Columns.Add("dRA");
                 dt.Columns.Add("dDec");
-                dt.Columns.Add("Size");
-                dt.Columns.Add("PosAngle");
-                dt.Columns.Add("Constellation");
+                dt.Columns.Add("Const");
+                dt.Columns.Add("Catalogue");
 
                 if (ResultsTable != null)
                 {
@@ -87,15 +90,15 @@ namespace EAACtrl
 
                         if (double.TryParse(APObject[3], out double Mag))
                         {
-                            row["Magnitude"] = Mag;
+                            row["Mag"] = Mag;
                         }
-                        else row["Magnitude"] = DBNull.Value;
+                        else row["Mag"] = DBNull.Value;
 
                         if (double.TryParse(APObject[5], out double Dist))
                         {
-                            row["Distance Mpc"] = Math.Round(Dist, 2);
+                            row["Dist Mpc"] = Math.Round(Dist, 2);
                         }
-                        else row["Distance Mpc"] = DBNull.Value;
+                        else row["Dist Mpc"] = DBNull.Value;
 
                         row["Galaxy Type"] = APObject[4];
                         row["Catalogue"] = APObject[6];
@@ -104,8 +107,33 @@ namespace EAACtrl
                         row["dRA"] = APObject[9];
                         row["dDec"] = APObject[10];
                         row["Size"] = APObject[11];
-                        row["PosAngle"] = APObject[12];
-                        row["Constellation"] = APObject[13];
+
+                        if (double.TryParse(APObject[12], out double PA))
+                        {
+                            if (PA == -999) row["PA"] = DBNull.Value;
+                            else
+                                row["PA"] = Math.Round(PA, 2);
+                        }
+                        else row["PA"] = DBNull.Value;
+
+                        row["Const"] = APObject[13];
+                        row["Comp"] = APObject[14];
+
+                        if (double.TryParse(APObject[15], out double Sep))
+                        {
+                            if (Sep == -999) row["Sep"] = DBNull.Value;
+                            else
+                                row["Sep"] = Math.Round(Sep, 2);
+                        }
+                        else row["Sep"] = DBNull.Value;
+
+                        if (double.TryParse(APObject[16], out double Mag2))
+                        {
+                            if (Mag2 == 999) row["Mag2"] = DBNull.Value;
+                            else
+                                row["Mag2"] = Math.Round(Mag2,2);
+                        }
+                        else row["Mag2"] = DBNull.Value;
 
                         dt.Rows.Add(row);
 
@@ -125,11 +153,11 @@ namespace EAACtrl
                 dgvSearchResults.DataSource = dt;
                 dgvSearchResults.Columns["dRA"].Visible = false;
                 dgvSearchResults.Columns["dDec"].Visible = false;
-                dgvSearchResults.Columns["Size"].Visible = false;
-                dgvSearchResults.Columns["PosAngle"].Visible = false;
-                dgvSearchResults.Columns["Constellation"].Visible = false;
+                dgvSearchResults.Columns["Size"].Visible = true;
+                dgvSearchResults.Columns["PA"].Visible = true;
+                dgvSearchResults.Columns["Const"].Visible = true;
 
-                dgvSearchResults.Sort(dgvSearchResults.Columns["Magnitude"], System.ComponentModel.ListSortDirection.Ascending);
+                dgvSearchResults.Sort(dgvSearchResults.Columns["Mag"], System.ComponentModel.ListSortDirection.Ascending);
                 
                 totalResults = dt.Rows.Count;
                 UpdateSearchInfo(totalResults);

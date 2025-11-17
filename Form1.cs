@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
-using System.Timers;
-using System.Text.Json;
-using System.IO;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Speech.Synthesis;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Timers;
+using System.Windows.Forms;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
-using System.Speech.Synthesis;
-using System.ComponentModel;
-using System.Drawing.Imaging;
-using System.Drawing;
-using System.Net.Http;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EAACtrl
 {
@@ -827,7 +829,12 @@ namespace EAACtrl
                     if (cbImagerZoom.Checked) {  
                         dblFOV = 1.0; // Set zoom for imager
                     }
-                    SkyChart.SkychartTargetPosition(SelectedObject.ID, SelectedObject.RA2000.ToString(), SelectedObject.Dec2000.ToString(), dblFOV);
+
+                    RA = APHelper.RADecimalHoursToHMS(SelectedObject.RA2000, @"hh\hmm\mss\.ff\s");
+                    Dec = APHelper.DecDecimalToDMS(SelectedObject.Dec2000);
+
+                    //SkyChart.SkychartTargetPosition(SelectedObject.ID, SelectedObject.RA2000.ToString(), SelectedObject.Dec2000.ToString(), dblFOV);
+                    SkyChart.SkychartTargetPosition(SelectedObject.ID, RA, Dec, dblFOV);
                     WriteMessage(SkyChart.Message);
                     break;
                 case 4:
@@ -1126,6 +1133,10 @@ namespace EAACtrl
                 if (sOut.Contains("}]}") && !sOut.Contains("}]}}"))
                 {
                     sOut += "}";
+                }
+                if (sOut.Contains("}]") && !sOut.Contains("}]}}"))
+                {
+                    sOut += "}}";
                 }
                 if (aAError.ErrorNumber != 0)
                 {
@@ -2552,6 +2563,28 @@ namespace EAACtrl
                 return;
             }
         }
+
+        private void btnNTPCheck_Click(object sender, EventArgs e)
+        {
+            string output = NTPHelper.ExecuteNtpStripchartCommand("pool.ntp.org");
+            if (string.IsNullOrEmpty(output))
+            {
+                Speak("NTP check failed");
+                WriteMessage("NTP check failed\r\n");
+            }
+            else
+            {
+                DialogResult dialogResult = MessageBox.Show(this,"NTP check successful:\r\n" + output, "EAACtrl", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+        }
+
+        private void btnAstro_Click(object sender, EventArgs e)
+        {
+            SolarAltitude solarAltitude = new SolarAltitude();
+            double altSolar = solarAltitude.CalculateAltitude(50.7432162, -1.3150645, DateTime.UtcNow); // Example for London
+            Speak("Solar altitude: " + altSolar.ToString("F2") + " degrees");
+        }
     }
 
     // New AP classes
@@ -2608,6 +2641,9 @@ namespace EAACtrl
         public double RA2000 { get; set; }
         public double Dec2000 { get; set; }
         public double ParallacticAngle { get; set; }
+        public double Magnitude2 { get; set; }
+        public double Separation { get; set; }
+        public string Components { get; set; }
     }
     
     public class APLog

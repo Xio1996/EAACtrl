@@ -42,6 +42,7 @@
             this.cbCaptureProfile = new System.Windows.Forms.ComboBox();
             this.tcExtra = new System.Windows.Forms.TabControl();
             this.tpTools = new System.Windows.Forms.TabPage();
+            this.btnNTPCheck = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.btnLogFullScreen = new System.Windows.Forms.Button();
             this.btnLogSharpCap = new System.Windows.Forms.Button();
@@ -165,6 +166,7 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
+            this.btnAstro = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -346,6 +348,8 @@
             // 
             // tpTools
             // 
+            this.tpTools.Controls.Add(this.btnAstro);
+            this.tpTools.Controls.Add(this.btnNTPCheck);
             this.tpTools.Controls.Add(this.button1);
             this.tpTools.Controls.Add(this.btnLogFullScreen);
             this.tpTools.Controls.Add(this.btnLogSharpCap);
@@ -365,6 +369,21 @@
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
+            // 
+            // btnNTPCheck
+            // 
+            this.btnNTPCheck.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnNTPCheck.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnNTPCheck.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnNTPCheck.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnNTPCheck.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnNTPCheck.Location = new System.Drawing.Point(9, 270);
+            this.btnNTPCheck.Name = "btnNTPCheck";
+            this.btnNTPCheck.Size = new System.Drawing.Size(96, 29);
+            this.btnNTPCheck.TabIndex = 41;
+            this.btnNTPCheck.Text = "NTP Check";
+            this.btnNTPCheck.UseVisualStyleBackColor = false;
+            this.btnNTPCheck.Click += new System.EventHandler(this.btnNTPCheck_Click);
             // 
             // button1
             // 
@@ -1870,6 +1889,21 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
+            // btnAstro
+            // 
+            this.btnAstro.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnAstro.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnAstro.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnAstro.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAstro.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnAstro.Location = new System.Drawing.Point(111, 270);
+            this.btnAstro.Name = "btnAstro";
+            this.btnAstro.Size = new System.Drawing.Size(96, 29);
+            this.btnAstro.TabIndex = 42;
+            this.btnAstro.Text = "Astro";
+            this.btnAstro.UseVisualStyleBackColor = false;
+            this.btnAstro.Click += new System.EventHandler(this.btnAstro_Click);
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -2072,6 +2106,8 @@
         private System.Windows.Forms.CheckBox cbSyncDateTime;
         private System.Windows.Forms.ComboBox cbMQTT;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Button btnNTPCheck;
+        private System.Windows.Forms.Button btnAstro;
     }
 }
 

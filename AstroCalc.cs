@@ -178,5 +178,63 @@ namespace EAACtrl
 
             return Delta;
         }
+
+        private const double Deg2Rad = Math.PI / 180.0;
+        private const double Rad2Deg = 180.0 / Math.PI;
+
+        /// <summary>
+        /// Calculates the sky coordinate reached by moving a given angular distance
+        /// from an origin point along a specified position angle.
+        /// </summary>
+        /// <param name="originRAHours">Origin right‑ascension in hours (0‑24).</param>
+        /// <param name="originDecDeg">Origin declination in degrees (‑90‑+90).</param>
+        /// <param name="posAngleDeg">Position angle in degrees, measured east‑of‑north.</param>
+        /// <param name="distArcSec">Angular distance to travel, in arc‑seconds.</param>
+        /// <param name="destRAHours">Resulting right‑ascension (output) in hours.</param>
+        /// <param name="destDecDeg">Resulting declination (output) in degrees.</param>
+        public void OffsetCoordinates(
+            double originRAHours,
+            double originDecDeg,
+            double posAngleDeg,
+            double distArcSec,
+            out double destRAHours,
+            out double destDecDeg)
+        {
+            // ----- 1️⃣  Convert everything to radians -----
+            double ra0 = originRAHours * 15.0 * Deg2Rad;          // hours → degrees → rad
+            double dec0 = originDecDeg * Deg2Rad;
+            double pa = posAngleDeg * Deg2Rad;
+            double d = distArcSec / 3600.0 * Deg2Rad;            // arc‑min → deg → rad
+
+            // ----- 2️⃣  Spherical trigonometry (great‑circle offset) -----
+            // Formulae from the “spherical law of cosines” / “vector rotation”:
+            // sin δ₂ = sin δ₁·cos d + cos δ₁·sin d·cos θ
+            // Δα    = atan2( sin d·sin θ , cos δ₁·cos d − sin δ₁·sin d·cos θ )
+            double sinDec0 = Math.Sin(dec0);
+            double cosDec0 = Math.Cos(dec0);
+            double sinD = Math.Sin(d);
+            double cosD = Math.Cos(d);
+            double sinPA = Math.Sin(pa);
+            double cosPA = Math.Cos(pa);
+
+            // Destination declination
+            double sinDec2 = sinDec0 * cosD + cosDec0 * sinD * cosPA;
+            double dec2 = Math.Asin(sinDec2);   // still in radians
+
+            // Destination right‑ascension offset
+            double y = sinD * sinPA;
+            double x = cosDec0 * cosD - sinDec0 * sinD * cosPA;
+            double deltaRA = Math.Atan2(y, x);    // radians, signed
+
+            double ra2 = ra0 + deltaRA;           // radians
+
+            // ----- 3️⃣  Normalise RA into the 0‑24 h range -----
+            // Convert back to hours first, then wrap.
+            destRAHours = (ra2 * Rad2Deg / 15.0) % 24.0;
+            if (destRAHours < 0) destRAHours += 24.0;
+
+            // ----- 4️⃣  Convert declination back to degrees -----
+            destDecDeg = dec2 * Rad2Deg;
+        }
     }
 }

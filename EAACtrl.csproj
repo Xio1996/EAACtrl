@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APHelper.cs" />
+    <Compile Include="Astro.cs" />
     <Compile Include="AstroCalc.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="EAAError.cs" />
@@ -203,6 +204,7 @@
     </Compile>
     <Compile Include="JPLHorizons.cs" />
     <Compile Include="KStars.cs" />
+    <Compile Include="NTPHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SAMP.cs" />
