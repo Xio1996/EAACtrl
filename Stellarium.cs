@@ -521,7 +521,7 @@ namespace EAACtrl
             {
                 if (bFilterOnDistance)
                 {
-                    if (double.TryParse(row["Distance Mpc"].ToString(), out double RV))
+                    if (double.TryParse(row["Dist Mpc"].ToString(), out double RV))
                     {
                         // Radial velocity to distance Mpc (good out to approx 50 Mpc)
                         double dblDistance = RV / Properties.Settings.Default.Hubble;
@@ -567,7 +567,7 @@ namespace EAACtrl
 
                 if (Properties.Settings.Default.soDistance)
                 {
-                    if (double.TryParse(row["Distance Mpc"].ToString(), out double dblDistance))
+                    if (double.TryParse(row["Dist Mpc"].ToString(), out double dblDistance))
                     {
                         double distance = dblDistance;
                         double dblDivider = 0;

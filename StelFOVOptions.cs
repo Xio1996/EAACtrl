@@ -69,6 +69,7 @@ namespace EAACtrl
             Properties.Settings.Default.StGraphicColour = lblStGraphicColour.BackColor;
             Properties.Settings.Default.StGraphic = cbStGraphic.SelectedItem.ToString();
             Properties.Settings.Default.StLabelPosition = cbLabelPosition.SelectedItem.ToString();
+            Properties.Settings.Default.StLabelDistance = int.Parse(txtLabelDistance.Text.Trim());
 
             Properties.Settings.Default.Save();
 
