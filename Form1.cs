@@ -1834,6 +1834,7 @@ namespace EAACtrl
             obj.Size = searchObj.Size;
             obj.Components = componentName + " (" + searchObj.Components + ")";
             obj.Catalogue = searchObj.Catalogue;
+            obj.Constellation = searchObj.Constellation;
 
             if (componentName == "A")
             {
@@ -1979,11 +1980,21 @@ namespace EAACtrl
                                 ds.Add(CreateComponent(obj, obj.Components[1].ToString()));
                             }
                         }
-                        // Components such as AB-C, AB-D etc
+                        // Components such as AB-C, AB-D, A-BC etc
                         else if (obj.Components.Contains("-"))
                         {
                             string [] components = obj.Components.Split('-');
                             // Create the secondary component
+                            ds.Add(CreateComponent(obj, components[1]));
+                        }
+                        else if (obj.Components.Length == 4 && obj.Components.Contains(","))
+                        {
+                            string[] components = obj.Components.Split(',');
+                            ds.Add(CreateComponent(obj, components[1]));
+                        }
+                        else if (obj.Components.Length == 5 && obj.Components.Contains(","))
+                        {
+                            string[] components = obj.Components.Split(',');
                             ds.Add(CreateComponent(obj, components[1]));
                         }
 

@@ -108,6 +108,7 @@ namespace EAACtrl
                         row["dRA"] = APObject[9];
                         row["dDec"] = APObject[10];
                         row["Size"] = APObject[11];
+                        row["Const"] = APObject[13];
 
                         if (double.TryParse(APObject[12], out double PA))
                         {
