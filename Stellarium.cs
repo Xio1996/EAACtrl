@@ -408,7 +408,11 @@ namespace EAACtrl
                 string objectLabel = "";
                 if (Properties.Settings.Default.soID)
                 {
-                    objectLabel = obj.ID + " ";
+                    objectLabel = obj.ID;
+                    if (!string.IsNullOrEmpty(obj.Components) && obj.Components.Contains("("))
+                    {
+                        objectLabel += " (" + obj.Components.Substring(0, obj.Components.IndexOf('(')) + ") ";
+                    }
                 }
                 if (Properties.Settings.Default.soNames)
                 {
@@ -538,7 +542,11 @@ namespace EAACtrl
                 string objectLabel = "";
                 if (Properties.Settings.Default.soID)
                 {
-                    objectLabel = row["ID"].ToString() + " ";
+                    objectLabel = row["ID"].ToString();
+                    if (!string.IsNullOrEmpty(row["Comp"].ToString()) && row["Comp"].ToString().Contains("("))
+                    {
+                        objectLabel += " (" + row["Comp"].ToString().Substring(0, row["Comp"].ToString().IndexOf('(')) + ") ";
+                    }
                 }
                 if (Properties.Settings.Default.soNames)
                 {

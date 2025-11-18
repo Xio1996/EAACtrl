@@ -57,6 +57,7 @@ namespace EAACtrl
 
             if (ResultsList != null || ResultsTable != null)
             {
+                
                 dt.Columns.Add("ID");
                 dt.Columns.Add("Names");
                 dt.Columns.Add("Type");
@@ -74,7 +75,7 @@ namespace EAACtrl
                 dt.Columns.Add("dDec");
                 dt.Columns.Add("Const");
                 dt.Columns.Add("Catalogue");
-
+                
                 if (ResultsTable != null)
                 {
                     dt = ResultsTable;
@@ -158,7 +159,25 @@ namespace EAACtrl
                 dgvSearchResults.Columns["Const"].Visible = true;
 
                 dgvSearchResults.Sort(dgvSearchResults.Columns["Mag"], System.ComponentModel.ListSortDirection.Ascending);
-                
+
+                // Removes first selection columnm
+                dgvSearchResults.RowHeadersVisible = false;
+
+                // Freeze the important columns
+                dgvSearchResults.Columns["ID"].Frozen = true;
+                dgvSearchResults.Columns["Names"].Frozen = true;
+                dgvSearchResults.Columns["Type"].Frozen = true;
+                dgvSearchResults.Columns["Mag"].Frozen = true;
+
+                // Resize to accomodate content
+                dgvSearchResults.AutoResizeColumns();
+
+                // Set the colour of the important columns
+                dgvSearchResults.Columns["ID"].DefaultCellStyle.BackColor = Color.LightBlue;
+                dgvSearchResults.Columns["Names"].DefaultCellStyle.BackColor = Color.LightBlue;
+                dgvSearchResults.Columns["Type"].DefaultCellStyle.BackColor = Color.LightBlue;
+                dgvSearchResults.Columns["Mag"].DefaultCellStyle.BackColor = Color.LightBlue;
+
                 totalResults = dt.Rows.Count;
                 UpdateSearchInfo(totalResults);
             }
@@ -172,21 +191,25 @@ namespace EAACtrl
         private void btnDrawSelection_Click(object sender, EventArgs e)
         {
             DataTable Selected = new DataTable();
-
+            
             Selected.Columns.Add("ID");
             Selected.Columns.Add("Names");
             Selected.Columns.Add("Type");
-            Selected.Columns.Add("Magnitude", typeof(double));
-            Selected.Columns.Add("Distance Mpc", typeof(double));
+            Selected.Columns.Add("Mag", typeof(double));
+            Selected.Columns.Add("Mag2", typeof(double));
+            Selected.Columns.Add("Dist Mpc", typeof(double));
             Selected.Columns.Add("Galaxy Type");
-            Selected.Columns.Add("Catalogue");
+            Selected.Columns.Add("Size");
+            Selected.Columns.Add("Comp");
+            Selected.Columns.Add("PA", typeof(double));
+            Selected.Columns.Add("Sep", typeof(double));
             Selected.Columns.Add("RA");
             Selected.Columns.Add("Dec");
             Selected.Columns.Add("dRA");
             Selected.Columns.Add("dDec");
-            Selected.Columns.Add("Size");
-            Selected.Columns.Add("PosAngle");
-            Selected.Columns.Add("Constellation");
+            Selected.Columns.Add("Const");
+            Selected.Columns.Add("Catalogue");
+
 
             foreach (DataGridViewRow row in dgvSearchResults.SelectedRows)
             {
@@ -195,17 +218,40 @@ namespace EAACtrl
                 SelectedRow["Names"] = row.Cells["Names"].Value;
                 SelectedRow["Type"] = row.Cells["Type"].Value;
 
-                if (double.TryParse(row.Cells["Magnitude"].Value.ToString(), out double Mag))
+                if (double.TryParse(row.Cells["Mag"].Value.ToString(), out double Mag))
                 {
-                    SelectedRow["Magnitude"] = Mag;
+                    SelectedRow["Mag"] = Mag;
                 }
-                else SelectedRow["Magnitude"] = DBNull.Value;
+                else SelectedRow["Mag"] = DBNull.Value;
 
-                if (double.TryParse(row.Cells["Distance Mpc"].Value.ToString(), out double Dist))
+                if (double.TryParse(row.Cells["Dist Mpc"].Value.ToString(), out double Dist))
                 {
-                    SelectedRow["Distance Mpc"] = Math.Round(Dist, 2);
+                    SelectedRow["Dist Mpc"] = Math.Round(Dist, 2);
                 }
-                else SelectedRow["Distance Mpc"] = DBNull.Value;
+                else SelectedRow["Dist Mpc"] = DBNull.Value;
+
+                if (double.TryParse(row.Cells["Mag2"].Value.ToString(), out double Mag2))
+                {
+                    SelectedRow["Mag2"] = Mag2;
+                }
+                else SelectedRow["Mag2"] = DBNull.Value;
+
+                if (double.TryParse(row.Cells["PA"].Value.ToString(), out double PA))
+                {
+                    if (PA == -999) row.Cells["PA"].Value = DBNull.Value;
+                    else
+                        row.Cells["PA"].Value = Math.Round(PA, 2);
+                }
+                else row.Cells["PA"].Value = DBNull.Value;
+
+                if (double.TryParse(row.Cells["Sep"].Value.ToString(), out double Sep))
+                {
+                    if (Sep == -999) row.Cells["Sep"].Value = DBNull.Value;
+                    else
+                        row.Cells["Sep"].Value = Math.Round(Sep, 2);
+                }
+                else row.Cells["Sep"].Value = DBNull.Value;
+
 
                 SelectedRow["Galaxy Type"] = row.Cells["Galaxy Type"].Value;
                 SelectedRow["Catalogue"] = row.Cells["Catalogue"].Value;
@@ -214,8 +260,9 @@ namespace EAACtrl
                 SelectedRow["dRA"] = row.Cells["dRA"].Value;
                 SelectedRow["dDec"] = row.Cells["dDec"].Value;
                 SelectedRow["Size"] = row.Cells["Size"].Value;
-                SelectedRow["PosAngle"] = row.Cells["PosAngle"].Value;
-                SelectedRow["Constellation"] = row.Cells["Constellation"].Value;
+                SelectedRow["PA"] = row.Cells["PA"].Value;
+                SelectedRow["Const"] = row.Cells["Const"].Value;
+                SelectedRow["Comp"] = row.Cells["Comp"].Value;
 
                 Selected.Rows.Add(SelectedRow);
             }
@@ -264,15 +311,29 @@ namespace EAACtrl
                 obj.RA2000 = double.Parse(row.Cells["dRA"].Value.ToString());
                 obj.Dec2000 = double.Parse(row.Cells["dDec"].Value.ToString());
                 obj.Catalogue = row.Cells["Catalogue"].Value.ToString();
-                obj.Distance = row.Cells["Distance Mpc"].Value.ToString();
+                obj.Distance = row.Cells["Dist Mpc"].Value.ToString();
                 obj.GalaxyType = row.Cells["Galaxy Type"].Value.ToString();
                 obj.Size = row.Cells["Size"].Value.ToString();
-                obj.PosAngle = int.Parse(row.Cells["PosAngle"].Value.ToString());
-                obj.Constellation = row.Cells["Constellation"].Value.ToString();
+                obj.Constellation = row.Cells["Const"].Value.ToString();
 
-                if (double.TryParse(row.Cells["Magnitude"].Value.ToString(), out double Magnitude))
+                if (double.TryParse(row.Cells["Mag"].Value.ToString(), out double Mag))
                 {
-                    obj.Magnitude = Magnitude;
+                    obj.Magnitude = Mag;
+                }
+
+                if (double.TryParse(row.Cells["Mag2"].Value.ToString(), out double Mag2))
+                {
+                    obj.Magnitude2 = Mag2;
+                }
+
+                if (double.TryParse(row.Cells["PA"].Value.ToString(), out double PA))
+                {
+                    obj.PosAngle = PA;
+                }
+
+                if (double.TryParse(row.Cells["Sep"].Value.ToString(), out double Sep))
+                {
+                    obj.Separation = Sep;
                 }
 
                 apObjects.Add(obj);
