@@ -2005,7 +2005,7 @@ namespace EAACtrl
                     }
                 }
 
-                // Add them to
+                // Add all the objects to the original data structure. Historically APGetCmdResult was used directly.
                 apOut.results.Objects.Clear();
                 foreach (APCmdObject obj in ds)
                 {
@@ -2745,6 +2745,7 @@ namespace EAACtrl
         public double RA2000 { get; set; }
         public double Dec2000 { get; set; }
         public double ParallacticAngle { get; set; }
+        public int Associated { get; set; }
         public double Magnitude2 { get; set; }
         public double Separation { get; set; }
         public string Components { get; set; }

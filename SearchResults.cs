@@ -21,6 +21,7 @@ namespace EAACtrl
         DataTable dtUniqueCatalogues = new DataTable();
         int totalResults = 0;
         string stellariumDSOFilter;
+        string displayMode = "All";
 
         public frmEAACP EAACP;
 
@@ -179,6 +180,8 @@ namespace EAACtrl
                 dgvSearchResults.Columns["Type"].DefaultCellStyle.BackColor = Color.LightBlue;
                 dgvSearchResults.Columns["Mag"].DefaultCellStyle.BackColor = Color.LightBlue;
 
+                InitDataGridViewContextMenu(dgvSearchResults);
+
                 totalResults = dt.Rows.Count;
                 UpdateSearchInfo(totalResults);
             }
@@ -189,10 +192,10 @@ namespace EAACtrl
             this.Text = $"Search Results: {totalResults} objects, Current View: {viewCount} objects";
         }
 
-        private void btnDrawSelection_Click(object sender, EventArgs e)
+        private void DrawSelectedObjects()
         {
             DataTable Selected = new DataTable();
-            
+
             Selected.Columns.Add("ID");
             Selected.Columns.Add("Names");
             Selected.Columns.Add("Type");
@@ -273,12 +276,23 @@ namespace EAACtrl
             UpdateSearchInfo(dgvSearchResults.SelectedRows.Count);
         }
 
-        private void btnPlotAll_Click(object sender, EventArgs e)
+        private void btnDrawSelection_Click(object sender, EventArgs e)
         {
-            // Stop the catalogues filter from firing
+            DrawSelectedObjects();
+        }
+
+        private void ResetCatalogueFilter()
+        {
             cbCataloguesFilter.SelectedIndexChanged -= cbCataloguesFilter_SelectedIndexChanged;
             cbCataloguesFilter.SelectedIndex = 0;
             cbCataloguesFilter.SelectedIndexChanged += cbCataloguesFilter_SelectedIndexChanged;
+        }
+
+        private void btnPlotAll_Click(object sender, EventArgs e)
+        {
+            displayMode = "All";
+            // Stop the catalogues filter from firing
+            ResetCatalogueFilter();
             
             // Remove any filtering
             dt.DefaultView.RowFilter = "";
@@ -360,13 +374,45 @@ namespace EAACtrl
                 frmOpt.TopMost = true;
                 if (frmOpt.ShowDialog() == DialogResult.OK)
                 {
-
+                    // If the user hs changed the display attributes then update the current plot selection on ext.
+                    switch (displayMode)
+                    {
+                        case "All":
+                            Stellarium.DrawObjects(dt);
+                            break;
+                        case "Filtered":
+                            DrawCatalogueFiltered();
+                            break;
+                        case "Selected":
+                            DrawSelectedObjects();
+                            break;
+                    }
                 }
             }
         }
-
         private void cbCataloguesFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
+            DrawCatalogueFiltered();
+        }
+
+        private void btnRecentre_Click(object sender, EventArgs e)
+        {
+            Stellarium.SyncStellariumToAPObject(CentreID, CentreRA.ToString(), CentreDec.ToString(), "");
+        }
+
+        private void btnCentreSelected_Click(object sender, EventArgs e)
+        {
+            if (dgvSearchResults.SelectedRows.Count > 0)
+            {
+                double RA = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dRA"].Value.ToString());
+                double Dec = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dDec"].Value.ToString());
+                Stellarium.SyncStellariumToPosition(RA, Dec);
+            }
+        }
+        private void DrawCatalogueFiltered()
+        {
+            displayMode = "Filtered";
+
             string apCatalogue = cbCataloguesFilter.Text;
             if (apCatalogue == "All Catalogues")
             {
@@ -382,21 +428,6 @@ namespace EAACtrl
                 Stellarium.DrawObjects(dv.ToTable());
 
                 UpdateSearchInfo(dv.ToTable().Rows.Count);
-            }
-        }
-
-        private void btnRecentre_Click(object sender, EventArgs e)
-        {
-            Stellarium.SyncStellariumToAPObject(CentreID, CentreRA.ToString(), CentreDec.ToString(), "");
-        }
-
-        private void btnCentreSelected_Click(object sender, EventArgs e)
-        {
-            if (dgvSearchResults.SelectedRows.Count > 0)
-            {
-                double RA = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dRA"].Value.ToString());
-                double Dec = double.Parse(dgvSearchResults.SelectedRows[0].Cells["dDec"].Value.ToString());
-                Stellarium.SyncStellariumToPosition(RA, Dec);
             }
         }
 
@@ -417,13 +448,122 @@ namespace EAACtrl
 
         private void btnClearPlot_Click(object sender, EventArgs e)
         {
+            displayMode = "All";
             Stellarium.ClearObjects();
+
+            // Stop the catalogues filter from firing
+            ResetCatalogueFilter();
+
             UpdateSearchInfo(0);
         }
 
         private void SearchResults_FormClosing(object sender, FormClosingEventArgs e)
         {
             Stellarium.SetStelProperty("NebulaMgr.catalogFilters", stellariumDSOFilter);
+        }
+
+        // add fields
+        private ContextMenuStrip dgvContextMenu;
+        private ToolStripMenuItem miCopyCell;
+        private ToolStripMenuItem miCopyRow;
+        private ToolStripMenuItem miCopyTable;
+
+        // call this from the form constructor after InitializeComponent()
+        private void InitDataGridViewContextMenu(DataGridView dgv)
+        {
+            dgvContextMenu = new ContextMenuStrip();
+            miCopyCell = new ToolStripMenuItem("Copy Cell", null, CopyCell_Click);
+            miCopyRow = new ToolStripMenuItem("Copy Row", null, CopyRow_Click);
+            miCopyTable = new ToolStripMenuItem("Copy Table", null, CopyTable_Click);
+
+            dgvContextMenu.Items.AddRange(new ToolStripItem[] { miCopyCell, miCopyRow, new ToolStripSeparator(), miCopyTable });
+            dgv.ContextMenuStrip = dgvContextMenu;
+
+            dgv.MouseDown += Dgv_MouseDown;               // detect right-click and select cell/row
+            dgvContextMenu.Opening += DgvContextMenu_Opening;
+        }
+
+        private void Dgv_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right) return;
+            var dgv = (DataGridView)sender;
+            var hit = dgv.HitTest(e.X, e.Y);
+
+            if (hit.Type == DataGridViewHitTestType.Cell)
+            {
+                // make the clicked cell current and select the row
+                dgv.CurrentCell = dgv[hit.ColumnIndex, hit.RowIndex];
+                dgv.ClearSelection();
+                dgv.Rows[hit.RowIndex].Selected = true;
+            }
+            else if (hit.Type == DataGridViewHitTestType.RowHeader)
+            {
+                // click on row header -> select that row
+                dgv.ClearSelection();
+                dgv.Rows[hit.RowIndex].Selected = true;
+            }
+            else
+            {
+                // clicked outside cells -> clear selection
+                dgv.ClearSelection();
+            }
+        }
+
+        private void DgvContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            var cms = (ContextMenuStrip)sender;
+            var dgv = (DataGridView)cms.SourceControl;
+
+            miCopyCell.Enabled = dgv.CurrentCell != null;
+            miCopyRow.Enabled = dgv.SelectedRows.Count > 0 || dgv.CurrentCell != null;
+            miCopyTable.Enabled = dgv.Rows.Count > 0;
+        }
+
+        private void CopyCell_Click(object sender, EventArgs e)
+        {
+            var dgv = (DataGridView)dgvContextMenu.SourceControl;
+            var cell = dgv.CurrentCell;
+            if (cell != null)
+            {
+                Clipboard.SetText(cell.FormattedValue?.ToString() ?? "");
+            }
+        }
+
+        private void CopyRow_Click(object sender, EventArgs e)
+        {
+            var dgv = (DataGridView)dgvContextMenu.SourceControl;
+            DataGridViewRow row = null;
+
+            if (dgv.SelectedRows.Count > 0)
+                row = dgv.SelectedRows[0];
+            else if (dgv.CurrentCell != null)
+                row = dgv.Rows[dgv.CurrentCell.RowIndex];
+
+            if (row != null)
+            {
+                // create tab-separated string of cell values
+                var values = row.Cells.Cast<DataGridViewCell>().Select(c => c.FormattedValue?.ToString() ?? "");
+                Clipboard.SetText(string.Join("\t", values));
+            }
+        }
+
+        private void CopyTable_Click(object sender, EventArgs e)
+        {
+            var dgv = (DataGridView)dgvContextMenu.SourceControl;
+            var sb = new StringBuilder();
+
+            // optional: include header row
+            var headers = dgv.Columns.Cast<DataGridViewColumn>().Select(c => c.HeaderText);
+            sb.AppendLine(string.Join("\t", headers));
+
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                if (row.IsNewRow) continue;
+                var values = row.Cells.Cast<DataGridViewCell>().Select(c => c.FormattedValue?.ToString() ?? "");
+                sb.AppendLine(string.Join("\t", values));
+            }
+
+            Clipboard.SetText(sb.ToString());
         }
     }
 }

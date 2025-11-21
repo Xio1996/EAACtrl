@@ -402,7 +402,7 @@ namespace EAACtrl
                         sDistance = (distance / Properties.Settings.Default.Hubble).ToString();
                     }
 
-                    listOfSearchResults.Add(new string[] { obj.ID, obj.Name, obj.Type, sMag, obj.GalaxyType, sDistance, obj.Catalogue, RA, Dec, obj.RA2000.ToString(), obj.Dec2000.ToString(), obj.Size, obj.PosAngle.ToString(), obj.Constellation, obj.Components, obj.Separation.ToString(), obj.Magnitude2.ToString() });
+                    listOfSearchResults.Add(new string[] { obj.ID, obj.Name, obj.Type, sMag, obj.GalaxyType, sDistance, obj.Catalogue, RA, Dec, obj.RA2000.ToString(), obj.Dec2000.ToString(), obj.Size, obj.PosAngle.ToString(), obj.Constellation, obj.Components, obj.Separation.ToString(), obj.Magnitude2.ToString(), obj.Associated.ToString() });
                 }
 
                 string objectLabel = "";
