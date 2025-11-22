@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchResults));
             this.dgvSearchResults = new System.Windows.Forms.DataGridView();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -44,7 +45,19 @@
             this.btnDSOStandard = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.btnDSOOff = new System.Windows.Forms.Button();
+            this.SearchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmiCentre = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiCDSByName = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCDSByPosition = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiShowStarSystem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiWDSComponentsFiltered = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiCopyRow = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCopyCell = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
+            this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvSearchResults
@@ -57,6 +70,7 @@
             this.dgvSearchResults.Name = "dgvSearchResults";
             this.dgvSearchResults.ReadOnly = true;
             this.dgvSearchResults.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvSearchResults.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSearchResults_CellMouseDown);
             // 
             // btnCancel
             // 
@@ -153,6 +167,80 @@
             this.btnDSOOff.UseVisualStyleBackColor = true;
             this.btnDSOOff.Click += new System.EventHandler(this.btnDSOOff_Click);
             // 
+            // SearchContextMenu
+            // 
+            this.SearchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiCentre,
+            this.toolStripSeparator1,
+            this.tsmiCDSByName,
+            this.tsmiCDSByPosition,
+            this.toolStripSeparator2,
+            this.tsmiShowStarSystem,
+            this.tsmiWDSComponentsFiltered,
+            this.toolStripSeparator3,
+            this.tsmiCopyRow,
+            this.tsmiCopyCell});
+            this.SearchContextMenu.Name = "SearchContextMenu";
+            resources.ApplyResources(this.SearchContextMenu, "SearchContextMenu");
+            this.SearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.SearchContextMenu_Opening);
+            // 
+            // tsmiCentre
+            // 
+            this.tsmiCentre.Name = "tsmiCentre";
+            resources.ApplyResources(this.tsmiCentre, "tsmiCentre");
+            this.tsmiCentre.Click += new System.EventHandler(this.tsmiCentre_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
+            // 
+            // tsmiCDSByName
+            // 
+            this.tsmiCDSByName.Name = "tsmiCDSByName";
+            resources.ApplyResources(this.tsmiCDSByName, "tsmiCDSByName");
+            this.tsmiCDSByName.Click += new System.EventHandler(this.tsmiCDSByName_Click);
+            // 
+            // tsmiCDSByPosition
+            // 
+            this.tsmiCDSByPosition.Name = "tsmiCDSByPosition";
+            resources.ApplyResources(this.tsmiCDSByPosition, "tsmiCDSByPosition");
+            this.tsmiCDSByPosition.Click += new System.EventHandler(this.tsmiCDSByPosition_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
+            // 
+            // tsmiShowStarSystem
+            // 
+            this.tsmiShowStarSystem.Name = "tsmiShowStarSystem";
+            resources.ApplyResources(this.tsmiShowStarSystem, "tsmiShowStarSystem");
+            this.tsmiShowStarSystem.Click += new System.EventHandler(this.tsmiShowStarSystem_Click);
+            // 
+            // tsmiWDSComponentsFiltered
+            // 
+            this.tsmiWDSComponentsFiltered.Name = "tsmiWDSComponentsFiltered";
+            resources.ApplyResources(this.tsmiWDSComponentsFiltered, "tsmiWDSComponentsFiltered");
+            this.tsmiWDSComponentsFiltered.Click += new System.EventHandler(this.tsmiWDSComponentsFiltered_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            resources.ApplyResources(this.toolStripSeparator3, "toolStripSeparator3");
+            // 
+            // tsmiCopyRow
+            // 
+            this.tsmiCopyRow.Name = "tsmiCopyRow";
+            resources.ApplyResources(this.tsmiCopyRow, "tsmiCopyRow");
+            this.tsmiCopyRow.Click += new System.EventHandler(this.tsmiCopyRow_Click);
+            // 
+            // tsmiCopyCell
+            // 
+            this.tsmiCopyCell.Name = "tsmiCopyCell";
+            resources.ApplyResources(this.tsmiCopyCell, "tsmiCopyCell");
+            this.tsmiCopyCell.Click += new System.EventHandler(this.tsmiCopyCell_Click);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
@@ -181,6 +269,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SearchResults_FormClosing);
             this.Load += new System.EventHandler(this.SearchResults_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).EndInit();
+            this.SearchContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -203,5 +292,16 @@
         private System.Windows.Forms.Button btnDSOStandard;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnDSOOff;
+        private System.Windows.Forms.ContextMenuStrip SearchContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCentre;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCDSByName;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCDSByPosition;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem tsmiShowStarSystem;
+        private System.Windows.Forms.ToolStripMenuItem tsmiWDSComponentsFiltered;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCopyRow;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCopyCell;
     }
 }
