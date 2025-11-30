@@ -1577,13 +1577,14 @@ function GetPlanObjectForObs(id as string) as APPlanObject
 end function
 
 sub AppendObservationNote(ByRef Obs as APObservation, ByRef Obj as APPlanObject, ImageInfo as string)
+	Debug "AppendObservationNote"
 	dim aInfo() as string = SplitComma(ImageInfo)
-	dim dtDate as Date = new Date(Plan().GMTDateTime)
+	dim dtDate as Date = new Date(Obs.UTDateTime)
+	
 	dim sLine as string = dtDate.LongDate + " " + dtDate.LongTime + " (UTC)"
 	
 	sLine = sLine + ", " + Obs.Telescope + " + " + Obs.Imager
 	sLine = sLine + " : Subs: " + aInfo(0) + ", Sub Exp: " + aInfo(2) + " sec, Total Exp: " + aInfo(1) + " sec"
-	
 	sLine = sLine + ", Alt: " + AngleFormatted(Obj.Altitude,1) + ", Az: " + AngleFormatted(Obj.Azimuth,1) + ", Airmass: " + DoubleToStr(Obj.AirMass,1) + ", App Mag: " + DoubleToStr(Obj.ApparentMagnitude,1)
 	
 	Debug "AppendObservationNote: ", sLine
@@ -1676,6 +1677,8 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 	dim oAttachment as APObservationAttachment
 	dim OrgOption as integer = Option
 	
+	Debug "LogObs"
+	
 	if obj<>nil then
 		dim oObs as APObservation
 		
@@ -1725,7 +1728,7 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 				oObs.OpticalAid = OpticalAidResource.Default.Name
 			end if
 			
-			Debug "Plan:",Plan().Name,"ID:", oObs.ID,"Name:",oObs.Name,"Const:",oObs.Constellation
+			Debug "LogObs: Plan=",Plan().Name,"ID:", oObs.ID,"Name:",oObs.Name,"Const:",oObs.Constellation
 			
 			// CHANGED to use plans new FilePath property 2.4b23
 			Debug "LogObs: Plan().FilePath=", Plan().FilePath
@@ -1749,12 +1752,9 @@ sub LogObs(obj as APPlanObject, Option as integer,  Silent as boolean, ObjectInf
 			
 			if oSettingsFile<>nil then
 				oAttachment.Description = oSettingsFile.ReadAll()
-				
 				// Append some basic information to the observation notes about the attachment and the objects basic properties at this time.
 				AppendObservationNote(oObs, obj, ImagInfo)
-				
 				oObs.Save()
-				
 				// Only speak if a single object observation is being created/appended
 				if not Silent then
 					if Option = 2 then
@@ -1898,7 +1898,11 @@ sub main()
 		dim sImgSettingsPath as string = Web.DecodeURLComponent(oCmd.Lookup("ImgSettingsPath",""))
 		dim sImgPath as string = Web.DecodeURLComponent(oCmd.Lookup("ImgPath",""))
 		dim sImgInfo as string = Web.DecodeURLComponent(oCmd.Lookup("ImgInfo",""))
-		Debug "Cmd: LogObservation", iOption, sObjectInfo, sImgSettingsPath, sImgPath, sImgInfo
+		Debug "Cmd: LogObservation Option=", iOption
+		Debug "Cmd: LogObservation ObjInfo=", sObjectInfo
+		Debug "Cmd: LogObservation ImgSettingsPath=", sImgSettingsPath
+		Debug "Cmd: LogObservation ImgPath=", sImgPath
+		Debug "Cmd: LogObservation ImgInfo=", sImgInfo
 		LogObservations(iOption, sObjectInfo, sImgSettingsPath, sImgPath, sImgInfo)
 		break
 	case 4
