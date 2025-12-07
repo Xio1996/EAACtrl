@@ -42,6 +42,7 @@
             this.cbCaptureProfile = new System.Windows.Forms.ComboBox();
             this.tcExtra = new System.Windows.Forms.TabControl();
             this.tpTools = new System.Windows.Forms.TabPage();
+            this.btnAstro = new System.Windows.Forms.Button();
             this.btnNTPCheck = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.btnLogFullScreen = new System.Windows.Forms.Button();
@@ -166,7 +167,8 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
-            this.btnAstro = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.txtAPPort = new System.Windows.Forms.TextBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -369,6 +371,21 @@
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
+            // 
+            // btnAstro
+            // 
+            this.btnAstro.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnAstro.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnAstro.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnAstro.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAstro.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnAstro.Location = new System.Drawing.Point(111, 270);
+            this.btnAstro.Name = "btnAstro";
+            this.btnAstro.Size = new System.Drawing.Size(96, 29);
+            this.btnAstro.TabIndex = 42;
+            this.btnAstro.Text = "Astro";
+            this.btnAstro.UseVisualStyleBackColor = false;
+            this.btnAstro.Click += new System.EventHandler(this.btnAstro_Click);
             // 
             // btnNTPCheck
             // 
@@ -1033,6 +1050,8 @@
             // 
             // tpConfig
             // 
+            this.tpConfig.Controls.Add(this.txtAPPort);
+            this.tpConfig.Controls.Add(this.label15);
             this.tpConfig.Controls.Add(this.label14);
             this.tpConfig.Controls.Add(this.cbMQTT);
             this.tpConfig.Controls.Add(this.cbStelTelePointer);
@@ -1889,20 +1908,21 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
-            // btnAstro
+            // label15
             // 
-            this.btnAstro.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnAstro.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnAstro.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.btnAstro.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAstro.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnAstro.Location = new System.Drawing.Point(111, 270);
-            this.btnAstro.Name = "btnAstro";
-            this.btnAstro.Size = new System.Drawing.Size(96, 29);
-            this.btnAstro.TabIndex = 42;
-            this.btnAstro.Text = "Astro";
-            this.btnAstro.UseVisualStyleBackColor = false;
-            this.btnAstro.Click += new System.EventHandler(this.btnAstro_Click);
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(225, 242);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(55, 17);
+            this.label15.TabIndex = 45;
+            this.label15.Text = "AP Port";
+            // 
+            // txtAPPort
+            // 
+            this.txtAPPort.Location = new System.Drawing.Point(286, 238);
+            this.txtAPPort.Name = "txtAPPort";
+            this.txtAPPort.Size = new System.Drawing.Size(68, 25);
+            this.txtAPPort.TabIndex = 46;
             // 
             // frmEAACP
             // 
@@ -2108,6 +2128,8 @@
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Button btnNTPCheck;
         private System.Windows.Forms.Button btnAstro;
+        private System.Windows.Forms.TextBox txtAPPort;
+        private System.Windows.Forms.Label label15;
     }
 }
 

@@ -872,5 +872,17 @@ namespace EAACtrl.Properties {
                 this["MQTTServer"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8080")]
+        public string APPort {
+            get {
+                return ((string)(this["APPort"]));
+            }
+            set {
+                this["APPort"] = value;
+            }
+        }
     }
 }

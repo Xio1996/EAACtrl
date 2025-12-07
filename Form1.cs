@@ -382,6 +382,7 @@ namespace EAACtrl
             cbStelTelePointer.Checked = Properties.Settings.Default.StTelescopePointer;
             cbSyncDateTime.Checked = Properties.Settings.Default.SyncAPView;
             cbMQTT.SelectedIndex = Properties.Settings.Default.MQTTServer;
+            txtAPPort.Text = Properties.Settings.Default.APPort;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -579,6 +580,7 @@ namespace EAACtrl
             Properties.Settings.Default.StTelescopePointer = cbStelTelePointer.Checked;
             Properties.Settings.Default.SyncAPView = cbSyncDateTime.Checked;
             Properties.Settings.Default.MQTTServer = cbMQTT.SelectedIndex;
+            Properties.Settings.Default.APPort = txtAPPort.Text;
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -710,8 +712,8 @@ namespace EAACtrl
         public string APExecuteScript(string ScriptPayload)
         {
             string result = "";
-
-            string apWebServices = $"http://localhost:8080?cmd=launch&auth={txtAPPassword.Text.Trim()}&cmdformat=json&responseformat=json&payload=";
+            string apPort = txtAPPort.Text.Trim();
+            string apWebServices = $"http://localhost:{apPort}?cmd=launch&auth={txtAPPassword.Text.Trim()}&cmdformat=json&responseformat=json&payload=";
             apWebServices += ScriptPayload;
 
             try
