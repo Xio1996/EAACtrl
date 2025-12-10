@@ -34,7 +34,7 @@
             // lblText
             // 
             this.lblText.BackColor = System.Drawing.SystemColors.Window;
-            this.lblText.Font = new System.Drawing.Font("Arial Nova", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblText.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblText.ForeColor = System.Drawing.Color.Yellow;
             this.lblText.Location = new System.Drawing.Point(1, 1);
             this.lblText.Name = "lblText";
@@ -50,7 +50,7 @@
             this.ControlBox = false;
             this.Controls.Add(this.lblText);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Location = new System.Drawing.Point(0, 90);
+            this.Location = new System.Drawing.Point(240, 95);
             this.Name = "frmTextOverlay";
             this.Opacity = 0.7D;
             this.ShowIcon = false;
