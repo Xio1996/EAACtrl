@@ -1223,7 +1223,18 @@ namespace EAACtrl
         private string DSAFormat(APCmdObject obj)
         {
             // IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
-            string sOut = obj.ID + "|" + obj.Name + "|";
+            string sOut = "";
+
+            if (string.IsNullOrEmpty(obj.Components))
+            {
+                sOut = obj.ID;
+            }
+            else
+            {
+                sOut = $"{obj.ID} {obj.Components}";
+            }
+            
+            sOut += "|" + obj.Name;
             sOut += APHelper.DisplayTypeFromAPType(obj.Type) + "|";
             sOut += obj.RA2000.ToString() + "|" + obj.Dec2000.ToString() + "|";
             sOut += obj.Magnitude.ToString() + "|";
