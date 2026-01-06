@@ -2380,7 +2380,7 @@ namespace EAACtrl
             string ObjectName = APHelper.TargetDisplay(SelectedObject);
 
             string FilePath = "C:\\SharpCap Captures\\Attachments\\SC_" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fK") + ".png";
-            ScreenShot(2290, -1, FilePath);
+            ScreenShot(2481, -1, FilePath);
             LogAttachment(ObjectName, FilePath,"SharpCap Screenshot");
             WriteMessage("Log - " + SelectedObject.ID + " SC screenshot\r\n");
         }
