@@ -184,7 +184,7 @@ namespace EAACtrl
             string sWebServiceURL = " https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&QUANTITIES='1,9,10,20,21,29'&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='";
             sWebServiceURL += $"{Longitude.ToString()},{Latitude.ToString()},{(Altitude/1000).ToString()}'";
             sWebServiceURL += $"&TLIST='{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}'";
-            sWebServiceURL += $"&COMMAND='{sID}'";
+            sWebServiceURL += $"&COMMAND='DES={sID}'";
 
             try
             {

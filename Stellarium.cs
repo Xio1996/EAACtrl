@@ -418,12 +418,12 @@ namespace EAACtrl
                         }
                         else
                         {
-                            objectLabel += component;
+                            objectLabel += component + " ";
                         }
                     }
                     else
                     {
-                        objectLabel = obj.ID;
+                        objectLabel = obj.ID + " ";
                     }
                 }
                 if (Properties.Settings.Default.soNames)
@@ -563,12 +563,12 @@ namespace EAACtrl
                         }
                         else
                         {
-                            objectLabel += component;
+                            objectLabel += component + " ";
                         }
                     }
                     else 
                     {
-                        objectLabel = row["ID"].ToString();
+                        objectLabel = row["ID"].ToString() + " ";
                     }
                 }
                 if (Properties.Settings.Default.soNames)
