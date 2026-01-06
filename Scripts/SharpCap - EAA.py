@@ -7,6 +7,10 @@
 import sys
 import random
 import time
+from SharpCap.Interfaces import PlateSolvePurpose
+from System.Threading import CancellationToken
+
+CurrentTargetObject = ''
 
 # The location of the paho-mqtt python package
 sys.path.append(r"C:\Users\peter\AppData\Local\MyPythonPackages")
@@ -14,7 +18,9 @@ sys.path.append(r"C:\Users\peter\AppData\Local\MyPythonPackages")
 from paho.mqtt import client as mqtt_client
 
 #TerraNova (telescope laptop)
-broker = '192.168.0.143'
+#broker = '192.168.0.143'
+#Odin (Mini PC)
+broker = '192.168.50.126'
 port = 1883
 
 CommandTopic = "SharpCap/command"
@@ -100,7 +106,7 @@ def selectCaptureMode(CaptureMode):
 	time.sleep(1)
 	
 	gExposure = SharpCap.SelectedCamera.Controls.Exposure.ExposureMs/1000;
-	print("gExposure=" + str(gExposure));
+	print("Sub Exposure=" + str(gExposure));
 
 	SharpCap.LiveStacking.Activate()
 
@@ -187,21 +193,28 @@ def subscribe(client: mqtt_client):
             if len(params) == 2:
                 selectCaptureMode(params[1])
         elif Cmd == "Log" or Cmd == "LogAppend":
-            ImageDetails = selectSaveAsSeen(Cmd)
+            if not CurrentTargetObject:
+                ImageDetails = "FAILED|Logging No Target"
+            else:
+                ImageDetails = selectSaveAsSeen(Cmd)
             
-            if ImageDetails == "":
-                ImageDetails = "FAILED|Logging"
+                if ImageDetails == "":
+                    ImageDetails = "FAILED|Logging"
                 
             ret = client.publish(ResultTopic, ImageDetails)
-        
+        elif Cmd == "PlateSolve" or Cmd == "PlateSolveAlign":
+            result = SharpCap.SafeGetAsyncResult(SharpCap.BlindSolver.SolveAsync(PlateSolvePurpose.Annotation, CancellationToken()))
+            print("Platesolve: RA=" + str(result.RightAscension) + " Dec=" + str(result.Declination))
+            ret = client.publish(ResultTopic, Cmd + "|" + str(result.RightAscension) + "|" + str(result.Declination))
+			
     client.subscribe(CommandTopic)
     client.on_message = on_message
     print("SharpCap subscribed to topic - " + CommandTopic)
 
 def run():
-    print("EAACtrl Script v2")
+    print("EAACtrl Script v3")
     print("Camera = ", SharpCap.SelectedCamera)
-	
+
     client = connect_mqtt()
     subscribe(client)
     client.loop_forever()

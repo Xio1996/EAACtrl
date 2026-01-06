@@ -189,6 +189,7 @@ namespace EAACtrl
                 {
                     case "FAILED":
                         WriteMessage("SharpCap - FAILED:" + CmdParams[1] + "\r\n");
+                        Speak("SharpCap command failed: " + CmdParams[1]);
                         break;
                     case "Log":
                         ProcessCaptureInfo(true, CmdParams[1], CmdParams[2], CmdParams[3], CmdParams[4]);
