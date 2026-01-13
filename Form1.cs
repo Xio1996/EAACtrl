@@ -45,7 +45,7 @@ namespace EAACtrl
         // TerraNova
         //private string mqttBroker = "192.168.50.226";
         // Odin
-        private string mqttBroker = "192.168.50.126";
+        private string mqttBroker = "192.168.50.125";
 
         private string TargetName = "";
         private string SelectedRA = "";
@@ -240,7 +240,7 @@ namespace EAACtrl
                     switch (cbMQTT.SelectedIndex)
                     {
                         case 0: // Odin (Beelink Mini PC)
-                            mqttBroker = "192.168.50.126";
+                            mqttBroker = "192.168.50.125";
                             break;
                         case 1: // TerrNova (Lenovo laptop)
                             mqttBroker = "192.168.50.226";
