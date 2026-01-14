@@ -334,6 +334,8 @@ namespace EAACtrl
                 obj.Size = row.Cells["Size"].Value.ToString();
                 obj.Constellation = row.Cells["Const"].Value.ToString();
 
+                obj.Components = row.Cells["Comp"].Value.ToString();
+
                 if (double.TryParse(row.Cells["Mag"].Value.ToString(), out double Mag))
                 {
                     obj.Magnitude = Mag;

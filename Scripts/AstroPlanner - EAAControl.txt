@@ -1446,7 +1446,7 @@ sub PutObjects(iOption as integer, ByRef oCmd as JSON)
 	dim i as integer
 	for i=0 to a.Count-1
 		b =a.Child(i)
-		Debug b.Child("ID"), b.Child("Name"), b.Child("Type"), b.Child("Size"), b.Child("RA2000"), b.Child("Dec2000")
+		Debug b.Child("ID"), b.Child("Name"), b.Child("Type"), b.Child("Size"), b.Child("RA2000"), b.Child("Dec2000"), b.Child("Components"), b.Child("Separation") 
 		if iOption = 1 then
 			// Add object to plan
 			obj = Plan.NewObject()
@@ -1455,6 +1455,8 @@ sub PutObjects(iOption as integer, ByRef oCmd as JSON)
 			obj.Type = b.child("Type")
 			obj.Size = b.Child("Size")
 			obj.PosAngle = b.Child("PosAngle")
+			obj.Components = b.Child("Components")
+			obj.Separation = b.Child("Separation")
 		elseif iOption = 2 then
 			// Find object in plan to update
 			obj = FindPlanObject(b.Child("ID"))
