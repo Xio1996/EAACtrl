@@ -56,6 +56,11 @@
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiCopyRow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyCell = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkAberration = new System.Windows.Forms.CheckBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
+            this.cbStellariumMinorBodyMarkers = new System.Windows.Forms.CheckBox();
+            this.cbStellariumSatellites = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -83,6 +88,7 @@
             // 
             resources.ApplyResources(this.btnAddToAP, "btnAddToAP");
             this.btnAddToAP.Name = "btnAddToAP";
+            this.toolTip1.SetToolTip(this.btnAddToAP, resources.GetString("btnAddToAP.ToolTip"));
             this.btnAddToAP.UseVisualStyleBackColor = true;
             this.btnAddToAP.Click += new System.EventHandler(this.btnAddToAP_Click);
             // 
@@ -90,6 +96,7 @@
             // 
             resources.ApplyResources(this.btnDrawSelection, "btnDrawSelection");
             this.btnDrawSelection.Name = "btnDrawSelection";
+            this.toolTip1.SetToolTip(this.btnDrawSelection, resources.GetString("btnDrawSelection.ToolTip"));
             this.btnDrawSelection.UseVisualStyleBackColor = true;
             this.btnDrawSelection.Click += new System.EventHandler(this.btnDrawSelection_Click);
             // 
@@ -97,6 +104,7 @@
             // 
             resources.ApplyResources(this.btnPlotAll, "btnPlotAll");
             this.btnPlotAll.Name = "btnPlotAll";
+            this.toolTip1.SetToolTip(this.btnPlotAll, resources.GetString("btnPlotAll.ToolTip"));
             this.btnPlotAll.UseVisualStyleBackColor = true;
             this.btnPlotAll.Click += new System.EventHandler(this.btnPlotAll_Click);
             // 
@@ -111,6 +119,7 @@
             // 
             resources.ApplyResources(this.btnClearPlot, "btnClearPlot");
             this.btnClearPlot.Name = "btnClearPlot";
+            this.toolTip1.SetToolTip(this.btnClearPlot, resources.GetString("btnClearPlot.ToolTip"));
             this.btnClearPlot.UseVisualStyleBackColor = true;
             this.btnClearPlot.Click += new System.EventHandler(this.btnClearPlot_Click);
             // 
@@ -131,6 +140,7 @@
             // 
             resources.ApplyResources(this.btnCentreSelected, "btnCentreSelected");
             this.btnCentreSelected.Name = "btnCentreSelected";
+            this.toolTip1.SetToolTip(this.btnCentreSelected, resources.GetString("btnCentreSelected.ToolTip"));
             this.btnCentreSelected.UseVisualStyleBackColor = true;
             this.btnCentreSelected.Click += new System.EventHandler(this.btnCentreSelected_Click);
             // 
@@ -138,6 +148,7 @@
             // 
             resources.ApplyResources(this.btnRecentre, "btnRecentre");
             this.btnRecentre.Name = "btnRecentre";
+            this.toolTip1.SetToolTip(this.btnRecentre, resources.GetString("btnRecentre.ToolTip"));
             this.btnRecentre.UseVisualStyleBackColor = true;
             this.btnRecentre.Click += new System.EventHandler(this.btnRecentre_Click);
             // 
@@ -145,6 +156,7 @@
             // 
             resources.ApplyResources(this.btnDSOAll, "btnDSOAll");
             this.btnDSOAll.Name = "btnDSOAll";
+            this.toolTip1.SetToolTip(this.btnDSOAll, resources.GetString("btnDSOAll.ToolTip"));
             this.btnDSOAll.UseVisualStyleBackColor = true;
             this.btnDSOAll.Click += new System.EventHandler(this.btnDSOAll_Click);
             // 
@@ -152,6 +164,7 @@
             // 
             resources.ApplyResources(this.btnDSOStandard, "btnDSOStandard");
             this.btnDSOStandard.Name = "btnDSOStandard";
+            this.toolTip1.SetToolTip(this.btnDSOStandard, resources.GetString("btnDSOStandard.ToolTip"));
             this.btnDSOStandard.UseVisualStyleBackColor = true;
             this.btnDSOStandard.Click += new System.EventHandler(this.btnDSOStandard_Click);
             // 
@@ -164,6 +177,7 @@
             // 
             resources.ApplyResources(this.btnDSOOff, "btnDSOOff");
             this.btnDSOOff.Name = "btnDSOOff";
+            this.toolTip1.SetToolTip(this.btnDSOOff, resources.GetString("btnDSOOff.ToolTip"));
             this.btnDSOOff.UseVisualStyleBackColor = true;
             this.btnDSOOff.Click += new System.EventHandler(this.btnDSOOff_Click);
             // 
@@ -241,10 +255,45 @@
             resources.ApplyResources(this.tsmiCopyCell, "tsmiCopyCell");
             this.tsmiCopyCell.Click += new System.EventHandler(this.tsmiCopyCell_Click);
             // 
+            // chkAberration
+            // 
+            resources.ApplyResources(this.chkAberration, "chkAberration");
+            this.chkAberration.Name = "chkAberration";
+            this.toolTip1.SetToolTip(this.chkAberration, resources.GetString("chkAberration.ToolTip"));
+            this.chkAberration.UseVisualStyleBackColor = true;
+            this.chkAberration.CheckedChanged += new System.EventHandler(this.chkAberration_CheckedChanged);
+            // 
+            // cbStellariumShowDSOImage
+            // 
+            resources.ApplyResources(this.cbStellariumShowDSOImage, "cbStellariumShowDSOImage");
+            this.cbStellariumShowDSOImage.Checked = true;
+            this.cbStellariumShowDSOImage.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbStellariumShowDSOImage.Name = "cbStellariumShowDSOImage";
+            this.cbStellariumShowDSOImage.UseVisualStyleBackColor = true;
+            this.cbStellariumShowDSOImage.CheckedChanged += new System.EventHandler(this.cbStellariumShowDSOImage_CheckedChanged);
+            // 
+            // cbStellariumMinorBodyMarkers
+            // 
+            resources.ApplyResources(this.cbStellariumMinorBodyMarkers, "cbStellariumMinorBodyMarkers");
+            this.cbStellariumMinorBodyMarkers.Name = "cbStellariumMinorBodyMarkers";
+            this.cbStellariumMinorBodyMarkers.UseVisualStyleBackColor = true;
+            this.cbStellariumMinorBodyMarkers.CheckedChanged += new System.EventHandler(this.cbStellariumMinorBodyMarkers_CheckedChanged);
+            // 
+            // cbStellariumSatellites
+            // 
+            resources.ApplyResources(this.cbStellariumSatellites, "cbStellariumSatellites");
+            this.cbStellariumSatellites.Name = "cbStellariumSatellites";
+            this.cbStellariumSatellites.UseVisualStyleBackColor = true;
+            this.cbStellariumSatellites.CheckedChanged += new System.EventHandler(this.cbStellariumSatellites_CheckedChanged);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.cbStellariumSatellites);
+            this.Controls.Add(this.cbStellariumMinorBodyMarkers);
+            this.Controls.Add(this.cbStellariumShowDSOImage);
+            this.Controls.Add(this.chkAberration);
             this.Controls.Add(this.btnDSOAll);
             this.Controls.Add(this.btnDSOStandard);
             this.Controls.Add(this.label2);
@@ -303,5 +352,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem tsmiCopyRow;
         private System.Windows.Forms.ToolStripMenuItem tsmiCopyCell;
+        private System.Windows.Forms.CheckBox chkAberration;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.CheckBox cbStellariumShowDSOImage;
+        private System.Windows.Forms.CheckBox cbStellariumMinorBodyMarkers;
+        private System.Windows.Forms.CheckBox cbStellariumSatellites;
     }
 }

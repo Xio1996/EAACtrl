@@ -56,6 +56,11 @@ namespace EAACtrl
             Stellarium.ScriptFolder = Properties.Settings.Default.StScriptFolder;
 
             stellariumDSOFilter = Stellarium.GetStelProperty("NebulaMgr.catalogFilters");
+            
+            if (bool.TryParse(Stellarium.GetStelProperty("StelCore.flagUseAberration", true),out bool Aberration))
+            {
+                chkAberration.Checked = Aberration;
+            }
 
             if (ResultsList != null || ResultsTable != null)
             {
@@ -723,6 +728,26 @@ namespace EAACtrl
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return; // header / empty area
 
             SearchContextMenu.Show(Cursor.Position);
+        }
+
+        private void chkAberration_CheckedChanged(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("StelCore.flagUseAberration", chkAberration.Checked ? "true" : "false");
+        }
+
+        private void cbStellariumShowDSOImage_CheckedChanged(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("actionShow_DSO_Textures", cbStellariumShowDSOImage.Checked.ToString());
+        }
+
+        private void cbStellariumMinorBodyMarkers_CheckedChanged(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("actionShow_Planets_ShowMinorBodyMarkers", cbStellariumMinorBodyMarkers.Checked.ToString());
+        }
+
+        private void cbStellariumSatellites_CheckedChanged(object sender, EventArgs e)
+        {
+            Stellarium.SetStelProperty("actionShow_Satellite_Hints", cbStellariumSatellites.Checked.ToString());
         }
     }
 }

@@ -169,15 +169,27 @@ namespace EAACtrl
             {
                 if (jsonStellariumProperties.RootElement.TryGetProperty(sName, out JsonElement property))
                 {
-                    property.TryGetProperty("value", out JsonElement value);
-
-                    if (value.ValueKind == JsonValueKind.Number)
+                    if (!property.TryGetProperty("value", out JsonElement value))
                     {
-                        return value.GetDouble().ToString();
+                        sMsg = $"StelProp {sName} missing value, {sMsg}";
+                        return "";
                     }
-                    else
+
+                    switch (value.ValueKind)
                     {
-                        return value.GetString();
+                        case JsonValueKind.Number:
+                            return value.GetDouble().ToString();
+                        case JsonValueKind.String:
+                            return value.GetString();
+                        case JsonValueKind.True:
+                        case JsonValueKind.False:
+                            // return lower-case "true"/"false" to match SetStelProperty usage
+                            return value.GetBoolean() ? "true" : "false";
+                        case JsonValueKind.Null:
+                            return "";
+                        default:
+                            // Arrays/Objects: return raw JSON text so caller can decide
+                            return value.GetRawText();
                     }
                 }
             }
