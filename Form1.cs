@@ -377,7 +377,7 @@ namespace EAACtrl
             cbTSAutoFOVI.Checked = Properties.Settings.Default.TSAutoFOVI;
             txtScriptFolder.Text = Properties.Settings.Default.StScriptFolder;
             Stellarium.ScriptFolder = txtScriptFolder.Text;
-            lblTelescope.Text = Properties.Settings.Default.ASCOMTelescope;
+            lblTelescope.Text = Properties.Settings.Default.ASCOMTelescopeName;
             txtAPPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.Auth);
             txtStellariumPassword.Text = EncryptionHelper.Decrypt(Properties.Settings.Default.StelPassword);
             cbStelTelePointer.Checked = Properties.Settings.Default.StTelescopePointer;
@@ -575,7 +575,7 @@ namespace EAACtrl
             Properties.Settings.Default.APAutoSort = cbAPAutoSort.Checked;
             Properties.Settings.Default.TSAutoFOVI = cbTSAutoFOVI.Checked;
             Properties.Settings.Default.StScriptFolder = txtScriptFolder.Text;
-            Properties.Settings.Default.ASCOMTelescope = lblTelescope.Text;
+            //Properties.Settings.Default.ASCOMTelescope = lblTelescope.Text; // Set when telescope selected
             Properties.Settings.Default.StelPassword = EncryptionHelper.Encrypt(txtStellariumPassword.Text.Trim());
             Properties.Settings.Default.Auth = EncryptionHelper.Encrypt(txtAPPassword.Text.Trim());
             Properties.Settings.Default.StTelescopePointer = cbStelTelePointer.Checked;
@@ -2222,7 +2222,7 @@ namespace EAACtrl
         {
             if (EAATelescope.Choose())
             {
-                lblTelescope.Text = Properties.Settings.Default.ASCOMTelescope;
+                lblTelescope.Text = Properties.Settings.Default.ASCOMTelescopeName;
             }
         }
 
@@ -2238,10 +2238,10 @@ namespace EAACtrl
                     lblTeleEquCoordType.Text = EAATelescope.EquatorialSystem.ToString();
                     Speak("Telescope connected");
 
-                    if (cbStelTelePointer.Checked)
-                    {
+                   // if (cbStelTelePointer.Checked)
+                   // {
                         StartTelescopeStatus();
-                    }
+                   // }
 
                     WriteMessage("Telescope: Connected\r\n");
 

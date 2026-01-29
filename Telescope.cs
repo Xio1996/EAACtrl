@@ -422,10 +422,32 @@ namespace EAACtrl
             if (TelescopeID != "")
             {
                 Properties.Settings.Default.ASCOMTelescope = TelescopeID;
+                Properties.Settings.Default.ASCOMTelescopeName = GetName();
+                Properties.Settings.Default.Save();
                 result =true;
             }
 
             return result;
+        }
+
+        public string GetName()
+        {
+            string name = "Unknown";
+            sMsg = "";
+            try
+            {
+                if (Telescope == null)
+                {
+                    Telescope = new Telescope(TelescopeID);
+                    name = Telescope.Name;
+                }
+                
+            }
+            catch (Exception e)
+            {
+                sMsg = "Telescope: Get Name failed - " + e.Message;
+            }
+            return name;
         }
 
         public bool Connect()

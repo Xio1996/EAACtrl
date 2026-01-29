@@ -884,5 +884,17 @@ namespace EAACtrl.Properties {
                 this["APPort"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ASCOMTelescopeName {
+            get {
+                return ((string)(this["ASCOMTelescopeName"]));
+            }
+            set {
+                this["ASCOMTelescopeName"] = value;
+            }
+        }
     }
 }
