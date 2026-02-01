@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using static System.Net.Mime.MediaTypeNames;
@@ -102,6 +103,8 @@ namespace EAACtrl
 
         // Observing session state
         private static SessionState sessionState = SessionState.None;
+
+        private static int TelescopeUpdateRateMs = 500;
 
         private bool SetSessionState(SessionState state)
         {
@@ -384,6 +387,7 @@ namespace EAACtrl
             cbSyncDateTime.Checked = Properties.Settings.Default.SyncAPView;
             cbMQTT.SelectedIndex = Properties.Settings.Default.MQTTServer;
             txtAPPort.Text = Properties.Settings.Default.APPort;
+            txtUpdateRate.Text = Properties.Settings.Default.TelescopeUpdateRate.ToString();
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -582,6 +586,7 @@ namespace EAACtrl
             Properties.Settings.Default.SyncAPView = cbSyncDateTime.Checked;
             Properties.Settings.Default.MQTTServer = cbMQTT.SelectedIndex;
             Properties.Settings.Default.APPort = txtAPPort.Text;
+            Properties.Settings.Default.TelescopeUpdateRate = int.Parse(txtUpdateRate.Text);
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -2278,7 +2283,7 @@ namespace EAACtrl
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(500);
+                    System.Threading.Thread.Sleep(TelescopeUpdateRateMs);
                     worker.ReportProgress(i++);
                 }
             }
@@ -2325,7 +2330,23 @@ namespace EAACtrl
                 return;
             }
 
-            EAATelescope.Stabilise();
+            if (!EAATelescope.Connect())
+            {
+                Speak("Telescope not connected");
+                return;
+            }
+
+            if (EAATelescope.Stabilise())
+            {
+                Speak("Telescope stabilising");
+                WriteMessage("Telescope: Stabilise command sent\r\n");
+            }
+            else
+            {
+                Speak("Telescope stabilise failed");
+                WriteMessage("Telescope: Stabilise command FAILED\r\n");
+            }
+
         }
 
         private bool ScreenShot(int Width, int Height, string Filepath)
@@ -2433,24 +2454,6 @@ namespace EAACtrl
             //}
             
             //WriteMessage(EAATelescope.Message + "\r\n");
-        }
-
-        private void btnAPASCOMTest_Click(object sender, EventArgs e)
-        {
-            EAATelescope.Connect();
-            
-            string sDriverVersion = EAATelescope.DriverVersion;
-
-            bool bCanPark = EAATelescope.CanPark;
-
-            bool bAtPark = EAATelescope.AtPark;
-
-            EAATelescope.UnPark();
-
-            bool bCanSetTracking = EAATelescope.CanSetTracking;
-
-            EAATelescope.Tracking = true;
-
         }
 
         private void cbStellariumMinorBodyMarkers_CheckedChanged(object sender, EventArgs e)
@@ -2721,6 +2724,126 @@ namespace EAACtrl
             SolarAltitude solarAltitude = new SolarAltitude();
             double altSolar = solarAltitude.CalculateAltitude(50.7432162, -1.3150645, DateTime.UtcNow); // Example for London
             Speak("Solar altitude: " + altSolar.ToString("F2") + " degrees");
+        }
+
+        private void btnStelSlew_Click(object sender, EventArgs e)
+        {
+            APCmdObject apObject = null;
+
+            if (IsStellariumRunning() == false)
+            {
+                Speak(StellariumSpeak + " is not running");
+                return;
+            }
+
+            if (!EAATelescope.Connected)
+            {
+                Speak("Telescope not connected");
+                return;
+            }
+
+            apObject = Stellarium.StellariumGetSelectedObjectInfo();
+            if (apObject == null)
+            {
+                Speak("No stellarium object selected");
+                return;
+            }
+
+            DialogResult dialogResult = MessageBox.Show("Confirm telescope SLEW?", "EAACtrl", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                WriteMessage("Slew confirmed by user.\r\n");
+                //APSlewTelescope();
+
+                AstroCalc astroCalc = new AstroCalc();
+                astroCalc.J2000ToJNOW(apObject.RA2000, apObject.Dec2000, out double RANow, out double DecNow);
+                if (EAATelescope.Slew(RANow, DecNow))
+                {
+                    WriteMessage("Slewing...\r\n");
+                }
+                else
+                {
+                    WriteMessage("Slew - command failed!\r\n");
+                }
+
+            }
+            else
+            {
+                WriteMessage("Slew - cancelled by user.\r\n");
+            }
+        }
+
+        private void btnStelSync_Click(object sender, EventArgs e)
+        {
+            APCmdObject apObject = null;
+
+            if (IsStellariumRunning() == false)
+            {
+                Speak(StellariumSpeak + " is not running");
+                return;
+            }
+
+            if (!EAATelescope.Connected)
+            {
+                Speak("Telescope not connected");
+                return;
+            }
+
+            apObject = Stellarium.StellariumGetSelectedObjectInfo();
+            if (apObject == null)
+            {
+                Speak("No stellarium object selected");
+                return;
+            }
+
+            DialogResult dialogResult = MessageBox.Show("Confirm telescope SYNC?", "EAACtrl", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                WriteMessage("SYNC confirmed by user.\r\n");
+                //APSlewTelescope();
+
+                AstroCalc astroCalc = new AstroCalc();
+                astroCalc.J2000ToJNOW(apObject.RA2000, apObject.Dec2000, out double RANow, out double DecNow);
+                if (EAATelescope.Sync(RANow, DecNow))
+                {
+                    WriteMessage("Sync...\r\n");
+                }
+                else
+                {
+                    WriteMessage("Sync - command failed!\r\n");
+                }
+
+            }
+            else
+            {
+                WriteMessage("Sync - cancelled by user.\r\n");
+            }
+        }
+
+        private void txtUpdateRate_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Allow control keys (e.g. Backspace) and digits only
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void txtUpdateRate_Leave(object sender, EventArgs e)
+        {
+            if (txtUpdateRate == null) return; // defensive
+
+            if (!int.TryParse(txtUpdateRate.Text, out int val))
+            {
+                // If not a number, fallback to minimum
+                val = 1000;
+            }
+
+            if (val < 100) val = 100;
+            if (val > 5000) val = 5000;
+
+            txtUpdateRate.Text = val.ToString();
+            TelescopeUpdateRateMs = val;
         }
     }
 

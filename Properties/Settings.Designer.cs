@@ -896,5 +896,17 @@ namespace EAACtrl.Properties {
                 this["ASCOMTelescopeName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int TelescopeUpdateRate {
+            get {
+                return ((int)(this["TelescopeUpdateRate"]));
+            }
+            set {
+                this["TelescopeUpdateRate"] = value;
+            }
+        }
     }
 }

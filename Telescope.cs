@@ -525,5 +525,25 @@ namespace EAACtrl
             }
             return result;
         }
+
+        public bool Sync(double RA, double Dec)
+        {
+            bool result = false;
+            sMsg = "";
+
+            if (Connected)
+            {
+                try
+                {
+                    Telescope.SyncToCoordinates(RA, Dec);
+                    result = true;
+                }
+                catch (Exception e)
+                {
+                    sMsg = "Telescope: Sync Failed - " + e.Message;
+                }
+            }
+            return result;
+        }
     }
 }
