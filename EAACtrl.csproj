@@ -184,6 +184,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlignmentSelector.cs" />
     <Compile Include="APHelper.cs" />
     <Compile Include="Astro.cs" />
     <Compile Include="AstroCalc.cs" />
@@ -251,6 +252,7 @@
     <EmbeddedResource Include="StelFOVOptions.resx">
       <DependentUpon>StelFOVOptions.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="hyg.csv" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -60,6 +60,7 @@
             this.btnAsteroidsFOV = new System.Windows.Forms.Button();
             this.btnObsClkStop = new System.Windows.Forms.Button();
             this.tpTelescope = new System.Windows.Forms.TabPage();
+            this.btnAlignAZ = new System.Windows.Forms.Button();
             this.txtUpdateRate = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -171,6 +172,10 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
+            this.txtTextLeft = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.txtTextTop = new System.Windows.Forms.TextBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -490,6 +495,10 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.label18);
+            this.groupBox2.Controls.Add(this.txtTextTop);
+            this.groupBox2.Controls.Add(this.label17);
+            this.groupBox2.Controls.Add(this.txtTextLeft);
             this.groupBox2.Controls.Add(this.btnOverlayText);
             this.groupBox2.Controls.Add(this.txtOverlay);
             this.groupBox2.Controls.Add(this.cbTextOverlay);
@@ -613,6 +622,7 @@
             // 
             // tpTelescope
             // 
+            this.tpTelescope.Controls.Add(this.btnAlignAZ);
             this.tpTelescope.Controls.Add(this.txtUpdateRate);
             this.tpTelescope.Controls.Add(this.label16);
             this.tpTelescope.Controls.Add(this.groupBox5);
@@ -629,6 +639,16 @@
             this.tpTelescope.TabIndex = 4;
             this.tpTelescope.Text = "Telescope";
             this.tpTelescope.UseVisualStyleBackColor = true;
+            // 
+            // btnAlignAZ
+            // 
+            this.btnAlignAZ.Location = new System.Drawing.Point(237, 221);
+            this.btnAlignAZ.Name = "btnAlignAZ";
+            this.btnAlignAZ.Size = new System.Drawing.Size(128, 27);
+            this.btnAlignAZ.TabIndex = 56;
+            this.btnAlignAZ.Text = "Align (SyncScan)";
+            this.btnAlignAZ.UseVisualStyleBackColor = true;
+            this.btnAlignAZ.Click += new System.EventHandler(this.btnAlignAZ_Click);
             // 
             // txtUpdateRate
             // 
@@ -682,7 +702,7 @@
             // 
             // btnStabilise
             // 
-            this.btnStabilise.Location = new System.Drawing.Point(237, 211);
+            this.btnStabilise.Location = new System.Drawing.Point(237, 188);
             this.btnStabilise.Name = "btnStabilise";
             this.btnStabilise.Size = new System.Drawing.Size(128, 27);
             this.btnStabilise.TabIndex = 47;
@@ -1945,6 +1965,38 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
+            // txtTextLeft
+            // 
+            this.txtTextLeft.Location = new System.Drawing.Point(111, 49);
+            this.txtTextLeft.Name = "txtTextLeft";
+            this.txtTextLeft.Size = new System.Drawing.Size(61, 25);
+            this.txtTextLeft.TabIndex = 31;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(80, 52);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(30, 17);
+            this.label17.TabIndex = 32;
+            this.label17.Text = "Left";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(177, 52);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(30, 17);
+            this.label18.TabIndex = 34;
+            this.label18.Text = "Top";
+            // 
+            // txtTextTop
+            // 
+            this.txtTextTop.Location = new System.Drawing.Point(210, 49);
+            this.txtTextTop.Name = "txtTextTop";
+            this.txtTextTop.Size = new System.Drawing.Size(61, 25);
+            this.txtTextTop.TabIndex = 33;
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -2154,6 +2206,11 @@
         private System.Windows.Forms.Button btnStelSync;
         private System.Windows.Forms.TextBox txtUpdateRate;
         private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Button btnAlignAZ;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.TextBox txtTextTop;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox txtTextLeft;
     }
 }
 

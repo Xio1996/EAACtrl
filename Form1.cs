@@ -388,6 +388,8 @@ namespace EAACtrl
             cbMQTT.SelectedIndex = Properties.Settings.Default.MQTTServer;
             txtAPPort.Text = Properties.Settings.Default.APPort;
             txtUpdateRate.Text = Properties.Settings.Default.TelescopeUpdateRate.ToString();
+            txtTextLeft.Text = Properties.Settings.Default.TextX.ToString();
+            txtTextTop.Text = Properties.Settings.Default.TextY.ToString();
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -587,6 +589,8 @@ namespace EAACtrl
             Properties.Settings.Default.MQTTServer = cbMQTT.SelectedIndex;
             Properties.Settings.Default.APPort = txtAPPort.Text;
             Properties.Settings.Default.TelescopeUpdateRate = int.Parse(txtUpdateRate.Text);
+            Properties.Settings.Default.TextX = int.Parse(txtTextLeft.Text);
+            Properties.Settings.Default.TextY = int.Parse(txtTextTop.Text);
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -594,6 +598,8 @@ namespace EAACtrl
 
         private void btnOverlayText_Click_2(object sender, EventArgs e)
         {
+            frmTextOverlay.Left = int.Parse(txtTextLeft.Text);
+            frmTextOverlay.Top = int.Parse(txtTextTop.Text);
             frmTextOverlay.Controls["lblText"].Text = txtOverlay.Text;
         }
 
@@ -606,6 +612,8 @@ namespace EAACtrl
             }
             else
             {
+                frmTextOverlay.Left = int.Parse(txtTextLeft.Text);
+                frmTextOverlay.Top = int.Parse(txtTextTop.Text);
                 bOverlayVisible = true;
                 frmTextOverlay.Show();
             }
@@ -623,6 +631,9 @@ namespace EAACtrl
 
         private void SetOverlayText(string sObjectName)
         {
+            frmTextOverlay.Left = int.Parse(txtTextLeft.Text);
+            frmTextOverlay.Top = int.Parse(txtTextTop.Text);
+
             if (sObjectName != "")
             {
                 frmTextOverlay.Controls["lblText"].Text = sObjectName;
@@ -2844,6 +2855,54 @@ namespace EAACtrl
 
             txtUpdateRate.Text = val.ToString();
             TelescopeUpdateRateMs = val;
+        }
+
+        private void btnAlignAZ_Click(object sender, EventArgs e)
+        {
+            if (!EAATelescope.Connected)
+            {
+                Speak("Telescope not connected");
+                return;
+            }
+
+            List<Tuple<double, double>> AlignAZPoints = new List<Tuple<double, double>>()
+            {
+                Tuple.Create(2.0, 70.0),
+                Tuple.Create(260.0, 35.0),
+                Tuple.Create(210.0, 55.0),
+                Tuple.Create(150.0, 45.0),
+                Tuple.Create(110.0, 55.0)
+            };
+
+
+            int i= 0;
+            do
+            {
+                DialogResult dialogResult = MessageBox.Show($"Slew to align position {(i+1).ToString()}: Az ={ AlignAZPoints[i].Item1 } Alt={AlignAZPoints[i].Item2}", "EAACtrl - Alignment", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    Speak($"Slewing to align position {(i+1).ToString()}");
+                    EAATelescope.SlewAzAlt(AlignAZPoints[i].Item1, AlignAZPoints[i].Item2);
+
+                    while (EAATelescope.Slewing)
+                    {
+                        DisplayTelescopeInformation();
+                        System.Threading.Thread.Sleep(500);
+                    }
+                }
+                else { Speak("Alignment cancelled"); return; }
+
+                dialogResult = MessageBox.Show($"Click Plate solve to Sync position {(i+1).ToString()}: Az ={AlignAZPoints[i].Item1} Alt={AlignAZPoints[i].Item2}", "EAACtrl - Alignment", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.No)
+                {
+                    Speak("Alignment cancelled"); return;
+                }
+                i++;
+
+            } while (i < 5);
+
+            Speak("Alignment completed");
+            return;
         }
     }
 

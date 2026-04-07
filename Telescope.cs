@@ -513,6 +513,25 @@ namespace EAACtrl
             return result;
         }
 
+        public bool SlewAzAlt(double Az, double Alt)
+        {
+            bool result = false;
+            sMsg = "";
+            if (Connected)
+            {
+                try
+                {
+                    Telescope.SlewToAltAzAsync(Az, Alt);
+                    result = true;
+                }
+                catch (Exception e)
+                {
+                    sMsg = "Telescope: Slew Failed - " + e.Message;
+                }
+            }
+            return result;
+        }
+
         public bool AbortSlew()
         {
             bool result = false;
