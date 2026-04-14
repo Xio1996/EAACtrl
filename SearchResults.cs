@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -15,6 +17,9 @@ namespace EAACtrl
 {
     public partial class SearchResults : Form
     {
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         private Stellarium Stellarium = new Stellarium();
         private List<string[]> ResultsList = null;
         private DataTable ResultsTable = null;
@@ -748,6 +753,46 @@ namespace EAACtrl
         private void cbStellariumSatellites_CheckedChanged(object sender, EventArgs e)
         {
             Stellarium.SetStelProperty("actionShow_Satellite_Hints", cbStellariumSatellites.Checked.ToString());
+        }
+
+        private void btnPlFront_Click(object sender, EventArgs e)
+        {
+            SwitchAppToFront("Stellarium");
+        }
+        private void SwitchAppToFront(string processName)
+        {
+            /*
+            Process[] proc = Process.GetProcesses();
+            foreach (var process in proc)
+            {
+                Console.WriteLine($"Process: {process.ProcessName}, ID: {process.Id}");
+            }
+            */
+
+            Process[] processes = Process.GetProcessesByName(processName);
+            if (processes.Length > 0)
+            {
+                IntPtr hWnd = processes[0].MainWindowHandle;
+                if (hWnd != IntPtr.Zero)
+                {
+                    SetForegroundWindow(hWnd);
+                    Console.WriteLine($"{processName} brought to the front.");
+                }
+                else
+                {
+                    Console.WriteLine($"{processName} does not have a main window handle.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"{processName} is not running.");
+            }
+
+        }
+
+        private void btnAPFront_Click(object sender, EventArgs e)
+        {
+            SwitchAppToFront("AstroPlanner");
         }
     }
 }

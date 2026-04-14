@@ -138,7 +138,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;dgvSearchResults.ZOrder" xml:space="preserve">
-    <value>19</value>
+    <value>21</value>
   </data>
   <data name="btnCancel.Location" type="System.Drawing.Point, System.Drawing">
     <value>932, 358</value>
@@ -162,7 +162,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnCancel.ZOrder" xml:space="preserve">
-    <value>18</value>
+    <value>20</value>
   </data>
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>178, 17</value>
@@ -192,7 +192,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnAddToAP.ZOrder" xml:space="preserve">
-    <value>17</value>
+    <value>19</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="btnDrawSelection.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
@@ -223,7 +223,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnDrawSelection.ZOrder" xml:space="preserve">
-    <value>16</value>
+    <value>18</value>
   </data>
   <data name="btnPlotAll.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -253,7 +253,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnPlotAll.ZOrder" xml:space="preserve">
-    <value>15</value>
+    <value>17</value>
   </data>
   <data name="btnOptions.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -280,7 +280,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnOptions.ZOrder" xml:space="preserve">
-    <value>14</value>
+    <value>16</value>
   </data>
   <data name="btnClearPlot.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -310,7 +310,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnClearPlot.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>11</value>
   </data>
   <data name="cbCataloguesFilter.Location" type="System.Drawing.Point, System.Drawing">
     <value>300, 359</value>
@@ -331,7 +331,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;cbCataloguesFilter.ZOrder" xml:space="preserve">
-    <value>10</value>
+    <value>12</value>
   </data>
   <data name="label1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -361,7 +361,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>11</value>
+    <value>13</value>
   </data>
   <data name="btnCentreSelected.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -391,7 +391,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnCentreSelected.ZOrder" xml:space="preserve">
-    <value>12</value>
+    <value>14</value>
   </data>
   <data name="btnRecentre.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -421,7 +421,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnRecentre.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>15</value>
   </data>
   <data name="btnDSOAll.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -451,7 +451,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnDSOAll.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>7</value>
   </data>
   <data name="btnDSOStandard.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -481,7 +481,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnDSOStandard.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>8</value>
   </data>
   <data name="label2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -511,7 +511,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>9</value>
   </data>
   <data name="btnDSOOff.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -541,7 +541,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnDSOOff.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>10</value>
   </data>
   <metadata name="SearchContextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -621,9 +621,6 @@
   <data name="chkAberration.Text" xml:space="preserve">
     <value>Aberration (Off, better label placement)</value>
   </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>178, 17</value>
-  </metadata>
   <data name="chkAberration.ToolTip" xml:space="preserve">
     <value>Accounts for the apparent shift caused by Earth’s orbital motion. Causes ~20 arcsec position error.</value>
   </data>
@@ -637,8 +634,11 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;chkAberration.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>6</value>
   </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>178, 17</value>
+  </metadata>
   <data name="cbStellariumShowDSOImage.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -667,7 +667,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;cbStellariumShowDSOImage.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>5</value>
   </data>
   <data name="cbStellariumMinorBodyMarkers.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -697,7 +697,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;cbStellariumMinorBodyMarkers.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>4</value>
   </data>
   <data name="cbStellariumSatellites.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -727,6 +727,57 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;cbStellariumSatellites.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="btnPlFront.Location" type="System.Drawing.Point, System.Drawing">
+    <value>966, 391</value>
+  </data>
+  <data name="btnPlFront.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 23</value>
+  </data>
+  <data name="btnPlFront.TabIndex" type="System.Int32, mscorlib">
+    <value>51</value>
+  </data>
+  <data name="btnPlFront.Text" xml:space="preserve">
+    <value>Pl</value>
+  </data>
+  <data name="&gt;&gt;btnPlFront.Name" xml:space="preserve">
+    <value>btnPlFront</value>
+  </data>
+  <data name="&gt;&gt;btnPlFront.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnPlFront.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnPlFront.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="btnAPFront.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnAPFront.Location" type="System.Drawing.Point, System.Drawing">
+    <value>920, 391</value>
+  </data>
+  <data name="btnAPFront.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 23</value>
+  </data>
+  <data name="btnAPFront.TabIndex" type="System.Int32, mscorlib">
+    <value>52</value>
+  </data>
+  <data name="btnAPFront.Text" xml:space="preserve">
+    <value>AP</value>
+  </data>
+  <data name="&gt;&gt;btnAPFront.Name" xml:space="preserve">
+    <value>btnAPFront</value>
+  </data>
+  <data name="&gt;&gt;btnAPFront.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnAPFront.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;btnAPFront.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">

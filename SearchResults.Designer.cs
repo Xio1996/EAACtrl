@@ -61,6 +61,8 @@
             this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
             this.cbStellariumMinorBodyMarkers = new System.Windows.Forms.CheckBox();
             this.cbStellariumSatellites = new System.Windows.Forms.CheckBox();
+            this.btnPlFront = new System.Windows.Forms.Button();
+            this.btnAPFront = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -286,10 +288,28 @@
             this.cbStellariumSatellites.UseVisualStyleBackColor = true;
             this.cbStellariumSatellites.CheckedChanged += new System.EventHandler(this.cbStellariumSatellites_CheckedChanged);
             // 
+            // btnPlFront
+            // 
+            this.btnPlFront.BackColor = System.Drawing.Color.Silver;
+            resources.ApplyResources(this.btnPlFront, "btnPlFront");
+            this.btnPlFront.Name = "btnPlFront";
+            this.btnPlFront.UseVisualStyleBackColor = false;
+            this.btnPlFront.Click += new System.EventHandler(this.btnPlFront_Click);
+            // 
+            // btnAPFront
+            // 
+            this.btnAPFront.BackColor = System.Drawing.Color.MediumSeaGreen;
+            resources.ApplyResources(this.btnAPFront, "btnAPFront");
+            this.btnAPFront.Name = "btnAPFront";
+            this.btnAPFront.UseVisualStyleBackColor = false;
+            this.btnAPFront.Click += new System.EventHandler(this.btnAPFront_Click);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnAPFront);
+            this.Controls.Add(this.btnPlFront);
             this.Controls.Add(this.cbStellariumSatellites);
             this.Controls.Add(this.cbStellariumMinorBodyMarkers);
             this.Controls.Add(this.cbStellariumShowDSOImage);
@@ -357,5 +377,7 @@
         private System.Windows.Forms.CheckBox cbStellariumShowDSOImage;
         private System.Windows.Forms.CheckBox cbStellariumMinorBodyMarkers;
         private System.Windows.Forms.CheckBox cbStellariumSatellites;
+        private System.Windows.Forms.Button btnPlFront;
+        private System.Windows.Forms.Button btnAPFront;
     }
 }
