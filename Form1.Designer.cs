@@ -51,6 +51,10 @@
             this.cbPLGetObject = new System.Windows.Forms.ComboBox();
             this.btnGetPlanetariumObject = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.txtTextTop = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.txtTextLeft = new System.Windows.Forms.TextBox();
             this.btnOverlayText = new System.Windows.Forms.Button();
             this.txtOverlay = new System.Windows.Forms.TextBox();
             this.cbTextOverlay = new System.Windows.Forms.CheckBox();
@@ -165,6 +169,13 @@
             this.btnSkyChartW = new System.Windows.Forms.Button();
             this.btnSkychartN = new System.Windows.Forms.Button();
             this.tabpKStars = new System.Windows.Forms.TabPage();
+            this.btnKStarsIV = new System.Windows.Forms.Button();
+            this.btnKStarsCV = new System.Windows.Forms.Button();
+            this.btnKStarsNV = new System.Windows.Forms.Button();
+            this.btnKStarsS = new System.Windows.Forms.Button();
+            this.btnKStarsE = new System.Windows.Forms.Button();
+            this.btnKStarsW = new System.Windows.Forms.Button();
+            this.btnKStarsN = new System.Windows.Forms.Button();
             this.lblObserveTime = new System.Windows.Forms.Label();
             this.workerObserveTime = new System.ComponentModel.BackgroundWorker();
             this.workerTelescopeStatus = new System.ComponentModel.BackgroundWorker();
@@ -172,10 +183,6 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
-            this.txtTextLeft = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.txtTextTop = new System.Windows.Forms.TextBox();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -193,6 +200,7 @@
             this.tabpSN.SuspendLayout();
             this.tabpTheSky.SuspendLayout();
             this.tabSkyChart.SuspendLayout();
+            this.tabpKStars.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnTarget
@@ -508,6 +516,38 @@
             this.groupBox2.TabIndex = 34;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Object Text Overlay";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(177, 52);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(30, 17);
+            this.label18.TabIndex = 34;
+            this.label18.Text = "Top";
+            // 
+            // txtTextTop
+            // 
+            this.txtTextTop.Location = new System.Drawing.Point(210, 49);
+            this.txtTextTop.Name = "txtTextTop";
+            this.txtTextTop.Size = new System.Drawing.Size(61, 25);
+            this.txtTextTop.TabIndex = 33;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(80, 52);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(30, 17);
+            this.label17.TabIndex = 32;
+            this.label17.Text = "Left";
+            // 
+            // txtTextLeft
+            // 
+            this.txtTextLeft.Location = new System.Drawing.Point(111, 49);
+            this.txtTextLeft.Name = "txtTextLeft";
+            this.txtTextLeft.Size = new System.Drawing.Size(61, 25);
+            this.txtTextLeft.TabIndex = 31;
             // 
             // btnOverlayText
             // 
@@ -1892,6 +1932,13 @@
             // 
             // tabpKStars
             // 
+            this.tabpKStars.Controls.Add(this.btnKStarsIV);
+            this.tabpKStars.Controls.Add(this.btnKStarsCV);
+            this.tabpKStars.Controls.Add(this.btnKStarsNV);
+            this.tabpKStars.Controls.Add(this.btnKStarsS);
+            this.tabpKStars.Controls.Add(this.btnKStarsE);
+            this.tabpKStars.Controls.Add(this.btnKStarsW);
+            this.tabpKStars.Controls.Add(this.btnKStarsN);
             this.tabpKStars.Location = new System.Drawing.Point(4, 26);
             this.tabpKStars.Name = "tabpKStars";
             this.tabpKStars.Padding = new System.Windows.Forms.Padding(3);
@@ -1899,6 +1946,111 @@
             this.tabpKStars.TabIndex = 4;
             this.tabpKStars.Text = "KStars";
             this.tabpKStars.UseVisualStyleBackColor = true;
+            // 
+            // btnKStarsIV
+            // 
+            this.btnKStarsIV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnKStarsIV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsIV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsIV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsIV.Location = new System.Drawing.Point(184, 7);
+            this.btnKStarsIV.Name = "btnKStarsIV";
+            this.btnKStarsIV.Size = new System.Drawing.Size(36, 32);
+            this.btnKStarsIV.TabIndex = 52;
+            this.btnKStarsIV.Text = "IV";
+            this.toolTip1.SetToolTip(this.btnKStarsIV, "Imager view");
+            this.btnKStarsIV.UseVisualStyleBackColor = false;
+            this.btnKStarsIV.Click += new System.EventHandler(this.btnKStarsIV_Click);
+            // 
+            // btnKStarsCV
+            // 
+            this.btnKStarsCV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnKStarsCV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsCV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsCV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsCV.Location = new System.Drawing.Point(149, 7);
+            this.btnKStarsCV.Name = "btnKStarsCV";
+            this.btnKStarsCV.Size = new System.Drawing.Size(36, 32);
+            this.btnKStarsCV.TabIndex = 51;
+            this.btnKStarsCV.Text = "CV";
+            this.toolTip1.SetToolTip(this.btnKStarsCV, "Constellation view");
+            this.btnKStarsCV.UseVisualStyleBackColor = false;
+            this.btnKStarsCV.Click += new System.EventHandler(this.btnKStarsCV_Click);
+            // 
+            // btnKStarsNV
+            // 
+            this.btnKStarsNV.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnKStarsNV.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsNV.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsNV.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsNV.Location = new System.Drawing.Point(113, 7);
+            this.btnKStarsNV.Name = "btnKStarsNV";
+            this.btnKStarsNV.Size = new System.Drawing.Size(37, 32);
+            this.btnKStarsNV.TabIndex = 50;
+            this.btnKStarsNV.Text = "NV";
+            this.toolTip1.SetToolTip(this.btnKStarsNV, "Naked eye view");
+            this.btnKStarsNV.UseVisualStyleBackColor = false;
+            this.btnKStarsNV.Click += new System.EventHandler(this.btnKStarsNV_Click);
+            // 
+            // btnKStarsS
+            // 
+            this.btnKStarsS.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnKStarsS.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsS.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsS.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsS.Location = new System.Drawing.Point(56, 7);
+            this.btnKStarsS.Name = "btnKStarsS";
+            this.btnKStarsS.Size = new System.Drawing.Size(28, 32);
+            this.btnKStarsS.TabIndex = 49;
+            this.btnKStarsS.Text = "S";
+            this.toolTip1.SetToolTip(this.btnKStarsS, "Southern Sky");
+            this.btnKStarsS.UseVisualStyleBackColor = false;
+            this.btnKStarsS.Click += new System.EventHandler(this.btnKStarsS_Click);
+            // 
+            // btnKStarsE
+            // 
+            this.btnKStarsE.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnKStarsE.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsE.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsE.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsE.Location = new System.Drawing.Point(84, 7);
+            this.btnKStarsE.Name = "btnKStarsE";
+            this.btnKStarsE.Size = new System.Drawing.Size(28, 32);
+            this.btnKStarsE.TabIndex = 48;
+            this.btnKStarsE.Text = "E";
+            this.toolTip1.SetToolTip(this.btnKStarsE, "Eastern Sky");
+            this.btnKStarsE.UseVisualStyleBackColor = false;
+            this.btnKStarsE.Click += new System.EventHandler(this.btnKStarsE_Click);
+            // 
+            // btnKStarsW
+            // 
+            this.btnKStarsW.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnKStarsW.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsW.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsW.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsW.Location = new System.Drawing.Point(28, 7);
+            this.btnKStarsW.Name = "btnKStarsW";
+            this.btnKStarsW.Size = new System.Drawing.Size(28, 32);
+            this.btnKStarsW.TabIndex = 47;
+            this.btnKStarsW.Text = "W";
+            this.toolTip1.SetToolTip(this.btnKStarsW, "Western sky");
+            this.btnKStarsW.UseVisualStyleBackColor = false;
+            this.btnKStarsW.Click += new System.EventHandler(this.btnKStarsW_Click);
+            // 
+            // btnKStarsN
+            // 
+            this.btnKStarsN.BackColor = System.Drawing.Color.PaleGreen;
+            this.btnKStarsN.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnKStarsN.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnKStarsN.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnKStarsN.Location = new System.Drawing.Point(0, 7);
+            this.btnKStarsN.Name = "btnKStarsN";
+            this.btnKStarsN.Size = new System.Drawing.Size(28, 32);
+            this.btnKStarsN.TabIndex = 46;
+            this.btnKStarsN.Text = "N";
+            this.toolTip1.SetToolTip(this.btnKStarsN, "Northern sky");
+            this.btnKStarsN.UseVisualStyleBackColor = false;
+            this.btnKStarsN.Click += new System.EventHandler(this.btnKStarsN_Click);
             // 
             // lblObserveTime
             // 
@@ -1965,38 +2117,6 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
-            // txtTextLeft
-            // 
-            this.txtTextLeft.Location = new System.Drawing.Point(111, 49);
-            this.txtTextLeft.Name = "txtTextLeft";
-            this.txtTextLeft.Size = new System.Drawing.Size(61, 25);
-            this.txtTextLeft.TabIndex = 31;
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(80, 52);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(30, 17);
-            this.label17.TabIndex = 32;
-            this.label17.Text = "Left";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(177, 52);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(30, 17);
-            this.label18.TabIndex = 34;
-            this.label18.Text = "Top";
-            // 
-            // txtTextTop
-            // 
-            this.txtTextTop.Location = new System.Drawing.Point(210, 49);
-            this.txtTextTop.Name = "txtTextTop";
-            this.txtTextTop.Size = new System.Drawing.Size(61, 25);
-            this.txtTextTop.TabIndex = 33;
-            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -2059,6 +2179,7 @@
             this.tabpSN.ResumeLayout(false);
             this.tabpTheSky.ResumeLayout(false);
             this.tabSkyChart.ResumeLayout(false);
+            this.tabpKStars.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2211,6 +2332,13 @@
         private System.Windows.Forms.TextBox txtTextTop;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox txtTextLeft;
+        private System.Windows.Forms.Button btnKStarsIV;
+        private System.Windows.Forms.Button btnKStarsCV;
+        private System.Windows.Forms.Button btnKStarsNV;
+        private System.Windows.Forms.Button btnKStarsS;
+        private System.Windows.Forms.Button btnKStarsE;
+        private System.Windows.Forms.Button btnKStarsW;
+        private System.Windows.Forms.Button btnKStarsN;
     }
 }
 

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ASCOM.Astrometry;
+using ASCOM.Astrometry.AstroUtils;
+using ASCOM.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ASCOM.Astrometry;
-using ASCOM.Utilities;
 
 namespace EAACtrl
 {
@@ -12,6 +13,7 @@ namespace EAACtrl
     {
         public void J2000ToJNOW(double RA2000, double Dec2000, out double RANOW, out double DecNOW, bool Apparent = false)
         {
+            ASCOM.Astrometry.AstroUtils.AstroUtils AstroUtils = new ASCOM.Astrometry.AstroUtils.AstroUtils();
             ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
             ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();        
 
@@ -19,7 +21,11 @@ namespace EAACtrl
             T.SiteLongitude = Properties.Settings.Default.SiteLng;
             T.SiteElevation = Properties.Settings.Default.SiteElev;
             T.SiteTemperature = 20.0;
-            T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+            // T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+            // Use UTC-based Julian date and add DeltaT to get Terrestrial Time (TT)
+            double jdUtc = U.DateUTCToJulian(DateTime.UtcNow);
+            double deltaT = AstroUtils.DeltaT();
+            T.JulianDateTT = jdUtc + deltaT / 86400.0;
             T.SetJ2000(RA2000, Dec2000);
 
             if (Apparent)
@@ -38,6 +44,7 @@ namespace EAACtrl
 
         public void JNOWToJ2000(double RANOW, double DecNOW, out double RA2000, out double Dec2000)
         {
+            ASCOM.Astrometry.AstroUtils.AstroUtils AstroUtils = new ASCOM.Astrometry.AstroUtils.AstroUtils();
             ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
             ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();
 
@@ -45,7 +52,11 @@ namespace EAACtrl
             T.SiteLongitude = Properties.Settings.Default.SiteLng;
             T.SiteElevation = Properties.Settings.Default.SiteElev;
             T.SiteTemperature = 20.0;
-            T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+            // T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+            // Use UTC-based Julian date and add DeltaT to get Terrestrial Time (TT)
+            double jdUtc = U.DateUTCToJulian(DateTime.UtcNow);
+            double deltaT = AstroUtils.DeltaT();
+            T.JulianDateTT = jdUtc + deltaT / 86400.0;
             T.SetTopocentric(RANOW, DecNOW);
             
             RA2000 = T.RAJ2000;
@@ -57,10 +68,11 @@ namespace EAACtrl
         public bool J2000ToAltAz(double RA, double Dec, out double Altitude, out double Azimuth)
         {
             bool bResult = false;
-            Altitude = 999; Azimuth = 999;
+            Altitude = 999; Azimuth = 999;          
 
             try
             {
+                ASCOM.Astrometry.AstroUtils.AstroUtils AstroUtils = new ASCOM.Astrometry.AstroUtils.AstroUtils();
                 ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();
                 ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
 
@@ -68,7 +80,12 @@ namespace EAACtrl
                 T.SiteLongitude = Properties.Settings.Default.SiteLng;
                 T.SiteElevation = Properties.Settings.Default.SiteElev;
                 T.SiteTemperature = 20.0;
-                T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                T.Refraction = false;
+                // T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                // Use UTC-based Julian date and add DeltaT to get Terrestrial Time (TT)
+                double jdUtc = U.DateUTCToJulian(DateTime.UtcNow);
+                double deltaT = AstroUtils.DeltaT();
+                T.JulianDateTT = jdUtc + deltaT / 86400.0;
                 T.SetJ2000(RA, Dec);
                 
                 Altitude = T.ElevationTopocentric;
@@ -88,6 +105,7 @@ namespace EAACtrl
 
             try
             {
+                ASCOM.Astrometry.AstroUtils.AstroUtils AstroUtils = new ASCOM.Astrometry.AstroUtils.AstroUtils();
                 ASCOM.Utilities.Util U = new ASCOM.Utilities.Util();
                 ASCOM.Astrometry.Transform.Transform T = new ASCOM.Astrometry.Transform.Transform();
 
@@ -95,7 +113,11 @@ namespace EAACtrl
                 T.SiteLongitude = Properties.Settings.Default.SiteLng;
                 T.SiteElevation = Properties.Settings.Default.SiteElev;
                 T.SiteTemperature = 20.0;
-                T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                // T.JulianDateTT = U.DateLocalToJulian(DateTime.Now);
+                // Use UTC-based Julian date and add DeltaT to get Terrestrial Time (TT)
+                double jdUtc = U.DateUTCToJulian(DateTime.UtcNow);
+                double deltaT = AstroUtils.DeltaT();
+                T.JulianDateTT = jdUtc + deltaT / 86400.0;
                 T.SetTopocentric(RA, Dec);
 
                 Altitude = T.ElevationTopocentric;

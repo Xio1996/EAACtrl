@@ -252,6 +252,7 @@
     <EmbeddedResource Include="StelFOVOptions.resx">
       <DependentUpon>StelFOVOptions.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include=".github\copilot-instructions.md" />
     <None Include="hyg.csv" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

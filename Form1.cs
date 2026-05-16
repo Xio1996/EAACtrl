@@ -18,6 +18,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
+using static EAACtrl.KStars;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace EAACtrl
@@ -857,7 +858,21 @@ namespace EAACtrl
                     WriteMessage(SkyChart.Message);
                     break;
                 case 4:
-                    KStars.SyncObject(SelectedObject.RA2000, SelectedObject.Dec2000);
+
+                   // if (KStars.IsSupportedCatalogue(SelectedObject.Catalogue))
+                   // {
+                   //     KStars.SyncObject(SelectedObject.ID, SelectedObject.Catalogue);
+                   // }
+                   // else
+                   // {
+                        AstroCalc astroCalc = new AstroCalc();
+                        astroCalc.J2000ToAltAz(SelectedObject.RA2000, SelectedObject.Dec2000, out double Altitude, out double Azimuth);
+                        KStars.SyncAltAz(Altitude, Azimuth);
+                    //}
+                    if (cbImagerZoom.Checked)
+                    {
+                        KStars.Zoom("2");
+                    }
                     break;
             }
 
@@ -1779,6 +1794,14 @@ namespace EAACtrl
                             if (apObject != null)
                             {
                                 Clipboard.SetText(apObject.ID);
+                                Speak("Object ID copied");
+                            }
+                            break;
+                        case 4:
+                            FocusInfo focussedObject = KStars.GetFocussedObject();
+                            if (focussedObject != null)
+                            {
+                                Clipboard.SetText(focussedObject.Focused_Object);
                                 Speak("Object ID copied");
                             }
                             break;
@@ -2903,6 +2926,41 @@ namespace EAACtrl
 
             Speak("Alignment completed");
             return;
+        }
+
+        private void btnKStarsN_Click(object sender, EventArgs e)
+        {
+            KStars.ViewDirection("north");
+        }
+
+        private void btnKStarsW_Click(object sender, EventArgs e)
+        {
+            KStars.ViewDirection("west");
+        }
+
+        private void btnKStarsS_Click(object sender, EventArgs e)
+        {
+            KStars.ViewDirection("south");
+        }
+
+        private void btnKStarsE_Click(object sender, EventArgs e)
+        {
+            KStars.ViewDirection("east");
+        }
+
+        private void btnKStarsNV_Click(object sender, EventArgs e)
+        {
+            KStars.Zoom("90");
+        }
+
+        private void btnKStarsCV_Click(object sender, EventArgs e)
+        {
+            KStars.Zoom("45");
+        }
+
+        private void btnKStarsIV_Click(object sender, EventArgs e)
+        {
+            KStars.Zoom("2");
         }
     }
 
