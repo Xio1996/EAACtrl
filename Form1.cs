@@ -1919,6 +1919,7 @@ namespace EAACtrl
             double SearchRA = 999, SearchDec = 999;
             string SearchID="";
 
+            // Get search position from selected object in Stellarium.
             if (Properties.Settings.Default.sfPlanetarium)
             {
                 if (!IsStellariumRunning())
@@ -1953,6 +1954,7 @@ namespace EAACtrl
             }
             else
             {
+                // Get search position from selected object in AstroPlanner.
                 if (!IsAPRunning())
                 {
                     Speak(AstroPlannerSpeak + " is not running");
@@ -1971,6 +1973,7 @@ namespace EAACtrl
                 SearchDec = SelectedObject.Dec2000;
             }
 
+            // Search AstroPlanner catalogues that are loaded and marjed as searchable.
             if (Properties.Settings.Default.sfDatasource == 0)
             {
                 // Store the search results for DSA and Search List display
@@ -2104,11 +2107,8 @@ namespace EAACtrl
                     Speak(apOut.results.Objects.Count.ToString() + " objects found");
                 }
             }
+            // Search the Glade+ catalogue. Held in the Postgre SQL database Astro.
             else if (Properties.Settings.Default.sfDatasource == 1)
-            {
-
-            }
-            else if (Properties.Settings.Default.sfDatasource == 2)
             {
                 if (!Properties.Settings.Default.sfPlanetarium)
                 {
@@ -2133,9 +2133,10 @@ namespace EAACtrl
                     ObjectType = "Q";
                 }
 
+                Speak("Searching");
+
                 AstroCalc Astro = new AstroCalc();
                 DataTable dt = null;
-                //Astro.J2000ToJNOW(apOut.RA2000, apOut.Dec2000, out double RANOW, out double DecNOW);
 
                 //dt = Database.GladeBoundingSearch(Astro.BoundingBox(apOut.RA2000*15, apOut.Dec2000,0.5,0.25),double.Parse(Properties.Settings.Default.sfMagnitude), ObjectType);
 
@@ -2164,8 +2165,52 @@ namespace EAACtrl
                     }
                 }
             }
+            // Search the REGALADE catalogue. Held in the Postgre SQL database Astro.
+            else if (Properties.Settings.Default.sfDatasource == 2)
+            {
+                if (!Properties.Settings.Default.sfPlanetarium)
+                {
+                    APCmdObject apOut = APGetSelectedObject();
+                    if (apOut == null)
+                    {
+                        Speak("No object selected");
+                        return;
+                    }
 
-            return;
+                    SearchRA = apOut.RA2000;
+                    SearchDec = apOut.Dec2000;
+                }
+                Speak("Searching");
+
+                AstroCalc Astro = new AstroCalc();
+                DataTable dt = null;
+
+                dt = Database.REGALADEConeSearch(SearchRA * 15, SearchDec, Properties.Settings.Default.SearchRadius, double.Parse(Properties.Settings.Default.sfMagnitude));
+                if (dt == null || dt.Rows.Count == 0)
+                {
+                    Speak("No search results");
+                    return;
+                }
+                Stellarium.DrawObjects(dt);
+
+                // Show search results window
+                if (Properties.Settings.Default.sResultsList)
+                {
+                    using (SearchResults frmOpt = new SearchResults())
+                    {
+                        frmOpt.EAACP = this;
+                        frmOpt.TopMost = true;
+                        frmOpt.Results = null;
+                        frmOpt.ResultsDataTable = dt;
+                        if (frmOpt.ShowDialog() == DialogResult.OK)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+                return;
         }
 
         private void btnFOVClear_Click(object sender, EventArgs e)

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
-using Npgsql;
 using System.Data;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace EAACtrl
 {
@@ -14,7 +16,7 @@ namespace EAACtrl
         private DataTable CreateTable()
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("ID");
+           /* dt.Columns.Add("ID");
             dt.Columns.Add("Names");
             dt.Columns.Add("Type");
             dt.Columns.Add("Magnitude", typeof(double));
@@ -27,8 +29,26 @@ namespace EAACtrl
             dt.Columns.Add("dDec");
             dt.Columns.Add("Size");
             dt.Columns.Add("PosAngle");
-            dt.Columns.Add("Constellation");
+            dt.Columns.Add("Constellation"); */
 
+            dt.Columns.Add("ID");
+            dt.Columns.Add("Names");
+            dt.Columns.Add("Type");
+            dt.Columns.Add("Mag", typeof(double));
+            dt.Columns.Add("Mag2", typeof(double));
+            dt.Columns.Add("Dist Mpc", typeof(double));
+            dt.Columns.Add("Galaxy Type");
+            dt.Columns.Add("Size");
+            dt.Columns.Add("Comp");
+            dt.Columns.Add("PA", typeof(double));
+            dt.Columns.Add("Sep", typeof(double));
+            dt.Columns.Add("RA");
+            dt.Columns.Add("Dec");
+            dt.Columns.Add("dRA");
+            dt.Columns.Add("dDec");
+            dt.Columns.Add("Const");
+            dt.Columns.Add("Catalogue");
+            
             return dt;
         }
 
@@ -124,8 +144,48 @@ namespace EAACtrl
                     DistanceMpc = Math.Round(reader.GetDouble(12) * 299792.458 / Properties.Settings.Default.Hubble, 0); // Convert to Mpc
                 }
 
-                dt.Rows.Add(ID, Names, sType, Bmag, DistanceMpc, "", "Glade+", RA, Dec, RAd, Decd, "", 0, "");
+                dt.Rows.Add(ID, Names, sType, Bmag, 0, DistanceMpc, "", "", "", 0.0, 0.0, RA, Dec, RAd, Decd, "", "Glade+");
+            }
+        }
 
+        private void ProcessREGALADEObjects(ref NpgsqlDataReader reader, ref DataTable dt)
+        {
+            while (reader.Read())
+            {
+                List<string> Namelist = new List<string>();
+                var Names = "";
+
+                var ID = reader.GetString(1).Trim();
+
+                var RAd = reader.GetDouble(2) / 15.0;
+                var RA = APHelper.RADecimalHoursToHMS(RAd, @"hh\hmm\mss\.ff\s");
+                var Decd = reader.GetDouble(3);
+                var Dec = APHelper.DecDecimalToDMS(Decd);
+                
+                var gmag = 0.0;
+                if (!reader.IsDBNull(10))
+                    gmag = Math.Round(reader.GetDouble(10), 2);
+
+                double DistanceMpc = 0;
+                if (!reader.IsDBNull(4))
+                {
+                    DistanceMpc = Math.Round(reader.GetDouble(4));
+                }
+
+                double PA = 0.0;
+                if (!reader.IsDBNull(8))
+                {
+                    PA = Math.Round(reader.GetDouble(8), 2);
+                }
+
+                var objSize = "";
+                // Both size entries available
+                if (!reader.IsDBNull(6) && !reader.IsDBNull(7))
+                {
+                    objSize = Math.Round(reader.GetDouble(6), 2).ToString() + " x " + Math.Round(reader.GetDouble(7), 2).ToString();
+                }
+
+                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, "", "REGALADE");
             }
         }
 
@@ -193,6 +253,30 @@ namespace EAACtrl
             var reader = cmd.ExecuteReader();
             
             ProcessObjects(ref reader, ref dt);
+
+            conn.Close();
+
+            return dt;
+        }
+
+        public DataTable REGALADEConeSearch(double CentreRA, double CentreDec, double Radius, double MagnitudeLimit)
+        {
+
+            DataTable dt = CreateTable();
+
+            NpgsqlConnection conn = new NpgsqlConnection(ConnectionString);
+
+            conn.Open();
+
+            string Query = "SELECT * FROM \"Regalade\"";
+            Query += "WHERE ST_DWithin(geom, ST_SetSRID(ST_MakePoint(" + CentreRA.ToString() + "," + CentreDec.ToString() + "), 4326)," + Radius.ToString() + ") ";
+            Query += "AND \"gmag\" < " + MagnitudeLimit.ToString();
+            Query += ";";
+
+            var cmd = new NpgsqlCommand(Query, conn);
+            var reader = cmd.ExecuteReader();
+
+            ProcessREGALADEObjects(ref reader, ref dt);
 
             conn.Close();
 

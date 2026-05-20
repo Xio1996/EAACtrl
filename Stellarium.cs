@@ -647,7 +647,7 @@ namespace EAACtrl
 
                 if (Properties.Settings.Default.ShowRV)
                 {
-                    if (double.TryParse(row["Distance Mpc"].ToString(), out double radial_velocity))
+                    if (double.TryParse(row["Dist Mpc"].ToString(), out double radial_velocity))
                     {
                         objectLabel += (radial_velocity * Properties.Settings.Default.Hubble).ToString() + @" km/s ";
                     }

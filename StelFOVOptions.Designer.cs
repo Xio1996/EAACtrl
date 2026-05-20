@@ -54,6 +54,9 @@
             this.chkNames = new System.Windows.Forms.CheckBox();
             this.chkCatalogue = new System.Windows.Forms.CheckBox();
             this.gbDisplay = new System.Windows.Forms.GroupBox();
+            this.txtLabelDistance = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.cbLabelPosition = new System.Windows.Forms.ComboBox();
             this.label14 = new System.Windows.Forms.Label();
             this.lblStGraphicColour = new System.Windows.Forms.Label();
             this.lblStFontColour = new System.Windows.Forms.Label();
@@ -85,9 +88,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rbPlanetarium = new System.Windows.Forms.RadioButton();
             this.rbAstroPlanner = new System.Windows.Forms.RadioButton();
-            this.cbLabelPosition = new System.Windows.Forms.ComboBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.txtLabelDistance = new System.Windows.Forms.TextBox();
             this.gbFilter.SuspendLayout();
             this.gbDisplay.SuspendLayout();
             this.gbOtherOptions.SuspendLayout();
@@ -394,6 +394,42 @@
             this.gbDisplay.TabStop = false;
             this.gbDisplay.Text = "Display";
             // 
+            // txtLabelDistance
+            // 
+            this.txtLabelDistance.Location = new System.Drawing.Point(346, 131);
+            this.txtLabelDistance.MaxLength = 4;
+            this.txtLabelDistance.Name = "txtLabelDistance";
+            this.txtLabelDistance.Size = new System.Drawing.Size(31, 20);
+            this.txtLabelDistance.TabIndex = 31;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(265, 135);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(78, 13);
+            this.label15.TabIndex = 30;
+            this.label15.Text = "Label Distance";
+            // 
+            // cbLabelPosition
+            // 
+            this.cbLabelPosition.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
+            this.cbLabelPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLabelPosition.FormattingEnabled = true;
+            this.cbLabelPosition.Items.AddRange(new object[] {
+            "N",
+            "NE",
+            "E",
+            "SE",
+            "S",
+            "SW",
+            "W",
+            "NW"});
+            this.cbLabelPosition.Location = new System.Drawing.Point(212, 132);
+            this.cbLabelPosition.Name = "cbLabelPosition";
+            this.cbLabelPosition.Size = new System.Drawing.Size(43, 21);
+            this.cbLabelPosition.TabIndex = 29;
+            // 
             // label14
             // 
             this.label14.AutoSize = true;
@@ -633,9 +669,8 @@
             this.cbDatasource.FormattingEnabled = true;
             this.cbDatasource.Items.AddRange(new object[] {
             "AstroPlanner (All catalogues marked for search)",
-            "JPL Horizons (Minor Bodies)",
             "GLADE+ (Galaxies & Quasars +23 million objects)",
-            "SIMBAD"});
+            "REGALADE (Galaxies 80 million galaxies)"});
             this.cbDatasource.Location = new System.Drawing.Point(10, 21);
             this.cbDatasource.Name = "cbDatasource";
             this.cbDatasource.Size = new System.Drawing.Size(368, 21);
@@ -715,42 +750,6 @@
             this.rbAstroPlanner.TabStop = true;
             this.rbAstroPlanner.Text = "AstroPlanner";
             this.rbAstroPlanner.UseVisualStyleBackColor = true;
-            // 
-            // cbLabelPosition
-            // 
-            this.cbLabelPosition.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            this.cbLabelPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbLabelPosition.FormattingEnabled = true;
-            this.cbLabelPosition.Items.AddRange(new object[] {
-            "N",
-            "NE",
-            "E",
-            "SE",
-            "S",
-            "SW",
-            "W",
-            "NW"});
-            this.cbLabelPosition.Location = new System.Drawing.Point(212, 132);
-            this.cbLabelPosition.Name = "cbLabelPosition";
-            this.cbLabelPosition.Size = new System.Drawing.Size(43, 21);
-            this.cbLabelPosition.TabIndex = 29;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(265, 135);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(78, 13);
-            this.label15.TabIndex = 30;
-            this.label15.Text = "Label Distance";
-            // 
-            // txtLabelDistance
-            // 
-            this.txtLabelDistance.Location = new System.Drawing.Point(346, 131);
-            this.txtLabelDistance.MaxLength = 4;
-            this.txtLabelDistance.Name = "txtLabelDistance";
-            this.txtLabelDistance.Size = new System.Drawing.Size(31, 20);
-            this.txtLabelDistance.TabIndex = 31;
             // 
             // StelFOVOptions
             // 
