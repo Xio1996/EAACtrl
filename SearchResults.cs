@@ -913,7 +913,13 @@ namespace EAACtrl
 
         private void tsmiAAVSOInfo_Click(object sender, EventArgs e)
         {
-            var row = dgvSearchResults.CurrentRow ?? (dgvSearchResults.SelectedRows.Count > 0 ? dgvSearchResults.SelectedRows[0] : null);
+            DataGridViewRow row = null;
+            if (dgvSearchResults.SelectedRows.Count > 0)
+                row = dgvSearchResults.SelectedRows[0];
+            else if (dgvSearchResults.CurrentRow != null)
+                row = dgvSearchResults.CurrentRow;
+
+            if (row == null) return;
             var id = row?.Cells["_ID"]?.Value?.ToString();
             if (string.IsNullOrWhiteSpace(id))
             {

@@ -61,7 +61,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "AAVSODialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "AAVSO Ephemeris - Maximum Brightness";
+            this.Text = "AAVSO Ephemeris - Mid";
             this.Load += new System.EventHandler(this.AAVSODialog_Load);
             this.ResumeLayout(false);
 
