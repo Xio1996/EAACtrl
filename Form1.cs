@@ -2039,7 +2039,7 @@ namespace EAACtrl
                         // Components such as AB-C, AB-D, A-BC etc
                         else if (obj.Components.Contains("-"))
                         {
-                            string [] components = obj.Components.Split('-');
+                            string[] components = obj.Components.Split('-');
                             // Create the secondary component
                             ds.Add(CreateComponent(obj, components[1]));
                         }
@@ -2140,8 +2140,8 @@ namespace EAACtrl
 
                 //dt = Database.GladeBoundingSearch(Astro.BoundingBox(apOut.RA2000*15, apOut.Dec2000,0.5,0.25),double.Parse(Properties.Settings.Default.sfMagnitude), ObjectType);
 
-                dt = Database.GladeConeSearch(SearchRA*15, SearchDec, Properties.Settings.Default.SearchRadius, double.Parse(Properties.Settings.Default.sfMagnitude), ObjectType);
-                if (dt == null || dt.Rows.Count==0)
+                dt = Database.GladeConeSearch(SearchRA * 15, SearchDec, Properties.Settings.Default.SearchRadius, double.Parse(Properties.Settings.Default.sfMagnitude), ObjectType);
+                if (dt == null || dt.Rows.Count == 0)
                 {
                     Speak("No search results");
                     return;
@@ -2209,8 +2209,52 @@ namespace EAACtrl
                     }
                 }
             }
+            // Search the AAVSO VSX catalogue. Held in the Postgre SQL database Astro.
+            else if (Properties.Settings.Default.sfDatasource == 3)
+            {
+                if (!Properties.Settings.Default.sfPlanetarium)
+                {
+                    APCmdObject apOut = APGetSelectedObject();
+                    if (apOut == null)
+                    {
+                        Speak("No object selected");
+                        return;
+                    }
 
-                return;
+                    SearchRA = apOut.RA2000;
+                    SearchDec = apOut.Dec2000;
+                }
+                Speak("Searching");
+
+                AstroCalc Astro = new AstroCalc();
+                DataTable dt = null;
+
+                dt = Database.AAVSO_VSX_ConeSearch(SearchRA * 15, SearchDec, Properties.Settings.Default.SearchRadius, double.Parse(Properties.Settings.Default.sfMagnitude));
+                if (dt == null || dt.Rows.Count == 0)
+                {
+                    Speak("No search results");
+                    return;
+                }
+                Stellarium.DrawObjects(dt);
+
+                // Show search results window
+                if (Properties.Settings.Default.sResultsList)
+                {
+                    using (SearchResults frmOpt = new SearchResults())
+                    {
+                        frmOpt.EAACP = this;
+                        frmOpt.TopMost = true;
+                        frmOpt.Results = null;
+                        frmOpt.ResultsDataTable = dt;
+                        if (frmOpt.ShowDialog() == DialogResult.OK)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return;
         }
 
         private void btnFOVClear_Click(object sender, EventArgs e)

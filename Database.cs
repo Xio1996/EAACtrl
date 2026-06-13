@@ -16,26 +16,13 @@ namespace EAACtrl
         private DataTable CreateTable()
         {
             DataTable dt = new DataTable();
-           /* dt.Columns.Add("ID");
-            dt.Columns.Add("Names");
-            dt.Columns.Add("Type");
-            dt.Columns.Add("Magnitude", typeof(double));
-            dt.Columns.Add("Distance Mpc", typeof(double));
-            dt.Columns.Add("Galaxy Type");
-            dt.Columns.Add("Catalogue");
-            dt.Columns.Add("RA");
-            dt.Columns.Add("Dec");
-            dt.Columns.Add("dRA");
-            dt.Columns.Add("dDec");
-            dt.Columns.Add("Size");
-            dt.Columns.Add("PosAngle");
-            dt.Columns.Add("Constellation"); */
 
             dt.Columns.Add("ID");
             dt.Columns.Add("Names");
             dt.Columns.Add("Type");
             dt.Columns.Add("Mag", typeof(double));
             dt.Columns.Add("Mag2", typeof(double));
+            dt.Columns.Add("Period", typeof(double));
             dt.Columns.Add("Dist Mpc", typeof(double));
             dt.Columns.Add("Galaxy Type");
             dt.Columns.Add("Size");
@@ -48,7 +35,8 @@ namespace EAACtrl
             dt.Columns.Add("dDec");
             dt.Columns.Add("Const");
             dt.Columns.Add("Catalogue");
-            
+            dt.Columns.Add("_ID");
+            dt.Columns.Add("_Epoch", typeof(double));
             return dt;
         }
 
@@ -144,7 +132,7 @@ namespace EAACtrl
                     DistanceMpc = Math.Round(reader.GetDouble(12) * 299792.458 / Properties.Settings.Default.Hubble, 0); // Convert to Mpc
                 }
 
-                dt.Rows.Add(ID, Names, sType, Bmag, 0, DistanceMpc, "", "", "", 0.0, 0.0, RA, Dec, RAd, Decd, "", "Glade+");
+                dt.Rows.Add(ID, Names, sType, Bmag, 0, 0, DistanceMpc, "", "", "", 0.0, 0.0, RA, Dec, RAd, Decd, "", "Glade+");
             }
         }
 
@@ -185,7 +173,44 @@ namespace EAACtrl
                     objSize = Math.Round(reader.GetDouble(6), 2).ToString() + " x " + Math.Round(reader.GetDouble(7), 2).ToString();
                 }
 
-                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, "", "REGALADE");
+                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0,0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, "", "REGALADE");
+            }
+        }
+
+        private void ProcessAAVSO_VSXObjects(ref NpgsqlDataReader reader, ref DataTable dt)
+        {
+            while (reader.Read())
+            {
+                List<string> Namelist = new List<string>();
+                var Names = "";
+
+                var ID = reader.GetString(1).Trim();
+
+                var RAd = reader.GetDouble(3) / 15.0;
+                var RA = APHelper.RADecimalHoursToHMS(RAd, @"hh\hmm\mss\.ff\s");
+                var Decd = reader.GetDouble(4);
+                var Dec = APHelper.DecDecimalToDMS(Decd);
+
+                var maxmag = 0.0;
+                if (!reader.IsDBNull(7))
+                    maxmag = Math.Round(reader.GetDouble(7), 2);
+
+                var minmag = 0.0;
+                if (!reader.IsDBNull(12))
+                    minmag = Math.Round(reader.GetDouble(12), 2);
+
+                var Period = 0.0;
+                if (!reader.IsDBNull(18))
+                    Period = Math.Round(reader.GetDouble(18), 2);
+
+                var varType = "";
+                if (!reader.IsDBNull(5))
+                {
+                    varType = reader.GetString(5).Trim();
+                    varType = varType.Replace("|", ",");
+                }
+
+                dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, "", "AAVSO VSX");
             }
         }
 
@@ -277,6 +302,30 @@ namespace EAACtrl
             var reader = cmd.ExecuteReader();
 
             ProcessREGALADEObjects(ref reader, ref dt);
+
+            conn.Close();
+
+            return dt;
+        }
+
+        public DataTable AAVSO_VSX_ConeSearch(double CentreRA, double CentreDec, double Radius, double MagnitudeLimit)
+        {
+
+            DataTable dt = CreateTable();
+
+            NpgsqlConnection conn = new NpgsqlConnection(ConnectionString);
+
+            conn.Open();
+
+            string Query = "SELECT * FROM \"AAVSO_VSX\"";
+            Query += "WHERE ST_DWithin(geom, ST_SetSRID(ST_MakePoint(" + CentreRA.ToString() + "," + CentreDec.ToString() + "), 4326)," + Radius.ToString() + ") ";
+            Query += "AND \"max\" < " + MagnitudeLimit.ToString();
+            Query += ";";
+
+            var cmd = new NpgsqlCommand(Query, conn);
+            var reader = cmd.ExecuteReader();
+
+            ProcessAAVSO_VSXObjects(ref reader, ref dt);
 
             conn.Close();
 

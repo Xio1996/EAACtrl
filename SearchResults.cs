@@ -75,6 +75,7 @@ namespace EAACtrl
                 dt.Columns.Add("Type");
                 dt.Columns.Add("Mag", typeof(double));
                 dt.Columns.Add("Mag2", typeof(double));
+                dt.Columns.Add("Period", typeof(double));
                 dt.Columns.Add("Dist Mpc", typeof(double));
                 dt.Columns.Add("Galaxy Type");
                 dt.Columns.Add("Size");
@@ -87,7 +88,7 @@ namespace EAACtrl
                 dt.Columns.Add("dDec");
                 dt.Columns.Add("Const");
                 dt.Columns.Add("Catalogue");
-                
+
                 if (ResultsTable != null)
                 {
                     dt = ResultsTable;
@@ -165,6 +166,15 @@ namespace EAACtrl
 
 
                 dgvSearchResults.DataSource = dt;
+
+                foreach (DataGridViewColumn col in dgvSearchResults.Columns)
+                {
+                    if (col.Name.StartsWith("_"))
+                    {
+                        col.Visible = false;
+                    }
+                }
+
                 dgvSearchResults.Columns["dRA"].Visible = false;
                 dgvSearchResults.Columns["dDec"].Visible = false;
                 dgvSearchResults.Columns["Size"].Visible = true;
@@ -198,6 +208,11 @@ namespace EAACtrl
                 totalResults = dt.Rows.Count;
                 UpdateSearchInfo(totalResults);
             }
+            if (txtFilterByID != null)
+            {
+                txtFilterByID.TextChanged -= txtFilterByID_TextChanged;
+                txtFilterByID.TextChanged += txtFilterByID_TextChanged;
+            }
         }
 
         private void UpdateSearchInfo(int viewCount)
@@ -214,6 +229,7 @@ namespace EAACtrl
             Selected.Columns.Add("Type");
             Selected.Columns.Add("Mag", typeof(double));
             Selected.Columns.Add("Mag2", typeof(double));
+            Selected.Columns.Add("Period", typeof(double));
             Selected.Columns.Add("Dist Mpc", typeof(double));
             Selected.Columns.Add("Galaxy Type");
             Selected.Columns.Add("Size");
@@ -226,7 +242,6 @@ namespace EAACtrl
             Selected.Columns.Add("dDec");
             Selected.Columns.Add("Const");
             Selected.Columns.Add("Catalogue");
-
 
             foreach (DataGridViewRow row in dgvSearchResults.SelectedRows)
             {
@@ -252,6 +267,12 @@ namespace EAACtrl
                     SelectedRow["Mag2"] = Mag2;
                 }
                 else SelectedRow["Mag2"] = DBNull.Value;
+
+                if (double.TryParse(row.Cells["Period"].Value.ToString(), out double Period))
+                {
+                    SelectedRow["Period"] = Period;
+                }
+                else SelectedRow["Period"] = DBNull.Value;
 
                 if (double.TryParse(row.Cells["PA"].Value.ToString(), out double PA))
                 {
@@ -729,10 +750,32 @@ namespace EAACtrl
 
         private void dgvSearchResults_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Right) return;
-            if (e.RowIndex < 0 || e.ColumnIndex < 0) return; // header / empty area
+            // Only handle clicks on rows (not headers) and when a mouse button was clicked
+            if (e.RowIndex < 0 || e.Button == MouseButtons.None) return;
 
-            SearchContextMenu.Show(Cursor.Position);
+            // Select the clicked row when right-clicking (so context menu operates on that row)
+            if (e.Button == MouseButtons.Right)
+            {
+                // Clear previous selection and select the row under the mouse
+                dgvSearchResults.ClearSelection();
+                dgvSearchResults.Rows[e.RowIndex].Selected = true;
+
+                // Ensure CurrentCell is set (avoid IndexOutOfRange when e.ColumnIndex is -1)
+                int colIndex = e.ColumnIndex >= 0 ? e.ColumnIndex : 0;
+                dgvSearchResults.CurrentCell = dgvSearchResults.Rows[e.RowIndex].Cells[colIndex];
+
+                // Display the context menu at the mouse position
+                SearchContextMenu.Show(Cursor.Position);
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                // Optional: make left-click also select the row (keeps standard behavior)
+                dgvSearchResults.ClearSelection();
+                dgvSearchResults.Rows[e.RowIndex].Selected = true;
+                int colIndex = e.ColumnIndex >= 0 ? e.ColumnIndex : 0;
+                dgvSearchResults.CurrentCell = dgvSearchResults.Rows[e.RowIndex].Cells[colIndex];
+            }
+            
         }
 
         private void chkAberration_CheckedChanged(object sender, EventArgs e)
@@ -793,6 +836,41 @@ namespace EAACtrl
         private void btnAPFront_Click(object sender, EventArgs e)
         {
             SwitchAppToFront("AstroPlanner");
+        }
+
+        // Inside the `SearchResults` class: add this event handler method (anywhere with other methods)
+        private void txtFilterByID_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dt == null) return;
+
+                string filterText = txtFilterByID.Text.Trim();
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    dt.DefaultView.RowFilter = "";
+                    UpdateSearchInfo(dt.DefaultView.Count);
+                    return;
+                }
+
+                // Escape single quotes for DataTable RowFilter expression
+                string esc = filterText.Replace("'", "''");
+
+                // Filter ID column for partial matches (case-sensitive by default; DataTable filtering is culture/DB-like)
+                dt.DefaultView.RowFilter = $"Convert(ID, 'System.String') LIKE '%{esc}%'";
+
+                UpdateSearchInfo(dt.DefaultView.Count);
+            }
+            catch (Exception)
+            {
+                //sMsg = "FilterByID error: " + ex.Message;
+            }
+        }
+
+        private void btnFilterReset_Click(object sender, EventArgs e)
+        {
+            txtFilterByID.Text = "";
         }
     }
 }

@@ -63,6 +63,9 @@
             this.cbStellariumSatellites = new System.Windows.Forms.CheckBox();
             this.btnPlFront = new System.Windows.Forms.Button();
             this.btnAPFront = new System.Windows.Forms.Button();
+            this.txtFilterByID = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.btnFilterReset = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -304,10 +307,30 @@
             this.btnAPFront.UseVisualStyleBackColor = false;
             this.btnAPFront.Click += new System.EventHandler(this.btnAPFront_Click);
             // 
+            // txtFilterByID
+            // 
+            resources.ApplyResources(this.txtFilterByID, "txtFilterByID");
+            this.txtFilterByID.Name = "txtFilterByID";
+            // 
+            // label3
+            // 
+            resources.ApplyResources(this.label3, "label3");
+            this.label3.Name = "label3";
+            // 
+            // btnFilterReset
+            // 
+            resources.ApplyResources(this.btnFilterReset, "btnFilterReset");
+            this.btnFilterReset.Name = "btnFilterReset";
+            this.btnFilterReset.UseVisualStyleBackColor = true;
+            this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnFilterReset);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtFilterByID);
             this.Controls.Add(this.btnAPFront);
             this.Controls.Add(this.btnPlFront);
             this.Controls.Add(this.cbStellariumSatellites);
@@ -379,5 +402,8 @@
         private System.Windows.Forms.CheckBox cbStellariumSatellites;
         private System.Windows.Forms.Button btnPlFront;
         private System.Windows.Forms.Button btnAPFront;
+        private System.Windows.Forms.TextBox txtFilterByID;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button btnFilterReset;
     }
 }
