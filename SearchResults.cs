@@ -115,7 +115,7 @@ namespace EAACtrl
                         else row["Dist Mpc"] = DBNull.Value;
 
                         row["Galaxy Type"] = APObject[4];
-                        row["Catalogue"] = APObject[6];
+                        row["Catalogue"] = APObject[6].Replace("'", "").Trim();
                         row["RA"] = APObject[7];
                         row["Dec"] = APObject[8];
                         row["dRA"] = APObject[9];

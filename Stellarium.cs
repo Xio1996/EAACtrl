@@ -680,7 +680,7 @@ namespace EAACtrl
 
             foreach (var row in uniqueCatalogues)
             {
-                resultTable.Rows.Add(row.Catalogue);
+                resultTable.Rows.Add(row.Catalogue.Replace("'", "").Trim() );
             }
 
             return resultTable;
