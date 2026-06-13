@@ -66,6 +66,9 @@
             this.txtFilterByID = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnFilterReset = new System.Windows.Forms.Button();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiAAVSOInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiAAVSOEphemeris = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -197,6 +200,9 @@
             this.tsmiShowStarSystem,
             this.tsmiWDSComponentsFiltered,
             this.toolStripSeparator3,
+            this.tsmiAAVSOInfo,
+            this.tsmiAAVSOEphemeris,
+            this.toolStripSeparator4,
             this.tsmiCopyRow,
             this.tsmiCopyCell});
             this.SearchContextMenu.Name = "SearchContextMenu";
@@ -324,6 +330,23 @@
             this.btnFilterReset.UseVisualStyleBackColor = true;
             this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
             // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
+            // 
+            // tsmiAAVSOInfo
+            // 
+            resources.ApplyResources(this.tsmiAAVSOInfo, "tsmiAAVSOInfo");
+            this.tsmiAAVSOInfo.Name = "tsmiAAVSOInfo";
+            this.tsmiAAVSOInfo.Click += new System.EventHandler(this.tsmiAAVSOInfo_Click);
+            // 
+            // tsmiAAVSOEphemeris
+            // 
+            resources.ApplyResources(this.tsmiAAVSOEphemeris, "tsmiAAVSOEphemeris");
+            this.tsmiAAVSOEphemeris.Name = "tsmiAAVSOEphemeris";
+            this.tsmiAAVSOEphemeris.Click += new System.EventHandler(this.tsmiAAVSOEphemeris_Click);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
@@ -405,5 +428,8 @@
         private System.Windows.Forms.TextBox txtFilterByID;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnFilterReset;
+        private System.Windows.Forms.ToolStripMenuItem tsmiAAVSOInfo;
+        private System.Windows.Forms.ToolStripMenuItem tsmiAAVSOEphemeris;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
     }
 }

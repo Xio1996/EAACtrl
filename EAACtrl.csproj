@@ -184,6 +184,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AAVSODialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AAVSODialog.Designer.cs">
+      <DependentUpon>AAVSODialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="AlignmentSelector.cs" />
     <Compile Include="APHelper.cs" />
     <Compile Include="Astro.cs" />
@@ -227,6 +233,9 @@
     <Compile Include="Stellarium.cs" />
     <Compile Include="Telescope.cs" />
     <Compile Include="TheSky.cs" />
+    <EmbeddedResource Include="AAVSODialog.resx">
+      <DependentUpon>AAVSODialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

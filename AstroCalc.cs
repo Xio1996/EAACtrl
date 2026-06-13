@@ -258,5 +258,116 @@ namespace EAACtrl
             // ----- 4️⃣  Convert declination back to degrees -----
             destDecDeg = dec2 * Rad2Deg;
         }
+
+        public struct MaximumForecast
+        {
+            public int N { get; set; }
+            public double JulianDate { get; set; }
+            public DateTime UniversalTime { get; set; }
+            public DateTime LocalTime { get; set; }
+
+            public MaximumForecast(int n, double jd, DateTime ut, DateTime local)
+            {
+                N = n;
+                JulianDate = jd;
+                UniversalTime = ut;
+                LocalTime = local;
+            }
+        }
+
+        public List<MaximumForecast> GetNextMaximums(double epoch, double period, int count)
+        {
+            if (count <= 0) throw new ArgumentException("Count must be greater than zero.");
+            if (period <= 0) throw new ArgumentException("Period must be a positive value.");
+
+            var forecasts = new List<MaximumForecast>();
+
+            // 1. Get the current Julian Date (UT)
+            double jdNow = DateTimeToJulianDate(DateTime.UtcNow);
+
+            // 2. Find the next cycle integer N
+            int startingN = (int)Math.Floor((jdNow - epoch) / period) + 1;
+
+            // 3. Generate the required number of maximums
+            for (int i = 0; i < count; i++)
+            {
+                int currentN = startingN + i;
+                double targetJD = epoch + (currentN * period);
+                DateTime targetUT = JulianDateToDateTime(targetJD);
+                DateTime targetLocal = targetUT.ToLocalTime();
+
+                forecasts.Add(new MaximumForecast(currentN, targetJD, targetUT, targetLocal));
+            }
+
+            return forecasts;
+        }
+
+        // Standard algorithm: Gregorian Calendar to Julian Date
+        private double DateTimeToJulianDate(DateTime date)
+        {
+            int year = date.Year;
+            int month = date.Month;
+            double day = date.Day + (date.Hour + date.Minute / 60.0 + date.Second / 3600.0 + date.Millisecond / 3600000.0) / 24.0;
+
+            if (month <= 2)
+            {
+                year -= 1;
+                month += 12;
+            }
+
+            int A = year / 100;
+            int B = 2 - A + (A / 4);
+            int C = (int)(365.25 * (year + 4716));
+            int D = (int)(30.6001 * (month + 1));
+
+            return B + C + D + day - 1524.5;
+        }
+
+        // Standard algorithm: Julian Date to Gregorian Calendar
+        private DateTime JulianDateToDateTime(double jd)
+        {
+            jd += 0.5;
+            long I = (long)Math.Floor(jd);
+            double F = jd - I;
+
+            long B = I;
+            if (I > 2299160)
+            {
+                long A = (long)((I - 1867216.25) / 36524.25);
+                B = I + 1 + A - (A / 4);
+            }
+
+            long C = B + 1524;
+            long D = (long)((C - 122.1) / 365.25);
+            long E = (long)(365.25 * D);
+            long G = (long)((C - E) / 30.6001);
+
+            double dayWithFraction = C - E - (long)(30.6001 * G) + F;
+            int day = (int)Math.Floor(dayWithFraction);
+
+            int month = (G < 14) ? (int)(G - 1) : (int)(G - 13);
+            int year = (month > 2) ? (int)(D - 4716) : (int)(D - 4715);
+
+            // Convert day fraction to time
+            double dayFraction = dayWithFraction - day;
+            double totalHours = dayFraction * 24.0;
+            int hour = (int)Math.Floor(totalHours);
+
+            double totalMinutes = (totalHours - hour) * 60.0;
+            int minute = (int)Math.Floor(totalMinutes);
+
+            double totalSeconds = (totalMinutes - minute) * 60.0;
+            int second = (int)Math.Floor(totalSeconds);
+
+            double totalMilliseconds = (totalSeconds - second) * 1000.0;
+            int millisecond = (int)Math.Round(totalMilliseconds);
+
+            // Handle edge roll-over adjustments for rounding errors
+            if (millisecond >= 1000) { millisecond = 0; second++; }
+            if (second >= 60) { second = 0; minute++; }
+            if (minute >= 60) { minute = 0; hour++; }
+
+            return new DateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc);
+        }
     }
 }

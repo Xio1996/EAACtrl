@@ -201,7 +201,7 @@ namespace EAACtrl
 
                 var Period = 0.0;
                 if (!reader.IsDBNull(18))
-                    Period = Math.Round(reader.GetDouble(18), 2);
+                    Period = reader.GetDouble(18);
 
                 var varType = "";
                 if (!reader.IsDBNull(5))

@@ -59,5 +59,7 @@ namespace EAACtrl
                                         Math.Cos(latRad) * Math.Cos(decRad) * Math.Cos(haRad));
             return altitude * 180.0 / Math.PI;
         }
+
+
     }
 }

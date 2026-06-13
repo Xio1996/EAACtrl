@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -12,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static EAACtrl.AstroCalc;
 
 namespace EAACtrl
 {
@@ -171,7 +173,7 @@ namespace EAACtrl
                 {
                     if (col.Name.StartsWith("_"))
                     {
-                        col.Visible = true;
+                        col.Visible = false;
                     }
                 }
 
@@ -560,6 +562,43 @@ namespace EAACtrl
             return false;
         }
 
+        private bool IsAAVSORow(DataGridViewRow row)
+        {
+            if (row == null) return false;
+
+            var catCell = row.Cells["Catalogue"]?.Value;
+            if (catCell == null) return false;
+            
+            string cat = catCell.ToString();
+            if (string.IsNullOrEmpty(cat)) return false;
+           
+            // Catalogue must contain "AAVSO VSX" (case-insensitive)
+            if (cat.IndexOf("AAVSO VSX", StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+            return false;
+        }
+
+        private bool IsAAVSOPeriodRow(DataGridViewRow row)
+        {
+            if (row == null) return false;
+            var periodCell = row.Cells["Period"]?.Value;
+            var epochCell = row.Cells["_Epoch"]?.Value;
+            var catCell = row.Cells["Catalogue"]?.Value;
+            if (periodCell == null || epochCell == null || catCell == null) return false;
+
+            if (double.TryParse(periodCell.ToString(), out double period) && period > 0 &&
+                double.TryParse(epochCell.ToString(), out double epoch) && epoch > 0)
+            {
+                string cat = catCell.ToString();
+                if (!string.IsNullOrEmpty(cat) && cat.IndexOf("AAVSO VSX", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void tsmiCentre_Click(object sender, EventArgs e)
         {
             CentreSelected();
@@ -716,36 +755,42 @@ namespace EAACtrl
 
         private void SearchContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            tsmiCentre.Enabled = dgvSearchResults.SelectedRows.Count == 1;
-            tsmiCopyCell.Enabled = dgvSearchResults.SelectedRows.Count == 1 && dgvSearchResults.CurrentCell != null && !string.IsNullOrWhiteSpace(dgvSearchResults.CurrentCell.Value.ToString());
-            tsmiCopyRow.Enabled = dgvSearchResults.SelectedRows.Count >= 1;
-
-            tsmiCDSByName.Enabled = dgvSearchResults.SelectedRows.Count == 1;
-            tsmiCDSByName.Text = "CDS by Name " + (dgvSearchResults.SelectedRows.Count == 1 ? dgvSearchResults.SelectedRows[0].Cells["ID"].Value.ToString() : "");
-
-            tsmiCDSByPosition.Enabled = dgvSearchResults.SelectedRows.Count == 1;
-            string cdsPos = FormatCDSPosition(dgvSearchResults.SelectedRows[0].Cells["RA"].Value.ToString(), dgvSearchResults.SelectedRows[0].Cells["Dec"].Value.ToString());
-            tsmiCDSByPosition.Text = "CDS by Position " + (dgvSearchResults.SelectedRows.Count == 1 ? cdsPos + "..." : "");
-
-            // Only one row selected and it is Dbl+WDS.
-            // Enable "Select as Star System" only when at least one of the selected rows (or current row if none selected)
-            // matches: Type is Dbl and Catalogue contains "Washington" or "WDS"
-            IEnumerable<DataGridViewRow> rowsToCheck;
-            if (dgvSearchResults.SelectedRows.Count > 0)
+            try
             {
-                rowsToCheck = dgvSearchResults.SelectedRows.Cast<DataGridViewRow>();
-            }
-            else if (dgvSearchResults.CurrentRow != null)
-            {
-                rowsToCheck = new[] { dgvSearchResults.CurrentRow };
-            }
-            else
-            {
-                rowsToCheck = Enumerable.Empty<DataGridViewRow>();
-            }
-            tsmiShowStarSystem.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsDoubleWDSRow(r));
-            tsmiWDSComponentsFiltered.Enabled = tsmiShowStarSystem.Enabled;
+                tsmiCentre.Enabled = dgvSearchResults.SelectedRows.Count == 1;
+                tsmiCopyCell.Enabled = dgvSearchResults.SelectedRows.Count == 1 && dgvSearchResults.CurrentCell != null && !string.IsNullOrWhiteSpace(dgvSearchResults.CurrentCell.Value.ToString());
+                tsmiCopyRow.Enabled = dgvSearchResults.SelectedRows.Count >= 1;
 
+                tsmiCDSByName.Enabled = dgvSearchResults.SelectedRows.Count == 1;
+                tsmiCDSByName.Text = "CDS by Name " + (dgvSearchResults.SelectedRows.Count == 1 ? dgvSearchResults.SelectedRows[0].Cells["ID"].Value.ToString() : "");
+
+                tsmiCDSByPosition.Enabled = dgvSearchResults.SelectedRows.Count == 1;
+                string cdsPos = FormatCDSPosition(dgvSearchResults.SelectedRows[0].Cells["RA"].Value.ToString(), dgvSearchResults.SelectedRows[0].Cells["Dec"].Value.ToString());
+                tsmiCDSByPosition.Text = "CDS by Position " + (dgvSearchResults.SelectedRows.Count == 1 ? cdsPos + "..." : "");
+
+                // Only one row selected and it is Dbl+WDS.
+                // Enable "Select as Star System" only when at least one of the selected rows (or current row if none selected)
+                // matches: Type is Dbl and Catalogue contains "Washington" or "WDS"
+                IEnumerable<DataGridViewRow> rowsToCheck;
+                if (dgvSearchResults.SelectedRows.Count > 0)
+                {
+                    rowsToCheck = dgvSearchResults.SelectedRows.Cast<DataGridViewRow>();
+                }
+                else if (dgvSearchResults.CurrentRow != null)
+                {
+                    rowsToCheck = new[] { dgvSearchResults.CurrentRow };
+                }
+                else
+                {
+                    rowsToCheck = Enumerable.Empty<DataGridViewRow>();
+                }
+                tsmiShowStarSystem.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsDoubleWDSRow(r));
+                tsmiWDSComponentsFiltered.Enabled = tsmiShowStarSystem.Enabled;
+
+                tsmiAAVSOInfo.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsAAVSORow(r));
+                tsmiAAVSOEphemeris.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsAAVSOPeriodRow(r));
+            }
+            catch (Exception) { }
         }
 
         private void dgvSearchResults_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
@@ -864,6 +909,105 @@ namespace EAACtrl
         private void btnFilterReset_Click(object sender, EventArgs e)
         {
             txtFilterByID.Text = "";
+        }
+
+        private void tsmiAAVSOInfo_Click(object sender, EventArgs e)
+        {
+            var row = dgvSearchResults.CurrentRow ?? (dgvSearchResults.SelectedRows.Count > 0 ? dgvSearchResults.SelectedRows[0] : null);
+            var id = row?.Cells["_ID"]?.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                MessageBox.Show("No ID available", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Build URL and open (escape the ID)
+            string url = "http://www.aavso.org/vsx/index.php?view=detail.top&oid=" + Uri.EscapeDataString(id);
+            OpenUrl(url);
+        }
+        private static string EscapeRtfText(string s)
+        {
+            if (s == null) return "";
+            // escape backslash and braces for RTF
+            return s.Replace(@"\", @"\\").Replace("{", @"\{").Replace("}", @"\}")
+                    .Replace("\r\n", "\n").Replace("\r", "\n");
+        }
+
+        public static string ConvertSimpleHtmlLikeToRtf(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html)) return @"{\rtf1\ansi }";
+
+            // decode entities and normalise newlines
+            string decoded = System.Net.WebUtility.HtmlDecode(html).Replace("\r\n", "\n").Replace("\r", "\n");
+
+            // Replace <br> with newline marker (will be converted to \par later)
+            decoded = Regex.Replace(decoded, @"<br\s*/?>", "\n", RegexOptions.IgnoreCase);
+
+            // Use unlikely tokens to protect tag positions while escaping text
+            string bOpen = Guid.NewGuid().ToString("N");
+            string bClose = Guid.NewGuid().ToString("N");
+            string iOpen = Guid.NewGuid().ToString("N");
+            string iClose = Guid.NewGuid().ToString("N");
+            string uOpen = Guid.NewGuid().ToString("N");
+            string uClose = Guid.NewGuid().ToString("N");
+
+            // Protect tags by replacing them with tokens
+            decoded = Regex.Replace(decoded, @"<\s*b\s*>", bOpen, RegexOptions.IgnoreCase);
+            decoded = Regex.Replace(decoded, @"<\s*/\s*b\s*>", bClose, RegexOptions.IgnoreCase);
+            decoded = Regex.Replace(decoded, @"<\s*i\s*>", iOpen, RegexOptions.IgnoreCase);
+            decoded = Regex.Replace(decoded, @"<\s*/\s*i\s*>", iClose, RegexOptions.IgnoreCase);
+            decoded = Regex.Replace(decoded, @"<\s*u\s*>", uOpen, RegexOptions.IgnoreCase);
+            decoded = Regex.Replace(decoded, @"<\s*/\s*u\s*>", uClose, RegexOptions.IgnoreCase);
+
+            // Escape the whole text now (tags are safe as tokens)
+            string escaped = EscapeRtfText(decoded);
+
+            // Replace newline with RTF paragraph marker
+            escaped = escaped.Replace("\n", @"\par ");
+
+            // Replace tokens with RTF markup (open token -> start group with style, close token -> end group)
+            escaped = escaped.Replace(bOpen, "{\\b ");
+            escaped = escaped.Replace(bClose, "}");
+            escaped = escaped.Replace(iOpen, "{\\i ");
+            escaped = escaped.Replace(iClose, "}");
+            escaped = escaped.Replace(uOpen, "{\\ul ");
+            escaped = escaped.Replace(uClose, "}");
+
+            // Wrap in minimal RTF header
+            return @"{\rtf1\ansi " + escaped + "}";
+        }
+        private void tsmiAAVSOEphemeris_Click(object sender, EventArgs e)
+        {
+            var astroCalc= new AstroCalc();
+
+
+
+            DataGridViewRow row = null;
+            if (dgvSearchResults.SelectedRows.Count > 0)
+                row = dgvSearchResults.SelectedRows[0];
+            else if (dgvSearchResults.CurrentRow != null)
+                row = dgvSearchResults.CurrentRow;
+
+            if (row == null) return;
+
+            //var row = dgvSearchResults.CurrentRow ?? (dgvSearchResults.SelectedRows.Count > 0 ? dgvSearchResults.SelectedRows[0] : null);
+            var epoch = (double)(row?.Cells["_Epoch"].Value);
+            var period = (double)(row?.Cells["Period"].Value);
+
+            List<MaximumForecast> results = astroCalc.GetNextMaximums(epoch, period, 10);
+
+            using (AAVSODialog frmAAVSO = new AAVSODialog())
+            {
+                frmAAVSO.TopMost = true;
+                var header = "<b>" +row?.Cells["ID"].Value?.ToString() + "</b>" + Environment.NewLine + "<b>Period:</b> " + period.ToString("F2") + " <b>Epoch:</b> " + epoch.ToString("F2") + Environment.NewLine + Environment.NewLine;
+                header += string.Join(Environment.NewLine, results.Select(r => $"{r.N}: JD {r.JulianDate:F5}, UT {r.UniversalTime:yyyy-MM-dd HH:mm:ss}, Local <b>{r.LocalTime:yyyy-MM-dd HH:mm:ss}</b>"));
+                frmAAVSO.ID = ConvertSimpleHtmlLikeToRtf(header);
+
+                if (frmAAVSO.ShowDialog() == DialogResult.OK)
+                {
+
+                }
+            }
         }
     }
 }
