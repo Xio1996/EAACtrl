@@ -210,7 +210,20 @@ namespace EAACtrl
                     varType = varType.Replace("|", ",");
                 }
 
-                dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, "", "AAVSO VSX");
+                var _ID = "";
+                if (!reader.IsDBNull(0))
+                {
+                    _ID = reader.GetInt32(0).ToString();
+                }
+
+                var _Epoch = 0.0;
+                if (!reader.IsDBNull(15))
+                {
+                    _Epoch = reader.GetDouble(15);
+                }
+
+
+                dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, "", "AAVSO VSX", _ID, _Epoch);
             }
         }
 

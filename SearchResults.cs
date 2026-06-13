@@ -171,7 +171,7 @@ namespace EAACtrl
                 {
                     if (col.Name.StartsWith("_"))
                     {
-                        col.Visible = false;
+                        col.Visible = true;
                     }
                 }
 
@@ -750,32 +750,25 @@ namespace EAACtrl
 
         private void dgvSearchResults_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            // Only handle clicks on rows (not headers) and when a mouse button was clicked
-            if (e.RowIndex < 0 || e.Button == MouseButtons.None) return;
 
-            // Select the clicked row when right-clicking (so context menu operates on that row)
-            if (e.Button == MouseButtons.Right)
+            // ignore header clicks
+            if (e.RowIndex < 0) return;
+
+            // only intervene for right-click so Ctrl/Shift selection by left-click remains intact
+            if (e.Button != MouseButtons.Right) return;
+
+            var grid = dgvSearchResults;
+
+            // If the clicked row is not already selected, make it the sole selection.
+            // If it is already selected, keep the current multi-selection (Ctrl/Shift) as-is.
+            if (!grid.Rows[e.RowIndex].Selected)
             {
-                // Clear previous selection and select the row under the mouse
-                dgvSearchResults.ClearSelection();
-                dgvSearchResults.Rows[e.RowIndex].Selected = true;
-
-                // Ensure CurrentCell is set (avoid IndexOutOfRange when e.ColumnIndex is -1)
-                int colIndex = e.ColumnIndex >= 0 ? e.ColumnIndex : 0;
-                dgvSearchResults.CurrentCell = dgvSearchResults.Rows[e.RowIndex].Cells[colIndex];
-
-                // Display the context menu at the mouse position
-                SearchContextMenu.Show(Cursor.Position);
+                grid.ClearSelection();
+                grid.Rows[e.RowIndex].Selected = true;
             }
-            else if (e.Button == MouseButtons.Left)
-            {
-                // Optional: make left-click also select the row (keeps standard behavior)
-                dgvSearchResults.ClearSelection();
-                dgvSearchResults.Rows[e.RowIndex].Selected = true;
-                int colIndex = e.ColumnIndex >= 0 ? e.ColumnIndex : 0;
-                dgvSearchResults.CurrentCell = dgvSearchResults.Rows[e.RowIndex].Cells[colIndex];
-            }
-            
+
+            // Display the context menu at the mouse position
+            SearchContextMenu.Show(Cursor.Position);
         }
 
         private void chkAberration_CheckedChanged(object sender, EventArgs e)
