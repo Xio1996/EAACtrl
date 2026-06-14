@@ -606,7 +606,13 @@ namespace EAACtrl
 
         private void tsmiCDSByName_Click(object sender, EventArgs e)
         {
-            var row = dgvSearchResults.CurrentRow ?? (dgvSearchResults.SelectedRows.Count > 0 ? dgvSearchResults.SelectedRows[0] : null);
+            DataGridViewRow row = null;
+            if (dgvSearchResults.SelectedRows.Count > 0)
+                row = dgvSearchResults.SelectedRows[0];
+            else if (dgvSearchResults.CurrentRow != null)
+                row = dgvSearchResults.CurrentRow;
+
+            if (row == null) return;
             var id = row?.Cells["ID"]?.Value?.ToString();
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -621,7 +627,13 @@ namespace EAACtrl
 
         private void tsmiCDSByPosition_Click(object sender, EventArgs e)
         {
-            var row = dgvSearchResults.CurrentRow ?? (dgvSearchResults.SelectedRows.Count > 0 ? dgvSearchResults.SelectedRows[0] : null);
+            DataGridViewRow row = null;
+            if (dgvSearchResults.SelectedRows.Count > 0)
+                row = dgvSearchResults.SelectedRows[0];
+            else if (dgvSearchResults.CurrentRow != null)
+                row = dgvSearchResults.CurrentRow;
+
+            if (row == null) return;
             var raObj = row?.Cells["RA"]?.Value.ToString();
             var decObj = row?.Cells["Dec"]?.Value.ToString();
             if (raObj == null || decObj == null)
