@@ -1919,58 +1919,62 @@ namespace EAACtrl
             double SearchRA = 999, SearchDec = 999;
             string SearchID="";
 
+            // Selection not required if plotting all plan objects in Stellarium.
             // Get search position from selected object in Stellarium.
-            if (Properties.Settings.Default.sfPlanetarium)
+            if (Properties.Settings.Default.sfDatasource != 4)
             {
-                if (!IsStellariumRunning())
+                if (Properties.Settings.Default.sfPlanetarium)
                 {
-                    Speak(StellariumSpeak + " is not running");
-                    return;
-                }
+                    if (!IsStellariumRunning())
+                    {
+                        Speak(StellariumSpeak + " is not running");
+                        return;
+                    }
 
-                APCmdObject ap = null;
-                switch (tabPlanetarium.SelectedIndex)
-                {
-                    case 0: // Stellarium
-                        ap = Stellarium.StellariumGetSelectedObjectInfo();
-                        break;
-                }
+                    APCmdObject ap = null;
+                    switch (tabPlanetarium.SelectedIndex)
+                    {
+                        case 0: // Stellarium
+                            ap = Stellarium.StellariumGetSelectedObjectInfo();
+                            break;
+                    }
 
-                if (ap == null && Stellarium.Message.Contains("401"))
-                {
-                    Speak(StellariumSpeak + " password incorrect or not set");
-                    return;
-                }
+                    if (ap == null && Stellarium.Message.Contains("401"))
+                    {
+                        Speak(StellariumSpeak + " password incorrect or not set");
+                        return;
+                    }
 
-                if (ap == null)
-                {
-                    Speak("No object selected in planetarium");
-                    return;
-                }
+                    if (ap == null)
+                    {
+                        Speak("No object selected in planetarium");
+                        return;
+                    }
 
-                SearchID = ap.ID;
-                SearchRA = ap.RA2000;
-                SearchDec = ap.Dec2000;
-            }
-            else
-            {
-                // Get search position from selected object in AstroPlanner.
-                if (!IsAPRunning())
-                {
-                    Speak(AstroPlannerSpeak + " is not running");
-                    return;
+                    SearchID = ap.ID;
+                    SearchRA = ap.RA2000;
+                    SearchDec = ap.Dec2000;
                 }
+                else
+                {
+                    // Get search position from selected object in AstroPlanner.
+                    if (!IsAPRunning())
+                    {
+                        Speak(AstroPlannerSpeak + " is not running");
+                        return;
+                    }
 
-                APCmdObject SelectedObject = APGetSelectedObject();
-                if (aAError.ErrorNumber == 0 && SelectedObject == null)
-                {
-                    Speak("No object selected in " + AstroPlannerSpeak);
-                    return;
+                    APCmdObject SelectedObject = APGetSelectedObject();
+                    if (aAError.ErrorNumber == 0 && SelectedObject == null)
+                    {
+                        Speak("No object selected in " + AstroPlannerSpeak);
+                        return;
+                    }
+
+                    SearchID = SelectedObject.ID;
+                    SearchRA = SelectedObject.RA2000;
+                    SearchDec = SelectedObject.Dec2000;
                 }
-                
-                SearchID = SelectedObject.ID;
-                SearchRA = SelectedObject.RA2000;
-                SearchDec = SelectedObject.Dec2000;
             }
 
             // Search AstroPlanner catalogues that are loaded and marjed as searchable.
@@ -2246,6 +2250,45 @@ namespace EAACtrl
                         frmOpt.TopMost = true;
                         frmOpt.Results = null;
                         frmOpt.ResultsDataTable = dt;
+                        if (frmOpt.ShowDialog() == DialogResult.OK)
+                        {
+
+                        }
+                    }
+                }
+            }
+            else if (Properties.Settings.Default.sfDatasource == 4)
+            {
+                string PlanFilepath = "";
+                using (var dlg = new OpenFileDialog())
+                {
+                    dlg.Title = "Select AstroPlanner Plan File";
+                    dlg.Filter = "AstroPlanner Plans (*.apd)|*.apd|All files (*.*)|*.*";
+                    dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AstroPlanner\\Plans";
+                    PlanFilepath =dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
+                }
+                if (PlanFilepath == null) {
+                    Speak("No file selected");
+                    return;
+                }
+                DataTable dtPlan = Database.ReadAPObjectsTable(PlanFilepath);
+                if (dtPlan == null || dtPlan.Rows.Count == 0)
+                {
+                    Speak("No search results");
+                    return;
+                }
+
+                DataTable dtOut = Database.ProcessAPPlanObjects(ref dtPlan);
+                Stellarium.DrawObjects(dtOut);
+                // Show search results window
+                if (Properties.Settings.Default.sResultsList)
+                {
+                    using (SearchResults frmOpt = new SearchResults())
+                    {
+                        frmOpt.EAACP = this;
+                        frmOpt.TopMost = true;
+                        frmOpt.Results = null;
+                        frmOpt.ResultsDataTable = dtOut;
                         if (frmOpt.ShowDialog() == DialogResult.OK)
                         {
 
@@ -3050,6 +3093,19 @@ namespace EAACtrl
         private void btnKStarsIV_Click(object sender, EventArgs e)
         {
             KStars.Zoom("2");
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            DataTable dt = Database.ReadAPObjectsTable("C:\\Users\\peter\\Documents\\Astronomy\\AstroPlanner\\Plans\\Constellations\\Bootes.apd");
+            if (dt != null)
+            {
+                foreach(DataRow row in dt.Rows)
+                {
+
+                    WriteMessage(row["ID"].ToString() + " " + row["Name"].ToString() + " " + row["RA2000"].ToString() + " " + row["Dec2000"].ToString() + "\r\n");
+                }
+            }
         }
     }
 

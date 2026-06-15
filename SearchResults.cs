@@ -207,6 +207,10 @@ namespace EAACtrl
                 dgvSearchResults.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
                 dgvSearchResults.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
 
+                if (dgvSearchResults.Columns["Names"].Width > 350)
+                {
+                    dgvSearchResults.Columns["Names"].Width = 350;
+                }
                 totalResults = dt.Rows.Count;
                 UpdateSearchInfo(totalResults);
             }

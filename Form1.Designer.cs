@@ -183,6 +183,7 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -366,6 +367,7 @@
             // 
             // tpTools
             // 
+            this.tpTools.Controls.Add(this.button3);
             this.tpTools.Controls.Add(this.btnAstro);
             this.tpTools.Controls.Add(this.btnNTPCheck);
             this.tpTools.Controls.Add(this.button1);
@@ -2117,6 +2119,16 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(279, 242);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 43;
+            this.button3.Text = "AP Plan";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -2339,6 +2351,7 @@
         private System.Windows.Forms.Button btnKStarsE;
         private System.Windows.Forms.Button btnKStarsW;
         private System.Windows.Forms.Button btnKStarsN;
+        private System.Windows.Forms.Button button3;
     }
 }
 

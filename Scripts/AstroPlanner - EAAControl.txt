@@ -1404,7 +1404,12 @@ sub GetObjects(iOption as integer, sType as string, ByRef Result as JSON)
 				ID = Ob.ID
 			end if
 			
-			doc = doc +CreateJSONObject(ID, Ob.Name, Ob.Type, Ob.Size, Ob.Constellation, Ob.Catalog, Ob.GetValueAsString("Distance"), "", Ob.PosAngle, Ob.Magnitude, Ob.RA, Ob.Dec, Ob.ParallacticAngle)
+			// Experimental code for JSON document production as used by search functionality
+			dim apCmdOb as APCmdObject = new APCmdObject(Ob)
+			doc = doc + apCmdOb.CreateJSONObject()
+			
+			// Above experimental code replaces this - Same JSON produced as Search functionality
+			//doc = doc +CreateJSONObject(ID, Ob.Name, Ob.Type, Ob.Size, Ob.Constellation, Ob.Catalog, Ob.GetValueAsString("Distance"), "", Ob.PosAngle, Ob.Magnitude, Ob.RA, Ob.Dec, Ob.ParallacticAngle)
 		next
 		doc = doc + "]}"
 		Debug doc
@@ -1446,7 +1451,7 @@ sub PutObjects(iOption as integer, ByRef oCmd as JSON)
 	dim i as integer
 	for i=0 to a.Count-1
 		b =a.Child(i)
-		Debug b.Child("ID"), b.Child("Name"), b.Child("Type"), b.Child("Size"), b.Child("RA2000"), b.Child("Dec2000"), b.Child("Components"), b.Child("Separation") 
+		Debug b.Child("ID"), b.Child("Name"), b.Child("Type"), b.Child("Size"), b.Child("RA2000"), b.Child("Dec2000"), b.Child("Components"), b.Child("Separation")
 		if iOption = 1 then
 			// Add object to plan
 			obj = Plan.NewObject()

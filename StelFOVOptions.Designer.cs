@@ -671,7 +671,8 @@
             "AstroPlanner (All catalogues marked for search)",
             "GLADE+ (Galaxies & Quasars +23 million objects)",
             "REGALADE (Galaxies 80 million galaxies)",
-            "AAVSO VSX (Variable Stars +10 million objects)"});
+            "AAVSO VSX (Variable Stars +10 million objects)",
+            "AstroPlanner Plan File"});
             this.cbDatasource.Location = new System.Drawing.Point(10, 21);
             this.cbDatasource.Name = "cbDatasource";
             this.cbDatasource.Size = new System.Drawing.Size(368, 21);

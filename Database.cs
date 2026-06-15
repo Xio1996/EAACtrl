@@ -2,8 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
+using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace EAACtrl
 {
@@ -341,6 +345,161 @@ namespace EAACtrl
             ProcessAAVSO_VSXObjects(ref reader, ref dt);
 
             conn.Close();
+
+            return dt;
+        }
+
+        public static void NullOutPlaceholders(DataTable dt, string[] columns, double placeholder = 999.0)
+        {
+            if (dt == null) throw new ArgumentNullException(nameof(dt));
+            if (columns == null || columns.Length == 0) return;
+
+            foreach (var colName in columns)
+            {
+                if (!dt.Columns.Contains(colName)) continue;
+                var colType = dt.Columns[colName].DataType;
+
+                for (int r = 0; r < dt.Rows.Count; r++)
+                {
+                    var cell = dt.Rows[r][colName];
+                    if (cell == DBNull.Value) continue;
+                    if (cell == null) { dt.Rows[r][colName] = DBNull.Value; continue; }
+
+                    // handle typed numeric columns
+                    if (IsNumericType(colType))
+                    {
+                        double d;
+                        try { d = Convert.ToDouble(cell, CultureInfo.InvariantCulture); }
+                        catch { continue; }
+                        if (Math.Abs(d - placeholder) < 1e-9) dt.Rows[r][colName] = DBNull.Value;
+                        continue;
+                    }
+
+                    // handle string or other types by parsing
+                    string s = cell.ToString().Trim();
+                    if (s.Length == 0) { dt.Rows[r][colName] = DBNull.Value; continue; }
+
+                    // accept "999", "999.0", etc.
+                    if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed))
+                    {
+                        if (Math.Abs(parsed - placeholder) < 1e-9) dt.Rows[r][colName] = DBNull.Value;
+                    }
+                    else
+                    {
+                        // exact string match fallback
+                        if (string.Equals(s, placeholder.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
+                            dt.Rows[r][colName] = DBNull.Value;
+                    }
+                }
+            }
+        }
+
+        private static bool IsNumericType(Type t)
+        {
+            return t == typeof(byte) || t == typeof(sbyte) ||
+                   t == typeof(short) || t == typeof(ushort) ||
+                   t == typeof(int) || t == typeof(uint) ||
+                   t == typeof(long) || t == typeof(ulong) ||
+                   t == typeof(float) || t == typeof(double) ||
+                   t == typeof(decimal);
+        }
+
+        public DataTable ProcessAPPlanObjects(ref DataTable dtPlan)
+        {
+            DataTable dtOut = CreateTable();
+            for (int i = 0; i < dtPlan.Rows.Count; i++)
+            {
+                DataRow row = dtPlan.Rows[i];   
+
+                var ID = row["ID"].ToString().Trim();
+
+                var RAd = Convert.ToDouble(row["RA"]);
+                var RA = APHelper.RADecimalHoursToHMS(RAd, @"hh\hmm\mss\.ff\s");
+                var Decd = Convert.ToDouble(row["Dec"]);
+                var Dec = APHelper.DecDecimalToDMS(Decd);
+
+                var maxmag = 0.0;
+                if (!string.IsNullOrEmpty(row["Magnitude"].ToString()))
+                    maxmag = Math.Round(Convert.ToDouble(row["Magnitude"]), 2);
+
+                var minmag = 0.0;
+                if (!string.IsNullOrEmpty(row["Magnitude2"].ToString()))
+                {
+                        minmag = Math.Round(Convert.ToDouble(row["Magnitude2"]), 2);
+                }
+
+                var Sep = 0.0;
+                if (!string.IsNullOrEmpty(row["Separation"].ToString()))
+                {
+                    Sep = Math.Round(Convert.ToDouble(row["Separation"]), 2);
+                }
+
+                var Period = 0.0;
+                if (!string.IsNullOrEmpty(row["Period"].ToString()))
+                    Period = Math.Round(Convert.ToDouble(row["Period"]), 2);
+
+                var varType = "";
+                if (!string.IsNullOrEmpty(row["Type"].ToString()))
+                {
+                    varType = row["Type"].ToString().Trim();
+                    varType = varType.Replace("|", ",");
+                }
+
+                var _ID = "";
+                var _Epoch = 0.0;
+                var Catalogue = row["Catalogue"].ToString().Trim();
+                var Names = row["Name"].ToString().Trim();
+                var Size = row["Size"].ToString().Trim();
+                var Comp = row["Comp"].ToString().Trim();
+
+                var PA = 0;
+                if (!string.IsNullOrEmpty(row["PosAngle"].ToString()))
+                    PA = Convert.ToInt32(row["PosAngle"]);
+
+
+                dtOut.Rows.Add(ID, Names, varType, maxmag, minmag, Period, 0, "", Size, Comp, PA, Sep, RA, Dec, RAd, Decd, "", Catalogue, _ID, _Epoch);
+            }
+
+            var columnsToNull = new[] { "Mag", "Mag2" };
+            NullOutPlaceholders(dtOut, columnsToNull, 999);
+            columnsToNull = new[] { "PA" };
+            NullOutPlaceholders(dtOut, columnsToNull, -999);
+            columnsToNull = new[] { "Dist MPC", "Period", "Sep" };
+            NullOutPlaceholders(dtOut, columnsToNull, 0);
+
+            return dtOut;
+        }
+        public static DataTable ReadAPObjectsTable(string dbFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(dbFilePath))
+                throw new ArgumentException("Database file path is required.", nameof(dbFilePath));
+            if (!File.Exists(dbFilePath))
+                throw new FileNotFoundException("Database file not found.", dbFilePath);
+
+            // Quick header check for "SQLite format 3"
+            using (var fs = File.OpenRead(dbFilePath))
+            {
+                var header = new byte[16];
+                int read = fs.Read(header, 0, header.Length);
+                var headerStr = Encoding.ASCII.GetString(header, 0, Math.Max(0, Math.Min(read, header.Length)));
+                if (!headerStr.StartsWith("SQLite format 3"))
+                    throw new InvalidDataException("File does not appear to be a SQLite format 3 database.");
+            }
+
+            var dt = new DataTable();
+
+            // Use read-only connection string
+            var connectionString = $"Data Source={dbFilePath};Read Only=True;";
+
+            using (var conn = new SQLiteConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand("SELECT * FROM Objects;", conn))
+                using (var adapter = new SQLiteDataAdapter(cmd))
+                {
+                    adapter.Fill(dt);
+                }
+            }
 
             return dt;
         }
