@@ -15,6 +15,9 @@ namespace EAACtrl
     {
         public string ConnectionString = "Server=127.0.0.1;Port=5432;Database=Astro;User Id=postgres;Password=Forrest;";
 
+        //Constellations 
+        public ConstellationFinder Constellations = new ConstellationFinder();
+
         private APHelper APHelper = new APHelper();
 
         private DataTable CreateTable()
@@ -136,7 +139,9 @@ namespace EAACtrl
                     DistanceMpc = Math.Round(reader.GetDouble(12) * 299792.458 / Properties.Settings.Default.Hubble, 0); // Convert to Mpc
                 }
 
-                dt.Rows.Add(ID, Names, sType, Bmag, 0, 0, DistanceMpc, "", "", "", 0.0, 0.0, RA, Dec, RAd, Decd, "", "Glade+");
+                string Constellation = Constellations.GetConstellation(RAd, Decd);
+
+                dt.Rows.Add(ID, Names, sType, Bmag, 0, 0, DistanceMpc, "", "", "", 0.0, 0.0, RA, Dec, RAd, Decd, Constellation, "Glade+");
             }
         }
 
@@ -177,7 +182,9 @@ namespace EAACtrl
                     objSize = Math.Round(reader.GetDouble(6), 2).ToString() + " x " + Math.Round(reader.GetDouble(7), 2).ToString();
                 }
 
-                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0,0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, "", "REGALADE");
+                string Constellation = Constellations.GetConstellation(RAd, Decd);
+
+                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0,0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, Constellation, "REGALADE");
             }
         }
 
@@ -226,8 +233,10 @@ namespace EAACtrl
                     _Epoch = reader.GetDouble(15);
                 }
 
+                string Constellation = Constellations.GetConstellation(RAd, Decd);
 
-                dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, "", "AAVSO VSX", _ID, _Epoch);
+                
+                dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, Constellation, "AAVSO VSX", _ID, _Epoch);
             }
         }
 
