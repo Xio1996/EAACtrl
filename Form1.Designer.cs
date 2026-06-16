@@ -42,6 +42,7 @@
             this.cbCaptureProfile = new System.Windows.Forms.ComboBox();
             this.tcExtra = new System.Windows.Forms.TabControl();
             this.tpTools = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
             this.btnAstro = new System.Windows.Forms.Button();
             this.btnNTPCheck = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -183,7 +184,6 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
-            this.button3 = new System.Windows.Forms.Button();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -389,6 +389,16 @@
             this.tpTools.TabIndex = 0;
             this.tpTools.Text = "Tools";
             this.tpTools.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(279, 242);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 43;
+            this.button3.Text = "AP Plan";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // btnAstro
             // 
@@ -1581,7 +1591,7 @@
             this.btnFOVSearch.Name = "btnFOVSearch";
             this.btnFOVSearch.Size = new System.Drawing.Size(103, 32);
             this.btnFOVSearch.TabIndex = 38;
-            this.btnFOVSearch.Text = "FOV Search";
+            this.btnFOVSearch.Text = "Search";
             this.toolTip1.SetToolTip(this.btnFOVSearch, "FOV Search");
             this.btnFOVSearch.UseVisualStyleBackColor = false;
             this.btnFOVSearch.Click += new System.EventHandler(this.btnFOVSearch_Click);
@@ -2118,16 +2128,6 @@
             this.cbSyncDateTime.Text = "Date Time";
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(279, 242);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 43;
-            this.button3.Text = "AP Plan";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // frmEAACP
             // 
