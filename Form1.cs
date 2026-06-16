@@ -3099,8 +3099,30 @@ namespace EAACtrl
         private void button3_Click(object sender, EventArgs e)
         {
             ConstellationFinder constellationFinder = new ConstellationFinder();
-            string wktBoundary = constellationFinder.GetConstellationWkt("Boo");
-            Database.AAVSO_VSX_ConstellationSearch(wktBoundary);
+            string wktBoundary = constellationFinder.GetConstellationWkt("Cep");
+            DataTable dt =Database.AAVSO_VSX_ConstellationSearch(wktBoundary, double.Parse(Properties.Settings.Default.sfMagnitude));
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                Speak("No search results");
+                return;
+            }
+            Stellarium.DrawObjects(dt);
+
+            // Show search results window
+            if (Properties.Settings.Default.sResultsList)
+            {
+                using (SearchResults frmOpt = new SearchResults())
+                {
+                    frmOpt.EAACP = this;
+                    frmOpt.TopMost = true;
+                    frmOpt.Results = null;
+                    frmOpt.ResultsDataTable = dt;
+                    if (frmOpt.ShowDialog() == DialogResult.OK)
+                    {
+
+                    }
+                }
+            }
         }
     }
 

@@ -358,7 +358,7 @@ namespace EAACtrl
             return dt;
         }
 
-        public DataTable AAVSO_VSX_ConstellationSearch(string wktBoundary)
+        public DataTable AAVSO_VSX_ConstellationSearch(string wktBoundary, double MagnitudeLimit)
         {
             DataTable dt = CreateTable();
 
@@ -373,7 +373,7 @@ namespace EAACtrl
             string sql = @"
             SELECT * 
             FROM ""AAVSO_VSX""
-            WHERE ST_Contains(ST_GeomFromText(@wkt, 4326), geom);";
+            WHERE ST_Contains(ST_GeomFromText(@wkt, 4326), geom) AND ""max"" < @magnitudeLimit";
 
             //geom_location
             try
@@ -391,6 +391,11 @@ namespace EAACtrl
                             Value = wktBoundary
                         };
                         command.Parameters.Add(wktParameter);
+                        var magnitudeLimitParameter = new NpgsqlParameter("@magnitudeLimit", NpgsqlTypes.NpgsqlDbType.Double)
+                        {
+                            Value = MagnitudeLimit
+                        };
+                        command.Parameters.Add(magnitudeLimitParameter);
 
                         // 2. Execute and read the data
                         var reader = command.ExecuteReader();

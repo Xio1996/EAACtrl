@@ -1,17 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace EAACtrl
 {
     internal class ConstellationFinder
     {
         private readonly List<ConstellationFeature> _constellations;
+        // Convert WKT with lon/lat (X=lon in -180..180) to WKT with RA/Dec (X=RA in 0..360)
+        public static string ConvertWktLonLatToRaDecWkt(string wkt)
+        {
+            if (string.IsNullOrWhiteSpace(wkt)) return wkt;
 
+            // preserve SRID=...; prefix if present
+            string prefix = "";
+            string body = wkt.Trim();
+            if (body.StartsWith("SRID=", StringComparison.OrdinalIgnoreCase))
+            {
+                int semi = body.IndexOf(';');
+                if (semi > 0)
+                {
+                    prefix = body.Substring(0, semi + 1); // includes ';'
+                    body = body.Substring(semi + 1).Trim();
+                }
+            }
+
+            // Regex to find coordinate pairs: <number> <number>
+            var coordPair = new Regex(@"(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)[\s,]+(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)",
+                                      RegexOptions.Compiled);
+
+            int pairIndex = 0;
+            string replaced = coordPair.Replace(body, match =>
+            {
+                // We expect successive matches to be coordinate pairs; convert X (lon) to RA
+                string sx = match.Groups[1].Value;
+                string sy = match.Groups[2].Value;
+
+                if (!double.TryParse(sx, NumberStyles.Float, CultureInfo.InvariantCulture, out double lon) ||
+                    !double.TryParse(sy, NumberStyles.Float, CultureInfo.InvariantCulture, out double lat))
+                {
+                    // if parse fails, return original
+                    return match.Value;
+                }
+
+                // normalize lon -> RA in [0,360)
+                double ra = lon % 360.0;
+                if (ra < 0) ra += 360.0;
+
+                // format with invariant culture; keep 6 decimals
+                string sra = ra.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+                string slat = lat.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+
+                pairIndex++;
+                return sra + " " + slat;
+            });
+
+            return prefix + replaced;
+        }
         public ConstellationFinder()
         {
             // 1. Get the current assembly where the JSON is embedded
@@ -103,7 +155,7 @@ namespace EAACtrl
                 string.Equals(f.Properties?.Id, abbreviation, StringComparison.OrdinalIgnoreCase));
 
             if (feature?.Geometry?.Coordinates == null) return null;
-
+            // Build MULTIPOLYGON WKT directly using RA in [0,360) and Dec as Y.
             var sb = new StringBuilder();
             sb.Append("MULTIPOLYGON(");
 
@@ -117,15 +169,41 @@ namespace EAACtrl
                     var ring = polygon[r];
                     sb.Append("(");
 
+                    // Append all points, converting lon->RA in [0,360) and formatting with invariant culture.
                     for (int pt = 0; pt < ring.Count; pt++)
                     {
                         var point = ring[pt];
-                        // WKT uses a space between X (longitude/RA) and Y (latitude/Dec)
-                        // and cultures with comma decimals should format with InvariantCulture
-                        sb.Append($"{point[0].ToString(System.Globalization.CultureInfo.InvariantCulture)} {point[1].ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                        double lon = point[0];
+                        double lat = point[1];
+                        double ra = (lon % 360.0 + 360.0) % 360.0;
+                        string sra = ra.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+                        string slat = lat.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+                        sb.Append(sra);
+                        sb.Append(" ");
+                        sb.Append(slat);
 
                         if (pt < ring.Count - 1)
                             sb.Append(", ");
+                    }
+
+                    // Ensure ring is closed: if first and last (after RA normalization) differ, append first point.
+                    if (ring.Count > 0)
+                    {
+                        var first = ring[0];
+                        var last = ring[ring.Count - 1];
+                        double firstRa = (first[0] % 360.0 + 360.0) % 360.0;
+                        double lastRa = (last[0] % 360.0 + 360.0) % 360.0;
+                        double firstDec = first[1];
+                        double lastDec = last[1];
+                        if (Math.Abs(firstRa - lastRa) > 1e-9 || Math.Abs(firstDec - lastDec) > 1e-9)
+                        {
+                            string sfa = firstRa.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+                            string sfd = firstDec.ToString("F6", CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.');
+                            sb.Append(", ");
+                            sb.Append(sfa);
+                            sb.Append(" ");
+                            sb.Append(sfd);
+                        }
                     }
 
                     sb.Append(")");
@@ -139,6 +217,7 @@ namespace EAACtrl
             }
 
             sb.Append(")");
+
             return sb.ToString();
         }
 
