@@ -519,8 +519,9 @@ namespace EAACtrl
                 if (!string.IsNullOrEmpty(row["PosAngle"].ToString()))
                     PA = Convert.ToInt32(row["PosAngle"]);
 
+                string Constellation = Constellations.GetConstellation(RAd, Decd);
 
-                dtOut.Rows.Add(ID, Names, varType, maxmag, minmag, Period, 0, "", Size, Comp, PA, Sep, RA, Dec, RAd, Decd, "", Catalogue, _ID, _Epoch);
+                dtOut.Rows.Add(ID, Names, varType, maxmag, minmag, Period, 0, "", Size, Comp, PA, Sep, RA, Dec, RAd, Decd, Constellation, Catalogue, _ID, _Epoch);
             }
 
             var columnsToNull = new[] { "Mag", "Mag2" };
