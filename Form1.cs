@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ASCOM.Alpaca.Discovery;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -3097,15 +3098,9 @@ namespace EAACtrl
 
         private void button3_Click(object sender, EventArgs e)
         {
-            DataTable dt = Database.ReadAPObjectsTable("C:\\Users\\peter\\Documents\\Astronomy\\AstroPlanner\\Plans\\Constellations\\Bootes.apd");
-            if (dt != null)
-            {
-                foreach(DataRow row in dt.Rows)
-                {
-
-                    WriteMessage(row["ID"].ToString() + " " + row["Name"].ToString() + " " + row["RA2000"].ToString() + " " + row["Dec2000"].ToString() + "\r\n");
-                }
-            }
+            ConstellationFinder constellationFinder = new ConstellationFinder();
+            string wktBoundary = constellationFinder.GetConstellationWkt("Boo");
+            Database.AAVSO_VSX_ConstellationSearch(wktBoundary);
         }
     }
 

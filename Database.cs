@@ -358,6 +358,55 @@ namespace EAACtrl
             return dt;
         }
 
+        public DataTable AAVSO_VSX_ConstellationSearch(string wktBoundary)
+        {
+            DataTable dt = CreateTable();
+
+            if (string.IsNullOrWhiteSpace(wktBoundary))
+            {
+                Console.WriteLine("Invalid WKT boundary provided.");
+                return dt;
+            }        
+
+            // The SQL query utilizes ST_GeomFromText to convert the WKT parameter into a geometry.
+            // 4326 represents the spatial reference system identifier (SRID) for WGS 84 / J2000 equivalents.
+            string sql = @"
+            SELECT * 
+            FROM ""AAVSO_VSX""
+            WHERE ST_Contains(ST_GeomFromText(@wkt, 4326), geom);";
+
+            //geom_location
+            try
+            {
+                using (var connection = new NpgsqlConnection(ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var command = new NpgsqlCommand(sql, connection))
+                    {
+                        // 1. Create the parameter and add it to the command.
+                        // Specifying NpgsqlDbType.Text ensures it passes correctly as a string expression.
+                        var wktParameter = new NpgsqlParameter("@wkt", NpgsqlTypes.NpgsqlDbType.Text)
+                        {
+                            Value = wktBoundary
+                        };
+                        command.Parameters.Add(wktParameter);
+
+                        // 2. Execute and read the data
+                        var reader = command.ExecuteReader();
+                        
+                        ProcessAAVSO_VSXObjects(ref reader, ref dt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred querying the database: {ex.Message}");
+            }
+
+            return dt;
+        }
+
         public static void NullOutPlaceholders(DataTable dt, string[] columns, double placeholder = 999.0)
         {
             if (dt == null) throw new ArgumentNullException(nameof(dt));

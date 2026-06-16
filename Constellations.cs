@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -85,6 +86,60 @@ namespace EAACtrl
             }
 
             return "Unknown";
+        }
+
+        /// <summary>
+        /// Returns the constellation's boundary as a Well-Known Text (WKT) MULTIPOLYGON string
+        /// suitable for PostgreSQL / PostGIS geometry insertion or querying.
+        /// </summary>
+        /// <param name="abbreviation">The 3-letter abbreviation of the constellation (e.g., "Boo", "And")</param>
+        /// <returns>A WKT MULTIPOLYGON string, or null if the constellation is not found.</returns>
+        public string GetConstellationWkt(string abbreviation)
+        {
+            if (string.IsNullOrWhiteSpace(abbreviation)) return null;
+
+            // Find the feature matching the abbreviation (case-insensitive)
+            var feature = _constellations.Find(f =>
+                string.Equals(f.Properties?.Id, abbreviation, StringComparison.OrdinalIgnoreCase));
+
+            if (feature?.Geometry?.Coordinates == null) return null;
+
+            var sb = new StringBuilder();
+            sb.Append("MULTIPOLYGON(");
+
+            for (int p = 0; p < feature.Geometry.Coordinates.Count; p++)
+            {
+                var polygon = feature.Geometry.Coordinates[p];
+                sb.Append("(");
+
+                for (int r = 0; r < polygon.Count; r++)
+                {
+                    var ring = polygon[r];
+                    sb.Append("(");
+
+                    for (int pt = 0; pt < ring.Count; pt++)
+                    {
+                        var point = ring[pt];
+                        // WKT uses a space between X (longitude/RA) and Y (latitude/Dec)
+                        // and cultures with comma decimals should format with InvariantCulture
+                        sb.Append($"{point[0].ToString(System.Globalization.CultureInfo.InvariantCulture)} {point[1].ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+
+                        if (pt < ring.Count - 1)
+                            sb.Append(", ");
+                    }
+
+                    sb.Append(")");
+                    if (r < polygon.Count - 1)
+                        sb.Append(", ");
+                }
+
+                sb.Append(")");
+                if (p < feature.Geometry.Coordinates.Count - 1)
+                    sb.Append(", ");
+            }
+
+            sb.Append(")");
+            return sb.ToString();
         }
 
         /// <summary>
