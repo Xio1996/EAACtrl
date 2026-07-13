@@ -54,6 +54,11 @@
             this.tsmiShowStarSystem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiWDSComponentsFiltered = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiAAVSOInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiAAVSOEphemeris = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiClusterMembers = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiCopyRow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyCell = new System.Windows.Forms.ToolStripMenuItem();
             this.chkAberration = new System.Windows.Forms.CheckBox();
@@ -66,9 +71,6 @@
             this.txtFilterByID = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnFilterReset = new System.Windows.Forms.Button();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsmiAAVSOInfo = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiAAVSOEphemeris = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -91,6 +93,7 @@
             resources.ApplyResources(this.btnCancel, "btnCancel");
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // btnAddToAP
             // 
@@ -202,6 +205,8 @@
             this.toolStripSeparator3,
             this.tsmiAAVSOInfo,
             this.tsmiAAVSOEphemeris,
+            this.toolStripSeparator5,
+            this.tsmiClusterMembers,
             this.toolStripSeparator4,
             this.tsmiCopyRow,
             this.tsmiCopyCell});
@@ -253,6 +258,34 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             resources.ApplyResources(this.toolStripSeparator3, "toolStripSeparator3");
+            // 
+            // tsmiAAVSOInfo
+            // 
+            resources.ApplyResources(this.tsmiAAVSOInfo, "tsmiAAVSOInfo");
+            this.tsmiAAVSOInfo.Name = "tsmiAAVSOInfo";
+            this.tsmiAAVSOInfo.Click += new System.EventHandler(this.tsmiAAVSOInfo_Click);
+            // 
+            // tsmiAAVSOEphemeris
+            // 
+            resources.ApplyResources(this.tsmiAAVSOEphemeris, "tsmiAAVSOEphemeris");
+            this.tsmiAAVSOEphemeris.Name = "tsmiAAVSOEphemeris";
+            this.tsmiAAVSOEphemeris.Click += new System.EventHandler(this.tsmiAAVSOEphemeris_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            resources.ApplyResources(this.toolStripSeparator5, "toolStripSeparator5");
+            // 
+            // tsmiClusterMembers
+            // 
+            this.tsmiClusterMembers.Name = "tsmiClusterMembers";
+            resources.ApplyResources(this.tsmiClusterMembers, "tsmiClusterMembers");
+            this.tsmiClusterMembers.Click += new System.EventHandler(this.tsmiClusterMembers_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
             // 
             // tsmiCopyRow
             // 
@@ -329,23 +362,6 @@
             this.btnFilterReset.Name = "btnFilterReset";
             this.btnFilterReset.UseVisualStyleBackColor = true;
             this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
-            // 
-            // tsmiAAVSOInfo
-            // 
-            resources.ApplyResources(this.tsmiAAVSOInfo, "tsmiAAVSOInfo");
-            this.tsmiAAVSOInfo.Name = "tsmiAAVSOInfo";
-            this.tsmiAAVSOInfo.Click += new System.EventHandler(this.tsmiAAVSOInfo_Click);
-            // 
-            // tsmiAAVSOEphemeris
-            // 
-            resources.ApplyResources(this.tsmiAAVSOEphemeris, "tsmiAAVSOEphemeris");
-            this.tsmiAAVSOEphemeris.Name = "tsmiAAVSOEphemeris";
-            this.tsmiAAVSOEphemeris.Click += new System.EventHandler(this.tsmiAAVSOEphemeris_Click);
             // 
             // SearchResults
             // 
@@ -431,5 +447,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiAAVSOInfo;
         private System.Windows.Forms.ToolStripMenuItem tsmiAAVSOEphemeris;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem tsmiClusterMembers;
     }
 }

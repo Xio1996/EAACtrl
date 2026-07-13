@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using System.Text.Json;
 
 namespace EAACtrl
 {
@@ -660,6 +661,30 @@ namespace EAACtrl
 
                 sOut += "[\"" + objectLabel + "\",\"" + RA + "\",\"" + Dec + "\"],";
             }
+            // Remove the trailing comma
+            sOut = sOut.Substring(0, sOut.Length - 1) + "];";
+
+            DrawObjects(sOut);
+        }
+
+        public void DrawClusterObjects(DataTable varObjects, bool markersOnly)
+        {
+            // Implementation for drawing cluster objects
+            string sOut = "obj = [";
+            foreach (DataRow row in varObjects.Rows)
+            {
+                string RA = ""; string Dec = "";
+                // Format RA/Dec to hms and dms
+                RA = row["RA2000"].ToString();
+                Dec = row["Dec2000"].ToString();
+
+                string objectLabel = "";
+                if (!markersOnly)
+                    objectLabel = row["Gaia ID"].ToString();
+
+                sOut += "[\"" + objectLabel + "\",\"" + RA + "\",\"" + Dec + "\"],";
+            }
+
             // Remove the trailing comma
             sOut = sOut.Substring(0, sOut.Length - 1) + "];";
 

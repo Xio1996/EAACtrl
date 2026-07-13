@@ -603,6 +603,22 @@ namespace EAACtrl
             return false;
         }
 
+        private bool IsClusterRow(DataGridViewRow row)
+        {
+            if (row == null) return false;
+
+            var catCell = row.Cells["Catalogue"]?.Value;
+            if (catCell == null) return false;
+
+            string cat = catCell.ToString();
+            if (string.IsNullOrEmpty(cat)) return false;
+
+            // Catalogue must contain "OC Census III" (case-insensitive)
+            if (cat.IndexOf("OC Census III", StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+            return false;
+        }
+
         private void tsmiCentre_Click(object sender, EventArgs e)
         {
             CentreSelected();
@@ -805,6 +821,8 @@ namespace EAACtrl
 
                 tsmiAAVSOInfo.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsAAVSORow(r));
                 tsmiAAVSOEphemeris.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsAAVSOPeriodRow(r));
+
+                tsmiClusterMembers.Enabled = dgvSearchResults.SelectedRows.Count == 1 && rowsToCheck.Any(r => IsClusterRow(r));
             }
             catch (Exception) { }
         }
@@ -1030,6 +1048,34 @@ namespace EAACtrl
 
                 }
             }
+        }
+
+        private void tsmiClusterMembers_Click(object sender, EventArgs e)
+        {
+            DataGridViewRow row = null;
+            if (dgvSearchResults.SelectedRows.Count > 0)
+                row = dgvSearchResults.SelectedRows[0];
+            else if (dgvSearchResults.CurrentRow != null)
+                row = dgvSearchResults.CurrentRow;
+
+            if (row == null) return;
+
+            using (ClusterMembers frmOpt = new ClusterMembers())
+            {
+               // frmOpt.EAACP = this;
+                frmOpt.TopMost = true;
+                frmOpt.ClusterRow = row;
+
+                if (frmOpt.ShowDialog() == DialogResult.OK)
+                {
+
+                }
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

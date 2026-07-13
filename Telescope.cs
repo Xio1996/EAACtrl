@@ -115,7 +115,7 @@ namespace EAACtrl
                 catch (Exception e)
                 {
                     sMsg = "Telescope: Get Az failed - " + e.Message;
-                    return 0.0;
+                    return 999.0;
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace EAACtrl
                 catch (Exception e)
                 {
                     sMsg = "Telescope: Get Alt failed - " + e.Message;
-                    return 0.0;
+                    return 999.0;
                 }
             }
         }

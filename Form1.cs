@@ -1922,7 +1922,7 @@ namespace EAACtrl
 
             // Selection not required if plotting all plan objects in Stellarium.
             // Get search position from selected object in Stellarium.
-            if (Properties.Settings.Default.sfDatasource != 4)
+            if (Properties.Settings.Default.sfDatasource != 5)
             {
                 if (Properties.Settings.Default.sfPlanetarium)
                 {
@@ -2258,7 +2258,51 @@ namespace EAACtrl
                     }
                 }
             }
+            // Search the Star Cluster catalogue. Held in the Postgre SQL database Astro.
             else if (Properties.Settings.Default.sfDatasource == 4)
+            {
+                if (!Properties.Settings.Default.sfPlanetarium)
+                {
+                    APCmdObject apOut = APGetSelectedObject();
+                    if (apOut == null)
+                    {
+                        Speak("No object selected");
+                        return;
+                    }
+
+                    SearchRA = apOut.RA2000;
+                    SearchDec = apOut.Dec2000;
+                }
+                Speak("Searching");
+
+                AstroCalc Astro = new AstroCalc();
+                DataTable dt = null;
+
+                dt = Database.Star_Cluster_ConeSearch(SearchRA * 15, SearchDec, Properties.Settings.Default.SearchRadius, double.Parse(Properties.Settings.Default.sfMagnitude));
+                if (dt == null || dt.Rows.Count == 0)
+                {
+                    Speak("No search results");
+                    return;
+                }
+                Stellarium.DrawObjects(dt);
+
+                // Show search results window
+                if (Properties.Settings.Default.sResultsList)
+                {
+                    using (SearchResults frmOpt = new SearchResults())
+                    {
+                        frmOpt.EAACP = this;
+                        frmOpt.TopMost = true;
+                        frmOpt.Results = null;
+                        frmOpt.ResultsDataTable = dt;
+                        if (frmOpt.ShowDialog() == DialogResult.OK)
+                        {
+
+                        }
+                    }
+                }
+            }
+            else if (Properties.Settings.Default.sfDatasource == 5)
             {
                 string PlanFilepath = "";
                 using (var dlg = new OpenFileDialog())
@@ -3120,6 +3164,29 @@ namespace EAACtrl
                     if (frmOpt.ShowDialog() == DialogResult.OK)
                     {
 
+                    }
+                }
+            }
+        }
+
+        // Slew the telescope to the current azimuth minus a fixed offset, keeping the altitude the same.
+        // A dirty hack to get the 2nd scopes to point to the same object as the main scope. 
+        private void btnScope2Centre_Click(object sender, EventArgs e)
+        {
+            double Alt = EAATelescope.Altitude;
+            if (Alt != 999.0)
+            {
+                double Az = EAATelescope.Azimuth;
+                if (Az != 999.0)
+                {
+                    // Subtract a fixed offset from the current azimuth and wrap into [0,360)
+                    // Change offsetDeg to the desired value (degrees)
+                    double offsetDeg = 0.2;
+                    double newAz = (Az - offsetDeg + 360.0) % 360.0;
+
+                    if (!EAATelescope.SlewAzAlt(newAz, Alt))
+                    {
+                        Speak("Failed to slew telescope");
                     }
                 }
             }

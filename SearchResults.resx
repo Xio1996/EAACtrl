@@ -164,9 +164,6 @@
   <data name="&gt;&gt;btnCancel.ZOrder" xml:space="preserve">
     <value>23</value>
   </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>178, 17</value>
-  </metadata>
   <data name="btnAddToAP.Location" type="System.Drawing.Point, System.Drawing">
     <value>799, 359</value>
   </data>
@@ -179,6 +176,9 @@
   <data name="btnAddToAP.Text" xml:space="preserve">
     <value>Add to AstroPlanner</value>
   </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>178, 17</value>
+  </metadata>
   <data name="btnAddToAP.ToolTip" xml:space="preserve">
     <value>Adds selected object(s) to AstroPlanner</value>
   </data>
@@ -603,6 +603,15 @@
   <data name="tsmiAAVSOEphemeris.Text" xml:space="preserve">
     <value>AAVSO Ephemeris</value>
   </data>
+  <data name="toolStripSeparator5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>210, 6</value>
+  </data>
+  <data name="tsmiClusterMembers.Size" type="System.Drawing.Size, System.Drawing">
+    <value>213, 22</value>
+  </data>
+  <data name="tsmiClusterMembers.Text" xml:space="preserve">
+    <value>Cluster Members</value>
+  </data>
   <data name="toolStripSeparator4.Size" type="System.Drawing.Size, System.Drawing">
     <value>210, 6</value>
   </data>
@@ -619,7 +628,7 @@
     <value>Copy Cell</value>
   </data>
   <data name="SearchContextMenu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>214, 248</value>
+    <value>214, 254</value>
   </data>
   <data name="&gt;&gt;SearchContextMenu.Name" xml:space="preserve">
     <value>SearchContextMenu</value>
@@ -657,9 +666,6 @@
   <data name="&gt;&gt;chkAberration.ZOrder" xml:space="preserve">
     <value>9</value>
   </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>178, 17</value>
-  </metadata>
   <data name="cbStellariumShowDSOImage.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -936,6 +942,36 @@
   <data name="&gt;&gt;toolStripSeparator3.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;tsmiAAVSOInfo.Name" xml:space="preserve">
+    <value>tsmiAAVSOInfo</value>
+  </data>
+  <data name="&gt;&gt;tsmiAAVSOInfo.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tsmiAAVSOEphemeris.Name" xml:space="preserve">
+    <value>tsmiAAVSOEphemeris</value>
+  </data>
+  <data name="&gt;&gt;tsmiAAVSOEphemeris.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator5.Name" xml:space="preserve">
+    <value>toolStripSeparator5</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tsmiClusterMembers.Name" xml:space="preserve">
+    <value>tsmiClusterMembers</value>
+  </data>
+  <data name="&gt;&gt;tsmiClusterMembers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator4.Name" xml:space="preserve">
+    <value>toolStripSeparator4</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;tsmiCopyRow.Name" xml:space="preserve">
     <value>tsmiCopyRow</value>
   </data>
@@ -953,24 +989,6 @@
   </data>
   <data name="&gt;&gt;toolTip1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator4.Name" xml:space="preserve">
-    <value>toolStripSeparator4</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator4.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tsmiAAVSOInfo.Name" xml:space="preserve">
-    <value>tsmiAAVSOInfo</value>
-  </data>
-  <data name="&gt;&gt;tsmiAAVSOInfo.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tsmiAAVSOEphemeris.Name" xml:space="preserve">
-    <value>tsmiAAVSOEphemeris</value>
-  </data>
-  <data name="&gt;&gt;tsmiAAVSOEphemeris.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>SearchResults</value>

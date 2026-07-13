@@ -672,6 +672,7 @@
             "GLADE+ (Galaxies & Quasars +23 million objects)",
             "REGALADE (Galaxies 80 million galaxies)",
             "AAVSO VSX (Variable Stars +10 million objects)",
+            "Open Cluster Census III (+Member Stars)",
             "AstroPlanner Plan File (All Objects)"});
             this.cbDatasource.Location = new System.Drawing.Point(10, 21);
             this.cbDatasource.Name = "cbDatasource";

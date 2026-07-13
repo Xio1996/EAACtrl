@@ -69,6 +69,7 @@
             this.txtUpdateRate = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.btnScope2Centre = new System.Windows.Forms.Button();
             this.btnStelSlew = new System.Windows.Forms.Button();
             this.btnStelSync = new System.Windows.Forms.Button();
             this.btnStabilise = new System.Windows.Forms.Button();
@@ -723,14 +724,25 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.btnScope2Centre);
             this.groupBox5.Controls.Add(this.btnStelSlew);
             this.groupBox5.Controls.Add(this.btnStelSync);
             this.groupBox5.Location = new System.Drawing.Point(7, 184);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(224, 60);
+            this.groupBox5.Size = new System.Drawing.Size(224, 90);
             this.groupBox5.TabIndex = 53;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Stellarium (Selected Object)";
+            // 
+            // btnScope2Centre
+            // 
+            this.btnScope2Centre.Location = new System.Drawing.Point(7, 58);
+            this.btnScope2Centre.Name = "btnScope2Centre";
+            this.btnScope2Centre.Size = new System.Drawing.Size(113, 27);
+            this.btnScope2Centre.TabIndex = 53;
+            this.btnScope2Centre.Text = "Scope 2 Centre";
+            this.btnScope2Centre.UseVisualStyleBackColor = true;
+            this.btnScope2Centre.Click += new System.EventHandler(this.btnScope2Centre_Click);
             // 
             // btnStelSlew
             // 
@@ -2352,6 +2364,7 @@
         private System.Windows.Forms.Button btnKStarsW;
         private System.Windows.Forms.Button btnKStarsN;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnScope2Centre;
     }
 }
 

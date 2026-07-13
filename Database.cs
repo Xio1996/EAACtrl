@@ -44,6 +44,13 @@ namespace EAACtrl
             dt.Columns.Add("Catalogue");
             dt.Columns.Add("_ID");
             dt.Columns.Add("_Epoch", typeof(double));
+            dt.Columns.Add("_StarCount", typeof(System.Int32));
+            dt.Columns.Add("_r50", typeof(double));
+            dt.Columns.Add("_pmRA", typeof(double));
+            dt.Columns.Add("_pmDE", typeof(double));
+            dt.Columns.Add("_Plx", typeof(double));
+            dt.Columns.Add("_dist50", typeof(double));
+
             return dt;
         }
 
@@ -237,6 +244,83 @@ namespace EAACtrl
 
                 
                 dt.Rows.Add(ID, Names, "Var Star - " + varType, maxmag, minmag, Period, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, Constellation, "AAVSO VSX", _ID, _Epoch);
+            }
+        }
+
+        private string GetClusterType(string typeCode)
+        {
+            switch (typeCode)
+            {
+                case "o":
+                    return "Open Cluster";
+                case "g":
+                    return "Globular Cluster";
+                case "m":
+                    return "Moving Group";
+                case "d":
+                    return "Too Distant";
+                case "r":
+                    return "Rejected";
+                default:
+                    return "Unknown Type";
+            }
+        }           
+        private void ProcessStar_ClusterObjects(ref NpgsqlDataReader reader, ref DataTable dt)
+        {
+            while (reader.Read())
+            {
+                var ID = reader.GetString(2).Trim().Replace("_", " ");
+                var _ID = reader.GetInt32(3);
+
+                var RAd = reader.GetDouble(0) / 15.0;
+                var RA = APHelper.RADecimalHoursToHMS(RAd, @"hh\hmm\mss\.ff\s");
+                var Decd = reader.GetDouble(1);
+                var Dec = APHelper.DecDecimalToDMS(Decd);
+
+                var AllNames = reader.GetString(4).Trim().Replace("_", " ").Replace(",", ", ");
+                var ObjectType = GetClusterType(reader.GetString(5).Trim());
+                
+                var _StarCount = reader.GetInt32(6);
+                var _r50 = reader.GetDouble(7);
+                
+                var _pmRA = reader.GetDouble(8);
+                var _pmDE = reader.GetDouble(9);
+                var _Plx = reader.GetDouble(10);
+                var _dist50 = reader.GetDouble(11) * 3.261564; // Convert to ly
+
+                string Constellation = Constellations.GetConstellation(RAd, Decd);
+
+
+                dt.Rows.Add(ID, AllNames, ObjectType, DBNull.Value, DBNull.Value, DBNull.Value, 0, "", 0, "", 0, 0.0, RA, Dec, RAd, Decd, Constellation, "OC Census III", _ID, 0, _StarCount, _r50, _pmRA, _pmDE, _Plx, _dist50);
+            }
+        }
+
+        public static double DistanceLightYearsFromParallaxMas(double parallaxMas) 
+        { 
+            if (parallaxMas <= 0.0) throw new ArgumentOutOfRangeException(nameof(parallaxMas), "Parallax must be positive (mas).");
+            
+            double parsecs = 1000.0 / parallaxMas; 
+            const double LightYearsPerParsec = 3.261563777; 
+            return parsecs * LightYearsPerParsec; 
+        }
+        private void ProcessStar_ClusterMemberObjects(ref NpgsqlDataReader reader, ref DataTable dt)
+        {
+            while (reader.Read())
+            {
+                var GaiaID = "Gaia dr3 " + reader.GetString(4).Trim();
+                var Prob = reader.GetDouble(6).ToString("F2");
+                var Gmag = reader.GetDouble(10).ToString("F2");
+                var distLY = DistanceLightYearsFromParallaxMas(reader.GetDouble(9));
+                var Parallax = reader.GetDouble(9);
+                var pmRA = reader.GetDouble(7);
+                var pmDE = reader.GetDouble(8);
+
+                var RAd = reader.GetDouble(0) / 15.0;
+                var RA = APHelper.RADecimalHoursToHMS(RAd, @"hh\hmm\mss\.ff\s");
+                var Decd = reader.GetDouble(1);
+                var Dec = APHelper.DecDecimalToDMS(Decd);
+
+                dt.Rows.Add(GaiaID, Prob, Gmag, distLY, Parallax, pmRA, pmDE, RA, Dec, RAd, Decd);
             }
         }
 
@@ -465,6 +549,73 @@ namespace EAACtrl
                    t == typeof(long) || t == typeof(ulong) ||
                    t == typeof(float) || t == typeof(double) ||
                    t == typeof(decimal);
+        }
+
+        public DataTable Star_Cluster_ConeSearch(double CentreRA, double CentreDec, double Radius, double MagnitudeLimit)
+        {
+
+            DataTable dt = CreateTable();
+
+            NpgsqlConnection conn = new NpgsqlConnection(ConnectionString);
+
+            conn.Open();
+
+            string Query = "SELECT * FROM public.\"Clusters\"";
+            Query += "WHERE ST_DWithin(geom, ST_SetSRID(ST_MakePoint(" + CentreRA.ToString() + "," + CentreDec.ToString() + "), 4326)," + Radius.ToString() + ") ";
+            //Query += "AND \"max\" < " + MagnitudeLimit.ToString();
+            Query += ";";
+
+            var cmd = new NpgsqlCommand(Query, conn);
+            var reader = cmd.ExecuteReader();
+
+            ProcessStar_ClusterObjects(ref reader, ref dt);
+
+            conn.Close();
+
+            return dt;
+        }
+
+        public DataTable CreateClusterMemberDataTable()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Gaia ID");
+            dt.Columns.Add("Probability", typeof(double));
+            dt.Columns.Add("G mag", typeof(double));
+            dt.Columns.Add("Distance ly", typeof(double));
+            dt.Columns.Add("Parallax", typeof(double));
+            dt.Columns.Add("pmRA", typeof(double));
+            dt.Columns.Add("pmDE", typeof(double));
+            dt.Columns.Add("RA2000");
+            dt.Columns.Add("Dec2000");
+            
+            dt.Columns.Add("_RAd2000", typeof(double));
+            dt.Columns.Add("_Decd2000", typeof(double));
+
+            return dt;
+        }
+        public DataTable Star_Cluster_MemberSearch(int ClusterID, double Probability, double MagnitudeLimit)
+        {
+
+            DataTable dt = CreateClusterMemberDataTable();
+
+            NpgsqlConnection conn = new NpgsqlConnection(ConnectionString);
+
+            conn.Open();
+
+            string Query = "SELECT * FROM public.\"ClusterMembers\"";
+            Query += "WHERE \"ID\" = " + ClusterID.ToString() + " ";
+            Query += "AND \"Gmag\" < " + MagnitudeLimit.ToString() + " ";
+            Query += "AND \"Prob\" >= " + (Probability*0.01).ToString() + " ";
+            Query += ";";
+
+            var cmd = new NpgsqlCommand(Query, conn);
+            var reader = cmd.ExecuteReader();
+
+            ProcessStar_ClusterMemberObjects(ref reader, ref dt);
+
+            conn.Close();
+
+            return dt;
         }
 
         public DataTable ProcessAPPlanObjects(ref DataTable dtPlan)
