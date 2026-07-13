@@ -66,10 +66,15 @@
             this.btnClearPlot = new System.Windows.Forms.Button();
             this.btnAPFront = new System.Windows.Forms.Button();
             this.btnPlFront = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.btnFilterReset = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.txtFilterByID = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SearchContextMenu.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvSearchResults
@@ -238,7 +243,7 @@
             this.lblRadius.AutoSize = true;
             this.lblRadius.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRadius.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblRadius.Location = new System.Drawing.Point(596, 40);
+            this.lblRadius.Location = new System.Drawing.Point(628, 40);
             this.lblRadius.Name = "lblRadius";
             this.lblRadius.Size = new System.Drawing.Size(60, 13);
             this.lblRadius.TabIndex = 34;
@@ -248,7 +253,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label7.Location = new System.Drawing.Point(467, 40);
+            this.label7.Location = new System.Drawing.Point(499, 40);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(123, 13);
             this.label7.TabIndex = 33;
@@ -280,7 +285,7 @@
             this.lblDistance.AutoSize = true;
             this.lblDistance.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblDistance.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblDistance.Location = new System.Drawing.Point(393, 40);
+            this.lblDistance.Location = new System.Drawing.Point(425, 40);
             this.lblDistance.Name = "lblDistance";
             this.lblDistance.Size = new System.Drawing.Size(60, 13);
             this.lblDistance.TabIndex = 30;
@@ -290,7 +295,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label3.Location = new System.Drawing.Point(259, 40);
+            this.label3.Location = new System.Drawing.Point(291, 40);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(132, 13);
             this.label3.TabIndex = 29;
@@ -301,7 +306,7 @@
             this.lblStarCount.AutoSize = true;
             this.lblStarCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblStarCount.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblStarCount.Location = new System.Drawing.Point(198, 40);
+            this.lblStarCount.Location = new System.Drawing.Point(230, 40);
             this.lblStarCount.Name = "lblStarCount";
             this.lblStarCount.Size = new System.Drawing.Size(60, 13);
             this.lblStarCount.TabIndex = 28;
@@ -311,7 +316,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label2.Location = new System.Drawing.Point(137, 40);
+            this.label2.Location = new System.Drawing.Point(169, 40);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(60, 13);
             this.label2.TabIndex = 27;
@@ -451,11 +456,53 @@
             this.btnPlFront.UseVisualStyleBackColor = false;
             this.btnPlFront.Click += new System.EventHandler(this.btnPlFront_Click);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.btnFilterReset);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.txtFilterByID);
+            this.groupBox3.Location = new System.Drawing.Point(588, 115);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(421, 58);
+            this.groupBox3.TabIndex = 59;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Filter";
+            // 
+            // btnFilterReset
+            // 
+            this.btnFilterReset.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnFilterReset.Location = new System.Drawing.Point(323, 18);
+            this.btnFilterReset.Name = "btnFilterReset";
+            this.btnFilterReset.Size = new System.Drawing.Size(46, 23);
+            this.btnFilterReset.TabIndex = 61;
+            this.btnFilterReset.Text = "Reset";
+            this.btnFilterReset.UseVisualStyleBackColor = true;
+            this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label5.Location = new System.Drawing.Point(7, 24);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(82, 13);
+            this.label5.TabIndex = 60;
+            this.label5.Text = "Filter by Gaia ID";
+            // 
+            // txtFilterByID
+            // 
+            this.txtFilterByID.Location = new System.Drawing.Point(96, 20);
+            this.txtFilterByID.Name = "txtFilterByID";
+            this.txtFilterByID.Size = new System.Drawing.Size(223, 20);
+            this.txtFilterByID.TabIndex = 59;
+            this.txtFilterByID.TextChanged += new System.EventHandler(this.txtFilterByID_TextChanged);
+            // 
             // ClusterMembers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1021, 542);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnAPFront);
             this.Controls.Add(this.btnPlFront);
             this.Controls.Add(this.btnClearPlot);
@@ -474,6 +521,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.SearchContextMenu.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -517,5 +566,9 @@
         private System.Windows.Forms.Button btnClearPlot;
         private System.Windows.Forms.Button btnAPFront;
         private System.Windows.Forms.Button btnPlFront;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button btnFilterReset;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox txtFilterByID;
     }
 }

@@ -322,7 +322,16 @@ namespace EAACtrl
                 var GaiaID = "Gaia DR3 " + reader.GetString(4).Trim();
                 var Prob = (reader.GetDouble(6) * 100).ToString("F2");
                 var Gmag = reader.GetDouble(10).ToString("F2");
-                var distLY = DistanceLightYearsFromParallaxMas(reader.GetDouble(9));
+                var distLY = 0.0;
+                try
+                {
+                    distLY = DistanceLightYearsFromParallaxMas(reader.GetDouble(9));
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // Handle the case where parallax is zero or negative
+                    distLY = double.NaN; // or some other sentinel value
+                }
                 var Parallax = reader.GetDouble(9);
                 var pmRA = reader.GetDouble(7);
                 var pmDE = reader.GetDouble(8);

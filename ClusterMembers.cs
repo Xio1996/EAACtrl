@@ -368,5 +368,38 @@ namespace EAACtrl
         {
             SwitchAppToFront("Stellarium");
         }
+
+        private void txtFilterByID_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                DataTable dt = dgvSearchResults.DataSource as DataTable;
+
+                string filterText = txtFilterByID.Text.Trim();
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    dt.DefaultView.RowFilter = "";
+                    return;
+                }
+
+                // Escape single quotes for DataTable RowFilter expression
+                string esc = filterText.Replace("'", "''");
+
+                // Filter ID column for partial matches (case-sensitive by default; DataTable filtering is culture/DB-like)
+                // Escape single quotes in the search text, then use the column name in brackets (no quotes)
+                string safe = esc?.Replace("'", "''") ?? "";
+                dt.DefaultView.RowFilter = $"Convert([Gaia ID], 'System.String') LIKE '%{safe}%'";
+            }
+            catch (Exception)
+            {
+                //sMsg = "FilterByID error: " + ex.Message;
+            }
+        }
+
+        private void btnFilterReset_Click(object sender, EventArgs e)
+        {
+            txtFilterByID.Text = "";
+        }
     }
 }
