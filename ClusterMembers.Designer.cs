@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.dgvSearchResults = new System.Windows.Forms.DataGridView();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lblMemberCount = new System.Windows.Forms.Label();
+            this.chkMarkersOnly = new System.Windows.Forms.CheckBox();
             this.btnShow = new System.Windows.Forms.Button();
             this.txtMagnitude = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -52,10 +55,21 @@
             this.lblCapNames = new System.Windows.Forms.Label();
             this.btnSharpCapDSA = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
-            this.chkMarkersOnly = new System.Windows.Forms.CheckBox();
+            this.SearchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmiCentre = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiCDSByName = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCDSByPosition = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiCopyRow = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCopyCell = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnClearPlot = new System.Windows.Forms.Button();
+            this.btnAPFront = new System.Windows.Forms.Button();
+            this.btnPlFront = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvSearchResults
@@ -70,9 +84,11 @@
             this.dgvSearchResults.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvSearchResults.Size = new System.Drawing.Size(999, 319);
             this.dgvSearchResults.TabIndex = 1;
+            this.dgvSearchResults.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSearchResults_CellMouseDown);
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.lblMemberCount);
             this.groupBox1.Controls.Add(this.chkMarkersOnly);
             this.groupBox1.Controls.Add(this.btnShow);
             this.groupBox1.Controls.Add(this.txtMagnitude);
@@ -81,10 +97,30 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 115);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(438, 58);
+            this.groupBox1.Size = new System.Drawing.Size(570, 58);
             this.groupBox1.TabIndex = 30;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Member Filtering";
+            // 
+            // lblMemberCount
+            // 
+            this.lblMemberCount.AutoSize = true;
+            this.lblMemberCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMemberCount.Location = new System.Drawing.Point(440, 26);
+            this.lblMemberCount.Name = "lblMemberCount";
+            this.lblMemberCount.Size = new System.Drawing.Size(103, 13);
+            this.lblMemberCount.TabIndex = 36;
+            this.lblMemberCount.Text = "0 members found";
+            // 
+            // chkMarkersOnly
+            // 
+            this.chkMarkersOnly.AutoSize = true;
+            this.chkMarkersOnly.Location = new System.Drawing.Point(246, 25);
+            this.chkMarkersOnly.Name = "chkMarkersOnly";
+            this.chkMarkersOnly.Size = new System.Drawing.Size(88, 17);
+            this.chkMarkersOnly.TabIndex = 35;
+            this.chkMarkersOnly.Text = "Markers Only";
+            this.chkMarkersOnly.UseVisualStyleBackColor = true;
             // 
             // btnShow
             // 
@@ -116,7 +152,7 @@
             // 
             // txtProbability
             // 
-            this.txtProbability.Location = new System.Drawing.Point(72, 23);
+            this.txtProbability.Location = new System.Drawing.Point(80, 24);
             this.txtProbability.Name = "txtProbability";
             this.txtProbability.Size = new System.Drawing.Size(35, 20);
             this.txtProbability.TabIndex = 31;
@@ -126,11 +162,11 @@
             // 
             this.label1.AutoSize = true;
             this.label1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label1.Location = new System.Drawing.Point(10, 27);
+            this.label1.Location = new System.Drawing.Point(8, 28);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(58, 13);
+            this.label1.Size = new System.Drawing.Size(69, 13);
             this.label1.TabIndex = 30;
-            this.label1.Text = "Probability:";
+            this.label1.Text = "Probability %:";
             // 
             // groupBox2
             // 
@@ -321,26 +357,113 @@
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // chkMarkersOnly
+            // SearchContextMenu
             // 
-            this.chkMarkersOnly.AutoSize = true;
-            this.chkMarkersOnly.Location = new System.Drawing.Point(246, 25);
-            this.chkMarkersOnly.Name = "chkMarkersOnly";
-            this.chkMarkersOnly.Size = new System.Drawing.Size(88, 17);
-            this.chkMarkersOnly.TabIndex = 35;
-            this.chkMarkersOnly.Text = "Markers Only";
-            this.chkMarkersOnly.UseVisualStyleBackColor = true;
+            this.SearchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiCentre,
+            this.toolStripSeparator1,
+            this.tsmiCDSByName,
+            this.tsmiCDSByPosition,
+            this.toolStripSeparator2,
+            this.tsmiCopyRow,
+            this.tsmiCopyCell});
+            this.SearchContextMenu.Name = "SearchContextMenu";
+            this.SearchContextMenu.Size = new System.Drawing.Size(159, 126);
+            this.SearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.SearchContextMenu_Opening);
+            // 
+            // tsmiCentre
+            // 
+            this.tsmiCentre.Name = "tsmiCentre";
+            this.tsmiCentre.Size = new System.Drawing.Size(158, 22);
+            this.tsmiCentre.Text = "Centre";
+            this.tsmiCentre.Click += new System.EventHandler(this.tsmiCentre_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(155, 6);
+            // 
+            // tsmiCDSByName
+            // 
+            this.tsmiCDSByName.Name = "tsmiCDSByName";
+            this.tsmiCDSByName.Size = new System.Drawing.Size(158, 22);
+            this.tsmiCDSByName.Text = "CDS by Name";
+            this.tsmiCDSByName.Click += new System.EventHandler(this.tsmiCDSByName_Click);
+            // 
+            // tsmiCDSByPosition
+            // 
+            this.tsmiCDSByPosition.Name = "tsmiCDSByPosition";
+            this.tsmiCDSByPosition.Size = new System.Drawing.Size(158, 22);
+            this.tsmiCDSByPosition.Text = "CDS by Position";
+            this.tsmiCDSByPosition.Click += new System.EventHandler(this.tsmiCDSByPosition_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(155, 6);
+            // 
+            // tsmiCopyRow
+            // 
+            this.tsmiCopyRow.Name = "tsmiCopyRow";
+            this.tsmiCopyRow.Size = new System.Drawing.Size(158, 22);
+            this.tsmiCopyRow.Text = "Copy Rows";
+            this.tsmiCopyRow.Click += new System.EventHandler(this.tsmiCopyRow_Click);
+            // 
+            // tsmiCopyCell
+            // 
+            this.tsmiCopyCell.Name = "tsmiCopyCell";
+            this.tsmiCopyCell.Size = new System.Drawing.Size(158, 22);
+            this.tsmiCopyCell.Text = "Copy Cell";
+            this.tsmiCopyCell.Click += new System.EventHandler(this.tsmiCopyCell_Click);
+            // 
+            // btnClearPlot
+            // 
+            this.btnClearPlot.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnClearPlot.Location = new System.Drawing.Point(126, 512);
+            this.btnClearPlot.Name = "btnClearPlot";
+            this.btnClearPlot.Size = new System.Drawing.Size(75, 23);
+            this.btnClearPlot.TabIndex = 37;
+            this.btnClearPlot.Text = "Clear Plot";
+            this.btnClearPlot.UseVisualStyleBackColor = true;
+            this.btnClearPlot.Click += new System.EventHandler(this.btnClearPlot_Click);
+            // 
+            // btnAPFront
+            // 
+            this.btnAPFront.BackColor = System.Drawing.Color.MediumSeaGreen;
+            this.btnAPFront.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnAPFront.Location = new System.Drawing.Point(213, 512);
+            this.btnAPFront.Name = "btnAPFront";
+            this.btnAPFront.Size = new System.Drawing.Size(41, 23);
+            this.btnAPFront.TabIndex = 54;
+            this.btnAPFront.Text = "AP";
+            this.btnAPFront.UseVisualStyleBackColor = false;
+            this.btnAPFront.Click += new System.EventHandler(this.btnAPFront_Click);
+            // 
+            // btnPlFront
+            // 
+            this.btnPlFront.BackColor = System.Drawing.Color.Silver;
+            this.btnPlFront.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnPlFront.Location = new System.Drawing.Point(259, 512);
+            this.btnPlFront.Name = "btnPlFront";
+            this.btnPlFront.Size = new System.Drawing.Size(41, 23);
+            this.btnPlFront.TabIndex = 53;
+            this.btnPlFront.Text = "Pl";
+            this.btnPlFront.UseVisualStyleBackColor = false;
+            this.btnPlFront.Click += new System.EventHandler(this.btnPlFront_Click);
             // 
             // ClusterMembers
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1021, 542);
+            this.Controls.Add(this.btnAPFront);
+            this.Controls.Add(this.btnPlFront);
+            this.Controls.Add(this.btnClearPlot);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnSharpCapDSA);
-            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.dgvSearchResults);
+            this.Controls.Add(this.groupBox2);
             this.Name = "ClusterMembers";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Open Cluster Census III - Members";
@@ -350,6 +473,7 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.SearchContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -381,5 +505,17 @@
         private System.Windows.Forms.Label lblProperMotionRA;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox chkMarkersOnly;
+        private System.Windows.Forms.Label lblMemberCount;
+        private System.Windows.Forms.ContextMenuStrip SearchContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCentre;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCDSByName;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCDSByPosition;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCopyRow;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCopyCell;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.Button btnClearPlot;
+        private System.Windows.Forms.Button btnAPFront;
+        private System.Windows.Forms.Button btnPlFront;
     }
 }

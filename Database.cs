@@ -270,6 +270,13 @@ namespace EAACtrl
             while (reader.Read())
             {
                 var ID = reader.GetString(2).Trim().Replace("_", " ");
+
+                // Special handling for Theia clusters (streams), CDS requires [KC2019] prefix for Theia clusters
+                if (ID.Contains("Theia"))
+                {
+                    ID = ID.Replace("Theia", "[KC2019] Theia");
+                }
+
                 var _ID = reader.GetInt32(3);
 
                 var RAd = reader.GetDouble(0) / 15.0;
@@ -278,6 +285,11 @@ namespace EAACtrl
                 var Dec = APHelper.DecDecimalToDMS(Decd);
 
                 var AllNames = reader.GetString(4).Trim().Replace("_", " ").Replace(",", ", ");
+                // Special handling for Theia clusters (streams), CDS requires [KC2019] prefix for Theia clusters
+                if (AllNames.Contains("Theia"))
+                {
+                    AllNames = AllNames.Replace("Theia", "[KC2019] Theia");
+                }
                 var ObjectType = GetClusterType(reader.GetString(5).Trim());
                 
                 var _StarCount = reader.GetInt32(6);
@@ -307,8 +319,8 @@ namespace EAACtrl
         {
             while (reader.Read())
             {
-                var GaiaID = "Gaia dr3 " + reader.GetString(4).Trim();
-                var Prob = reader.GetDouble(6).ToString("F2");
+                var GaiaID = "Gaia DR3 " + reader.GetString(4).Trim();
+                var Prob = (reader.GetDouble(6) * 100).ToString("F2");
                 var Gmag = reader.GetDouble(10).ToString("F2");
                 var distLY = DistanceLightYearsFromParallaxMas(reader.GetDouble(9));
                 var Parallax = reader.GetDouble(9);
