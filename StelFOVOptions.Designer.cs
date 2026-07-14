@@ -670,7 +670,7 @@
             this.cbDatasource.Items.AddRange(new object[] {
             "AstroPlanner (All catalogues marked for search)",
             "GLADE+ (Galaxies & Quasars +23 million objects)",
-            "REGALADE (Galaxies 80 million galaxies)",
+            "REGALADEv2 (Galaxies 80 million galaxies)",
             "AAVSO VSX (Variable Stars +10 million objects)",
             "Open Cluster Census III (+Member Stars)",
             "AstroPlanner Plan File (All Objects)"});

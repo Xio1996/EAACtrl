@@ -167,8 +167,8 @@ namespace EAACtrl
                 var Dec = APHelper.DecDecimalToDMS(Decd);
                 
                 var gmag = 0.0;
-                if (!reader.IsDBNull(10))
-                    gmag = Math.Round(reader.GetDouble(10), 2);
+                if (!reader.IsDBNull(9))
+                    gmag = Math.Round(reader.GetDouble(9), 2);
 
                 double DistanceMpc = 0;
                 if (!reader.IsDBNull(4))
@@ -191,7 +191,7 @@ namespace EAACtrl
 
                 string Constellation = Constellations.GetConstellation(RAd, Decd);
 
-                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0,0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, Constellation, "REGALADE");
+                dt.Rows.Add(ID, Names, "Galaxy", gmag, 0,0, DistanceMpc, "", objSize, "", PA, 0.0, RA, Dec, RAd, Decd, Constellation, "REGALADEv2");
             }
         }
 
@@ -424,7 +424,7 @@ namespace EAACtrl
 
             conn.Open();
 
-            string Query = "SELECT * FROM \"Regalade\"";
+            string Query = "SELECT * FROM public.\"Regalade\"";
             Query += "WHERE ST_DWithin(geom, ST_SetSRID(ST_MakePoint(" + CentreRA.ToString() + "," + CentreDec.ToString() + "), 4326)," + Radius.ToString() + ") ";
             Query += "AND \"gmag\" < " + MagnitudeLimit.ToString();
             Query += ";";

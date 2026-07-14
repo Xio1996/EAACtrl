@@ -71,6 +71,7 @@
             this.txtFilterByID = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnFilterReset = new System.Windows.Forms.Button();
+            this.btnSharpCapDSA = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -93,7 +94,6 @@
             resources.ApplyResources(this.btnCancel, "btnCancel");
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // btnAddToAP
             // 
@@ -363,10 +363,19 @@
             this.btnFilterReset.UseVisualStyleBackColor = true;
             this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
             // 
+            // btnSharpCapDSA
+            // 
+            resources.ApplyResources(this.btnSharpCapDSA, "btnSharpCapDSA");
+            this.btnSharpCapDSA.Name = "btnSharpCapDSA";
+            this.toolTip1.SetToolTip(this.btnSharpCapDSA, resources.GetString("btnSharpCapDSA.ToolTip"));
+            this.btnSharpCapDSA.UseVisualStyleBackColor = true;
+            this.btnSharpCapDSA.Click += new System.EventHandler(this.btnSharpCapDSA_Click);
+            // 
             // SearchResults
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnSharpCapDSA);
             this.Controls.Add(this.btnFilterReset);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtFilterByID);
@@ -449,5 +458,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem tsmiClusterMembers;
+        private System.Windows.Forms.Button btnSharpCapDSA;
     }
 }

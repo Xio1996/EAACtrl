@@ -401,5 +401,30 @@ namespace EAACtrl
         {
             txtFilterByID.Text = "";
         }
+
+        private void btnSharpCapDSA_Click(object sender, EventArgs e)
+        {
+            string DSA = "";
+
+            foreach (DataGridViewRow row in dgvSearchResults.Rows)
+            {
+                string ID = row.Cells["Gaia ID"].Value?.ToString() ?? "";
+                string Names = "";
+                string Type = "Star";
+                double RAHour = Convert.ToDouble(row.Cells["_RAd2000"].Value);
+                double Dec = Convert.ToDouble(row.Cells["_Decd2000"].Value);
+                double VMag = Convert.ToDouble(row.Cells["G mag"].Value);
+                double RMax = double.NaN;
+                double RMin = double.NaN;
+                double PosAngle = double.NaN;
+
+                DSA += SharpCap.CreateDSAEntry(ID, Names, Type, RAHour, Dec, VMag, RMax, RMin, PosAngle);
+            }
+
+            if (!string.IsNullOrWhiteSpace(DSA))
+            {
+                Clipboard.SetText(DSA);
+            }
+        }
     }
 }

@@ -350,6 +350,7 @@
             this.btnSharpCapDSA.TabIndex = 35;
             this.btnSharpCapDSA.Text = "SharpCap DSA";
             this.btnSharpCapDSA.UseVisualStyleBackColor = true;
+            this.btnSharpCapDSA.Click += new System.EventHandler(this.btnSharpCapDSA_Click);
             // 
             // btnClose
             // 

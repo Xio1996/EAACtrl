@@ -236,6 +236,7 @@
       <DependentUpon>SearchResults.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="SharpCap.cs" />
     <Compile Include="SkyChart.cs" />
     <Compile Include="StarryNight.cs" />
     <Compile Include="StelFOVOptions.cs">
