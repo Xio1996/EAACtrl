@@ -135,6 +135,18 @@
             this.cbFOVICorr = new System.Windows.Forms.CheckBox();
             this.tpDev = new System.Windows.Forms.TabPage();
             this.tbMessages = new System.Windows.Forms.TextBox();
+            this.tpSharpCap = new System.Windows.Forms.TabPage();
+            this.btnMQTTExit = new System.Windows.Forms.Button();
+            this.chkDualSetup = new System.Windows.Forms.CheckBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.comboBox4 = new System.Windows.Forms.ComboBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.comboBox3 = new System.Windows.Forms.ComboBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.cbTelescope = new System.Windows.Forms.ComboBox();
+            this.label19 = new System.Windows.Forms.Label();
             this.tabPlanetarium = new System.Windows.Forms.TabControl();
             this.tabpStellarium = new System.Windows.Forms.TabPage();
             this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
@@ -197,6 +209,7 @@
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tpDev.SuspendLayout();
+            this.tpSharpCap.SuspendLayout();
             this.tabPlanetarium.SuspendLayout();
             this.tabpStellarium.SuspendLayout();
             this.tabpSN.SuspendLayout();
@@ -358,6 +371,7 @@
             this.tcExtra.Controls.Add(this.tpSAMP);
             this.tcExtra.Controls.Add(this.tpConfig);
             this.tcExtra.Controls.Add(this.tpDev);
+            this.tcExtra.Controls.Add(this.tpSharpCap);
             this.tcExtra.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold);
             this.tcExtra.Location = new System.Drawing.Point(234, 6);
             this.tcExtra.Name = "tcExtra";
@@ -1440,6 +1454,146 @@
             this.tbMessages.TabIndex = 20;
             this.tbMessages.WordWrap = false;
             // 
+            // tpSharpCap
+            // 
+            this.tpSharpCap.Controls.Add(this.btnMQTTExit);
+            this.tpSharpCap.Controls.Add(this.chkDualSetup);
+            this.tpSharpCap.Controls.Add(this.label23);
+            this.tpSharpCap.Controls.Add(this.comboBox4);
+            this.tpSharpCap.Controls.Add(this.label22);
+            this.tpSharpCap.Controls.Add(this.comboBox3);
+            this.tpSharpCap.Controls.Add(this.label21);
+            this.tpSharpCap.Controls.Add(this.comboBox2);
+            this.tpSharpCap.Controls.Add(this.label20);
+            this.tpSharpCap.Controls.Add(this.cbTelescope);
+            this.tpSharpCap.Controls.Add(this.label19);
+            this.tpSharpCap.Location = new System.Drawing.Point(4, 26);
+            this.tpSharpCap.Name = "tpSharpCap";
+            this.tpSharpCap.Size = new System.Drawing.Size(368, 305);
+            this.tpSharpCap.TabIndex = 5;
+            this.tpSharpCap.Text = "SharpCap";
+            this.tpSharpCap.UseVisualStyleBackColor = true;
+            // 
+            // btnMQTTExit
+            // 
+            this.btnMQTTExit.Location = new System.Drawing.Point(6, 274);
+            this.btnMQTTExit.Name = "btnMQTTExit";
+            this.btnMQTTExit.Size = new System.Drawing.Size(90, 27);
+            this.btnMQTTExit.TabIndex = 55;
+            this.btnMQTTExit.Text = "MQTT Exit";
+            this.btnMQTTExit.UseVisualStyleBackColor = true;
+            this.btnMQTTExit.Click += new System.EventHandler(this.btnMQTTExit_Click);
+            // 
+            // chkDualSetup
+            // 
+            this.chkDualSetup.AutoSize = true;
+            this.chkDualSetup.Location = new System.Drawing.Point(283, 17);
+            this.chkDualSetup.Name = "chkDualSetup";
+            this.chkDualSetup.Size = new System.Drawing.Size(85, 21);
+            this.chkDualSetup.TabIndex = 54;
+            this.chkDualSetup.Text = "Dual Lock";
+            this.chkDualSetup.UseVisualStyleBackColor = true;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(3, 70);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(192, 17);
+            this.label23.TabIndex = 53;
+            this.label23.Text = "Telescope Camera Assignment";
+            // 
+            // comboBox4
+            // 
+            this.comboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox4.FormattingEnabled = true;
+            this.comboBox4.Items.AddRange(new object[] {
+            "Test Camera 1 (Deep Sky)",
+            "AA294CPRO",
+            "ZWO ASI Cameras::ZWO ASI533MM",
+            "Player One Cameras::Ares-C PRO (IMX533)"});
+            this.comboBox4.Location = new System.Drawing.Point(125, 184);
+            this.comboBox4.Name = "comboBox4";
+            this.comboBox4.Size = new System.Drawing.Size(230, 25);
+            this.comboBox4.TabIndex = 52;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(3, 188);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(119, 17);
+            this.label22.TabIndex = 51;
+            this.label22.Text = "Celestron CPC-800";
+            // 
+            // comboBox3
+            // 
+            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox3.FormattingEnabled = true;
+            this.comboBox3.Items.AddRange(new object[] {
+            "Test Camera 1 (Deep Sky)",
+            "AA294CPRO",
+            "ZWO ASI Cameras::ZWO ASI533MM",
+            "Player One Cameras::Ares-C PRO (IMX533)"});
+            this.comboBox3.Location = new System.Drawing.Point(125, 142);
+            this.comboBox3.Name = "comboBox3";
+            this.comboBox3.Size = new System.Drawing.Size(230, 25);
+            this.comboBox3.TabIndex = 50;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(3, 146);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(84, 17);
+            this.label21.TabIndex = 49;
+            this.label21.Text = "Celestron C6";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "Test Camera 1 (Deep Sky)",
+            "AA294CPRO",
+            "ZWO ASI Cameras::ZWO ASI533MM",
+            "Player One Cameras::Ares-C PRO (IMX533)"});
+            this.comboBox2.Location = new System.Drawing.Point(125, 100);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(230, 25);
+            this.comboBox2.TabIndex = 48;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(3, 104);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(62, 17);
+            this.label20.TabIndex = 47;
+            this.label20.Text = "Askar f71";
+            // 
+            // cbTelescope
+            // 
+            this.cbTelescope.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbTelescope.FormattingEnabled = true;
+            this.cbTelescope.Items.AddRange(new object[] {
+            "Askar 71f",
+            "Celestron C6",
+            "Celestron CPC-800"});
+            this.cbTelescope.Location = new System.Drawing.Point(121, 15);
+            this.cbTelescope.Name = "cbTelescope";
+            this.cbTelescope.Size = new System.Drawing.Size(158, 25);
+            this.cbTelescope.TabIndex = 46;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(3, 19);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(116, 17);
+            this.label19.TabIndex = 45;
+            this.label19.Text = "Current Telescope";
+            // 
             // tabPlanetarium
             // 
             this.tabPlanetarium.Controls.Add(this.tabpStellarium);
@@ -2197,6 +2351,8 @@
             this.groupBox1.PerformLayout();
             this.tpDev.ResumeLayout(false);
             this.tpDev.PerformLayout();
+            this.tpSharpCap.ResumeLayout(false);
+            this.tpSharpCap.PerformLayout();
             this.tabPlanetarium.ResumeLayout(false);
             this.tabpStellarium.ResumeLayout(false);
             this.tabpStellarium.PerformLayout();
@@ -2365,6 +2521,18 @@
         private System.Windows.Forms.Button btnKStarsN;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button btnScope2Centre;
+        private System.Windows.Forms.TabPage tpSharpCap;
+        private System.Windows.Forms.ComboBox cbTelescope;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.ComboBox comboBox4;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.ComboBox comboBox3;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.CheckBox chkDualSetup;
+        private System.Windows.Forms.Button btnMQTTExit;
     }
 }
 

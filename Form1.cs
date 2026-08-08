@@ -209,12 +209,6 @@ namespace EAACtrl
                         WriteMessage(sMsg + "\r\n");
 
                         CentreObject(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2]));
-
-                       /* if (EAATelescope.AddAlignmentPoint(Double.Parse(CmdParams[1]), Double.Parse(CmdParams[2])))
-                        {
-                            Speak("Alignment point added.");
-                        }
-                       */
                         break;
                     default:
                         break;
@@ -281,6 +275,9 @@ namespace EAACtrl
             if (!cbNoSharpCap.Checked)
             { 
                 MQTTConnect();
+
+                // Prepend the telescope index to the command so the correct instance of SharpCap responds to the command.
+                cmd = cbTelescope.SelectedIndex.ToString() + "|" + cmd;
 
                 WriteMessage("SharpCapCmd: " + cmd + "\r\n");
                 mqttSharpCap.Publish("SharpCap/command", Encoding.UTF8.GetBytes(cmd));
@@ -392,6 +389,7 @@ namespace EAACtrl
             txtUpdateRate.Text = Properties.Settings.Default.TelescopeUpdateRate.ToString();
             txtTextLeft.Text = Properties.Settings.Default.TextX.ToString();
             txtTextTop.Text = Properties.Settings.Default.TextY.ToString();
+            cbTelescope.SelectedIndex = Properties.Settings.Default.SharpCapTelescope;
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -593,6 +591,7 @@ namespace EAACtrl
             Properties.Settings.Default.TelescopeUpdateRate = int.Parse(txtUpdateRate.Text);
             Properties.Settings.Default.TextX = int.Parse(txtTextLeft.Text);
             Properties.Settings.Default.TextY = int.Parse(txtTextTop.Text);
+            Properties.Settings.Default.SharpCapTelescope = cbTelescope.SelectedIndex;
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -3191,6 +3190,13 @@ namespace EAACtrl
                 }
             }
         }
+
+        private void btnMQTTExit_Click(object sender, EventArgs e)
+        {
+            SharpCapCmd("Exit");
+        }
+
+
     }
 
     // New AP classes

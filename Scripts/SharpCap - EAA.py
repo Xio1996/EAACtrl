@@ -20,7 +20,7 @@ from paho.mqtt import client as mqtt_client
 #TerraNova (telescope laptop)
 #broker = '192.168.0.143'
 #Odin (Mini PC)
-broker = '192.168.50.126'
+broker = '192.168.50.125'
 port = 1883
 
 CommandTopic = "SharpCap/command"
@@ -29,10 +29,11 @@ ResultTopic = "SharpCap/out"
 # Generate a Client ID with the subscribe prefix.
 client_id = f'subscribe-{random.randint(0, 100)}'
 
-# username = 'emqx'
-# password = 'public'
-
-#Set the camera we are going to use
+# Set the instance ID of this script. 
+# In a dual telescope configuration , each instance of SharpCap should have a unique ID. 
+# The command messages will include the instance ID to ensure that only the correct instance responds to the command.
+InstanceID = "0"
+#Set the camera we are going to use. This should really be set by EAACtrl but "If wishes were horses, we'd all be eatin' steak!" - Jayne Cobb
 sCameraName="Test Camera 1 (Deep Sky)"
 #sCameraName="AA294CPRO"
 #sCameraName="ZWO ASI Cameras::ZWO ASI533MM"
@@ -41,7 +42,6 @@ sCameraName="Test Camera 1 (Deep Sky)"
 gExposure = -1
 
 def selectFindMode():
-
 	# Check that the camera is connected
 	if not SharpCap.IsCameraSelected:
 		# If not then attempt to connect to the camera
@@ -52,7 +52,7 @@ def selectFindMode():
 			return
 
 	# If Live Stacking then stop the process
-	if SharpCap.IsLiveStacking or SharpCap.LiveStacking.IsPaused:
+	if SharpCap.LiveStacking.IsActive or SharpCap.LiveStacking.IsPaused:
 		SharpCap.LiveStacking.Reset()
 		SharpCap.Transforms.SelectedTransform = None
 
@@ -75,7 +75,7 @@ def selectCaptureMode(CaptureMode):
 	sTargetName=""
 
 	# Make sure live stacking is off and reset from last object
-	if SharpCap.IsLiveStacking or SharpCap.LiveStacking.IsPaused:
+	if SharpCap.LiveStacking.IsActive or SharpCap.LiveStacking.IsPaused:
 			SharpCap.LiveStacking.Reset()
 			SharpCap.Transforms.SelectedTransform = None
 
@@ -135,7 +135,7 @@ def selectSaveAsSeen(Cmd):
         
         # Return image and image settings details.
         client = mqtt_client.Client(client_id)
-        ImageDetails= Cmd + "|" + CurrentTargetObject + "|" + sStackInfo + "|" + sLastImageFile + "|" + sLastSettingsFile
+        ImageDetails= Cmd + "|" + CurrentTargetObject + "|" + sStackInfo + "|" + sLastImageFile + "|" + sLastSettingsFile + "|" + InstanceID
         print (ImageDetails)
         
     else:
@@ -175,23 +175,27 @@ def subscribe(client: mqtt_client):
             # No parameters! Need at least one command parameter.
             return
         
-        # First parameter is the command.
-        Cmd = params[0]
+        if (params[0] != InstanceID):
+            # Not for this instance of SharpCap. Ignore.
+            return
+
+        # second parameter is the command.
+        Cmd = params[1]
 		
         if Cmd == "Exit":
             client.disconnect()
         elif Cmd == "Find":
             selectFindMode()
         elif Cmd == "Target":
-            if len(params) == 2:        
+            if len(params) == 3:        
                 selectFindMode()
                 # SharpCap will replace invalid filename characters with a '_'. Keep the original object ID for matching to AP object on logging.
-                CurrentTargetObject = params[1]
-                SharpCap.TargetName = params[1]
+                CurrentTargetObject = params[2]
+                SharpCap.TargetName = params[2]
         elif Cmd == "Capture":
             # Check we have enough params - Command, Profile Name 
-            if len(params) == 2:
-                selectCaptureMode(params[1])
+            if len(params) == 3:
+                selectCaptureMode(params[2])
         elif Cmd == "Log" or Cmd == "LogAppend":
             if not CurrentTargetObject:
                 ImageDetails = "FAILED|Logging No Target"
@@ -212,8 +216,9 @@ def subscribe(client: mqtt_client):
     print("SharpCap subscribed to topic - " + CommandTopic)
 
 def run():
-    print("EAACtrl Script v3")
+    print("EAACtrl Script v4")
     print("Camera = ", SharpCap.SelectedCamera)
+    print("InstanceID = ", InstanceID)
 
     client = connect_mqtt()
     subscribe(client)
