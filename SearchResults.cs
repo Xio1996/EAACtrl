@@ -1082,8 +1082,8 @@ namespace EAACtrl
                 string ID = row.Cells["ID"].Value?.ToString() ?? "";
                 string Names = row.Cells["Names"].Value?.ToString() ?? "";
                 string Type = row.Cells["Type"].Value?.ToString() ?? "";
-                double RAHour = Convert.ToDouble(row.Cells["_RAd2000"].Value);
-                double Dec = Convert.ToDouble(row.Cells["_Decd2000"].Value);
+                double RAHour = Convert.ToDouble(row.Cells["dRA"].Value);
+                double Dec = Convert.ToDouble(row.Cells["dDec"].Value);
                 double VMag = Convert.ToDouble(row.Cells["Mag"].Value);
                 double RMax = double.NaN;
                 double RMin = double.NaN;
@@ -1095,6 +1095,7 @@ namespace EAACtrl
             if (!string.IsNullOrWhiteSpace(DSA))
             {
                 Clipboard.SetText(DSA);
+                MessageBox.Show("DSA entries " + dgvSearchResults.Rows.Count.ToString() + " copied to clipboard. You can now paste them into SharpCap.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

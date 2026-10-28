@@ -63,6 +63,7 @@
             this.tsmiCopyCell = new System.Windows.Forms.ToolStripMenuItem();
             this.chkAberration = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btnSharpCapDSA = new System.Windows.Forms.Button();
             this.cbStellariumShowDSOImage = new System.Windows.Forms.CheckBox();
             this.cbStellariumMinorBodyMarkers = new System.Windows.Forms.CheckBox();
             this.cbStellariumSatellites = new System.Windows.Forms.CheckBox();
@@ -71,7 +72,6 @@
             this.txtFilterByID = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnFilterReset = new System.Windows.Forms.Button();
-            this.btnSharpCapDSA = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSearchResults)).BeginInit();
             this.SearchContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -307,6 +307,14 @@
             this.chkAberration.UseVisualStyleBackColor = true;
             this.chkAberration.CheckedChanged += new System.EventHandler(this.chkAberration_CheckedChanged);
             // 
+            // btnSharpCapDSA
+            // 
+            resources.ApplyResources(this.btnSharpCapDSA, "btnSharpCapDSA");
+            this.btnSharpCapDSA.Name = "btnSharpCapDSA";
+            this.toolTip1.SetToolTip(this.btnSharpCapDSA, resources.GetString("btnSharpCapDSA.ToolTip"));
+            this.btnSharpCapDSA.UseVisualStyleBackColor = true;
+            this.btnSharpCapDSA.Click += new System.EventHandler(this.btnSharpCapDSA_Click);
+            // 
             // cbStellariumShowDSOImage
             // 
             resources.ApplyResources(this.cbStellariumShowDSOImage, "cbStellariumShowDSOImage");
@@ -362,14 +370,6 @@
             this.btnFilterReset.Name = "btnFilterReset";
             this.btnFilterReset.UseVisualStyleBackColor = true;
             this.btnFilterReset.Click += new System.EventHandler(this.btnFilterReset_Click);
-            // 
-            // btnSharpCapDSA
-            // 
-            resources.ApplyResources(this.btnSharpCapDSA, "btnSharpCapDSA");
-            this.btnSharpCapDSA.Name = "btnSharpCapDSA";
-            this.toolTip1.SetToolTip(this.btnSharpCapDSA, resources.GetString("btnSharpCapDSA.ToolTip"));
-            this.btnSharpCapDSA.UseVisualStyleBackColor = true;
-            this.btnSharpCapDSA.Click += new System.EventHandler(this.btnSharpCapDSA_Click);
             // 
             // SearchResults
             // 
