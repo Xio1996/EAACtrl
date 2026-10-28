@@ -230,7 +230,6 @@
             this.btnTarget.Size = new System.Drawing.Size(104, 27);
             this.btnTarget.TabIndex = 2;
             this.btnTarget.Text = "Target";
-            this.toolTip1.SetToolTip(this.btnTarget, "Set target object");
             this.btnTarget.UseVisualStyleBackColor = false;
             this.btnTarget.Click += new System.EventHandler(this.btnTarget_Click);
             // 
@@ -245,7 +244,6 @@
             this.btnView.Size = new System.Drawing.Size(104, 32);
             this.btnView.TabIndex = 1;
             this.btnView.Text = "Sync Object";
-            this.toolTip1.SetToolTip(this.btnView, "Sync planetarium to selected AstroPlanner object");
             this.btnView.UseVisualStyleBackColor = false;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -259,7 +257,6 @@
             this.cbImagerZoom.Size = new System.Drawing.Size(101, 23);
             this.cbImagerZoom.TabIndex = 3;
             this.cbImagerZoom.Text = "Imager FOV";
-            this.toolTip1.SetToolTip(this.cbImagerZoom, "Set planetariun FOV to imager FOV");
             this.cbImagerZoom.UseVisualStyleBackColor = true;
             // 
             // btnFind
@@ -274,7 +271,6 @@
             this.btnFind.Size = new System.Drawing.Size(104, 27);
             this.btnFind.TabIndex = 7;
             this.btnFind.Text = "SC Find";
-            this.toolTip1.SetToolTip(this.btnFind, "Set SharpCap find profile");
             this.btnFind.UseVisualStyleBackColor = false;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
             // 
@@ -290,7 +286,6 @@
             this.btnCapture.Size = new System.Drawing.Size(104, 27);
             this.btnCapture.TabIndex = 8;
             this.btnCapture.Text = "Observe";
-            this.toolTip1.SetToolTip(this.btnCapture, "Observe object");
             this.btnCapture.UseVisualStyleBackColor = false;
             this.btnCapture.Click += new System.EventHandler(this.btnCapture_Click);
             // 
@@ -306,7 +301,6 @@
             this.btnLog.Size = new System.Drawing.Size(104, 27);
             this.btnLog.TabIndex = 9;
             this.btnLog.Text = "Log";
-            this.toolTip1.SetToolTip(this.btnLog, "Create log entry");
             this.btnLog.UseVisualStyleBackColor = false;
             this.btnLog.Click += new System.EventHandler(this.btnLog_Click);
             // 
@@ -322,7 +316,6 @@
             this.btnLogPlus.Size = new System.Drawing.Size(104, 27);
             this.btnLogPlus.TabIndex = 15;
             this.btnLogPlus.Text = "Log+";
-            this.toolTip1.SetToolTip(this.btnLogPlus, "Append/Create a log entry");
             this.btnLogPlus.UseVisualStyleBackColor = false;
             this.btnLogPlus.Click += new System.EventHandler(this.btnLogPlus_Click);
             // 
@@ -622,7 +615,7 @@
             "IDs (newline list)",
             "RA/Dec J2000 (CDS/Simbad)",
             "SAMP Sky Coords (Aladin)",
-            "JPL Asteroid Plot (Stellarium)"});
+            "JPL Minor Body Plot (Stellarium)"});
             this.cbAPGetObjects.Location = new System.Drawing.Point(130, 9);
             this.cbAPGetObjects.Name = "cbAPGetObjects";
             this.cbAPGetObjects.Size = new System.Drawing.Size(230, 25);
@@ -1660,7 +1653,6 @@
             this.btnImagerView.Size = new System.Drawing.Size(36, 32);
             this.btnImagerView.TabIndex = 45;
             this.btnImagerView.Text = "IV";
-            this.toolTip1.SetToolTip(this.btnImagerView, "Imager view");
             this.btnImagerView.UseVisualStyleBackColor = false;
             this.btnImagerView.Click += new System.EventHandler(this.btnImagerView_Click);
             // 
@@ -1675,7 +1667,6 @@
             this.btnSlew.Size = new System.Drawing.Size(114, 32);
             this.btnSlew.TabIndex = 44;
             this.btnSlew.Text = "Slew To Obj";
-            this.toolTip1.SetToolTip(this.btnSlew, "Slew to selected object in Stellarium");
             this.btnSlew.UseVisualStyleBackColor = false;
             this.btnSlew.Click += new System.EventHandler(this.btnSlew_Click);
             // 
@@ -1687,7 +1678,6 @@
             this.cbStellariumMinorBodyMarkers.Size = new System.Drawing.Size(62, 23);
             this.cbStellariumMinorBodyMarkers.TabIndex = 43;
             this.cbStellariumMinorBodyMarkers.Text = "MBM";
-            this.toolTip1.SetToolTip(this.cbStellariumMinorBodyMarkers, "Minor body markers");
             this.cbStellariumMinorBodyMarkers.UseVisualStyleBackColor = true;
             this.cbStellariumMinorBodyMarkers.CheckedChanged += new System.EventHandler(this.cbStellariumMinorBodyMarkers_CheckedChanged);
             // 
@@ -1728,7 +1718,6 @@
             this.btnFOVOptions.Size = new System.Drawing.Size(57, 32);
             this.btnFOVOptions.TabIndex = 40;
             this.btnFOVOptions.Text = "Opt";
-            this.toolTip1.SetToolTip(this.btnFOVOptions, "Search Options");
             this.btnFOVOptions.UseVisualStyleBackColor = false;
             this.btnFOVOptions.Click += new System.EventHandler(this.btnFOVOptions_Click);
             // 
@@ -1743,7 +1732,6 @@
             this.btnFOVClear.Size = new System.Drawing.Size(54, 32);
             this.btnFOVClear.TabIndex = 39;
             this.btnFOVClear.Text = "Clr";
-            this.toolTip1.SetToolTip(this.btnFOVClear, "Clear search results");
             this.btnFOVClear.UseVisualStyleBackColor = false;
             this.btnFOVClear.Click += new System.EventHandler(this.btnFOVClear_Click);
             // 
@@ -1758,7 +1746,6 @@
             this.btnFOVSearch.Size = new System.Drawing.Size(103, 32);
             this.btnFOVSearch.TabIndex = 38;
             this.btnFOVSearch.Text = "Search";
-            this.toolTip1.SetToolTip(this.btnFOVSearch, "FOV Search");
             this.btnFOVSearch.UseVisualStyleBackColor = false;
             this.btnFOVSearch.Click += new System.EventHandler(this.btnFOVSearch_Click);
             // 
@@ -1773,7 +1760,6 @@
             this.btnStellariumClearMarkers.Size = new System.Drawing.Size(99, 30);
             this.btnStellariumClearMarkers.TabIndex = 37;
             this.btnStellariumClearMarkers.Text = "Clr Markers";
-            this.toolTip1.SetToolTip(this.btnStellariumClearMarkers, "Clear Markers");
             this.btnStellariumClearMarkers.UseVisualStyleBackColor = false;
             this.btnStellariumClearMarkers.Click += new System.EventHandler(this.btnStellariumClearMarkers_Click);
             // 
@@ -1789,7 +1775,6 @@
             this.btnAllCats.Size = new System.Drawing.Size(97, 32);
             this.btnAllCats.TabIndex = 36;
             this.btnAllCats.Text = "Std DSO";
-            this.toolTip1.SetToolTip(this.btnAllCats, "DSO selector");
             this.btnAllCats.UseVisualStyleBackColor = false;
             this.btnAllCats.Click += new System.EventHandler(this.btnAllCats_Click_1);
             // 
@@ -1804,7 +1789,6 @@
             this.btnCV.Size = new System.Drawing.Size(36, 32);
             this.btnCV.TabIndex = 35;
             this.btnCV.Text = "CV";
-            this.toolTip1.SetToolTip(this.btnCV, "Constellation view");
             this.btnCV.UseVisualStyleBackColor = false;
             this.btnCV.Click += new System.EventHandler(this.btnCV_Click_1);
             // 
@@ -1819,7 +1803,6 @@
             this.btnNV.Size = new System.Drawing.Size(37, 32);
             this.btnNV.TabIndex = 34;
             this.btnNV.Text = "NV";
-            this.toolTip1.SetToolTip(this.btnNV, "Naked eye view");
             this.btnNV.UseVisualStyleBackColor = false;
             this.btnNV.Click += new System.EventHandler(this.btnNV_Click_1);
             // 
@@ -1834,7 +1817,6 @@
             this.btnS.Size = new System.Drawing.Size(28, 32);
             this.btnS.TabIndex = 33;
             this.btnS.Text = "S";
-            this.toolTip1.SetToolTip(this.btnS, "Southern Sky");
             this.btnS.UseVisualStyleBackColor = false;
             this.btnS.Click += new System.EventHandler(this.btnS_Click_1);
             // 
@@ -1849,7 +1831,6 @@
             this.btnE.Size = new System.Drawing.Size(28, 32);
             this.btnE.TabIndex = 32;
             this.btnE.Text = "E";
-            this.toolTip1.SetToolTip(this.btnE, "Eastern Sky");
             this.btnE.UseVisualStyleBackColor = false;
             this.btnE.Click += new System.EventHandler(this.btnE_Click_1);
             // 
@@ -1864,7 +1845,6 @@
             this.btnW.Size = new System.Drawing.Size(28, 32);
             this.btnW.TabIndex = 31;
             this.btnW.Text = "W";
-            this.toolTip1.SetToolTip(this.btnW, "Western sky");
             this.btnW.UseVisualStyleBackColor = false;
             this.btnW.Click += new System.EventHandler(this.btnW_Click_1);
             // 
@@ -1879,7 +1859,6 @@
             this.btnN.Size = new System.Drawing.Size(28, 32);
             this.btnN.TabIndex = 30;
             this.btnN.Text = "N";
-            this.toolTip1.SetToolTip(this.btnN, "Northern sky");
             this.btnN.UseVisualStyleBackColor = false;
             this.btnN.Click += new System.EventHandler(this.btnN_Click_1);
             // 
@@ -2136,7 +2115,6 @@
             this.btnKStarsIV.Size = new System.Drawing.Size(36, 32);
             this.btnKStarsIV.TabIndex = 52;
             this.btnKStarsIV.Text = "IV";
-            this.toolTip1.SetToolTip(this.btnKStarsIV, "Imager view");
             this.btnKStarsIV.UseVisualStyleBackColor = false;
             this.btnKStarsIV.Click += new System.EventHandler(this.btnKStarsIV_Click);
             // 
@@ -2151,7 +2129,6 @@
             this.btnKStarsCV.Size = new System.Drawing.Size(36, 32);
             this.btnKStarsCV.TabIndex = 51;
             this.btnKStarsCV.Text = "CV";
-            this.toolTip1.SetToolTip(this.btnKStarsCV, "Constellation view");
             this.btnKStarsCV.UseVisualStyleBackColor = false;
             this.btnKStarsCV.Click += new System.EventHandler(this.btnKStarsCV_Click);
             // 
@@ -2166,7 +2143,6 @@
             this.btnKStarsNV.Size = new System.Drawing.Size(37, 32);
             this.btnKStarsNV.TabIndex = 50;
             this.btnKStarsNV.Text = "NV";
-            this.toolTip1.SetToolTip(this.btnKStarsNV, "Naked eye view");
             this.btnKStarsNV.UseVisualStyleBackColor = false;
             this.btnKStarsNV.Click += new System.EventHandler(this.btnKStarsNV_Click);
             // 
@@ -2181,7 +2157,6 @@
             this.btnKStarsS.Size = new System.Drawing.Size(28, 32);
             this.btnKStarsS.TabIndex = 49;
             this.btnKStarsS.Text = "S";
-            this.toolTip1.SetToolTip(this.btnKStarsS, "Southern Sky");
             this.btnKStarsS.UseVisualStyleBackColor = false;
             this.btnKStarsS.Click += new System.EventHandler(this.btnKStarsS_Click);
             // 
@@ -2196,7 +2171,6 @@
             this.btnKStarsE.Size = new System.Drawing.Size(28, 32);
             this.btnKStarsE.TabIndex = 48;
             this.btnKStarsE.Text = "E";
-            this.toolTip1.SetToolTip(this.btnKStarsE, "Eastern Sky");
             this.btnKStarsE.UseVisualStyleBackColor = false;
             this.btnKStarsE.Click += new System.EventHandler(this.btnKStarsE_Click);
             // 
@@ -2211,7 +2185,6 @@
             this.btnKStarsW.Size = new System.Drawing.Size(28, 32);
             this.btnKStarsW.TabIndex = 47;
             this.btnKStarsW.Text = "W";
-            this.toolTip1.SetToolTip(this.btnKStarsW, "Western sky");
             this.btnKStarsW.UseVisualStyleBackColor = false;
             this.btnKStarsW.Click += new System.EventHandler(this.btnKStarsW_Click);
             // 
@@ -2226,7 +2199,6 @@
             this.btnKStarsN.Size = new System.Drawing.Size(28, 32);
             this.btnKStarsN.TabIndex = 46;
             this.btnKStarsN.Text = "N";
-            this.toolTip1.SetToolTip(this.btnKStarsN, "Northern sky");
             this.btnKStarsN.UseVisualStyleBackColor = false;
             this.btnKStarsN.Click += new System.EventHandler(this.btnKStarsN_Click);
             // 

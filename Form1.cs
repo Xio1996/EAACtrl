@@ -1387,8 +1387,8 @@ namespace EAACtrl
                                               .ToArray();
                         // Process the fields
                         DateTime ephDateTime = DateTime.SpecifyKind(DateTime.Parse(wordsArray[0] + " " + wordsArray[1]),DateTimeKind.Utc);
-                        string ephRA = $"{wordsArray[2]}h{wordsArray[3]}m{wordsArray[4]}s";
-                        string ephDec = $"{wordsArray[5]}d{wordsArray[6]}m{wordsArray[7]}s";
+                        string ephRA = $"{wordsArray[3]}h{wordsArray[4]}m{wordsArray[5]}s";
+                        string ephDec = $"{wordsArray[6]}d{wordsArray[7]}m{wordsArray[8]}s";
 
                         double ephVMag = 999;
                         if (!double.TryParse(wordsArray[9], out ephVMag))
@@ -1397,13 +1397,13 @@ namespace EAACtrl
                         }
 
                         double ephDistAU = -1;
-                        if (!double.TryParse(wordsArray[11], out ephDistAU))
+                        if (!double.TryParse(wordsArray[12], out ephDistAU))
                         {
                             ephDistAU = -1;
                         }
 
                         double ephDistDeltaKMs = 0;
-                        if (!double.TryParse(wordsArray[12], out ephDistDeltaKMs))
+                        if (!double.TryParse(wordsArray[13], out ephDistDeltaKMs))
                         {
                             ephDistDeltaKMs = 0;
                         }
@@ -1423,14 +1423,14 @@ namespace EAACtrl
                         }
 
                             double ephDistLTMinuntes = 0;
-                        if (!double.TryParse(wordsArray[13], out ephDistLTMinuntes))
+                        if (!double.TryParse(wordsArray[14], out ephDistLTMinuntes))
                         {
                             ephDistLTMinuntes = 0;
                         }
                         TimeSpan ts = TimeSpan.FromMinutes(ephDistLTMinuntes);
                         string ephDistLTHMS = $"{ts.Hours:D2} hours {ts.Minutes:D2} minutes {ts.Seconds:D2} seconds";
                         
-                        string ephConst = wordsArray[14].Trim();
+                        string ephConst = wordsArray[15].Trim();
                         string ephDistKM = (ephDistAU * 149597870.7).ToString("N0") + " km";
                         string ephDistLD = (ephDistAU * 149597870.7/384399).ToString() + " LD"; // Lunar Distance
 
@@ -2848,21 +2848,54 @@ namespace EAACtrl
                     case "MPCNEA":
                     case "MPCPHA":
                     case "MPCUnusual":
-                    case "MPCComet":
                     case "User":
                         if (iFirstCharacter == 40) // '(' character
                         {
                             // MPC Numbered Asteroid Name, e.g. (1) Ceres
                             int iBracketEnd = APMBName.IndexOf(')');
                             int iSlashPos = APMBName.IndexOf('/', iBracketEnd);
-                            APMBName = APMBName.Substring(1, iBracketEnd - 1).Trim() + "%3B";
+                            APMBName = APMBName.Substring(1, iBracketEnd - 1).Trim() + ";";
                         }
+                        else
+                        {
+                            APMBName = "DES=" + APMBName;
+                        }
+                        break;
+                    case "MPCComet":
+                        // MPC Comet names e.g. 67P/Churyumov-Gerasimenko
+                        // If C/2025 N1 (ATLAS) then remove the brackets and contents to get C/2025 N1
+                        if (APMBName.EndsWith(")"))
+                        {
+                            int iBracketStart = APMBName.IndexOf('(');
+                            int iBracketEnd = APMBName.IndexOf(')');
+                            APMBName = APMBName.Remove(iBracketStart, iBracketEnd - iBracketStart + 1).Trim();
+
+                        }
+                        if (APMBName.StartsWith("("))
+                        {
+                            int iBracketStart = APMBName.IndexOf('(');
+                            int iBracketEnd = APMBName.IndexOf(')');
+                            APMBName = APMBName.Substring(iBracketStart + 1, iBracketEnd - iBracketStart - 1);
+                        }
+                        Match periodicMpcComet = Regex.Match(APMBName, @"^(\d+P)/");
+                        if (periodicMpcComet.Success)
+                        {
+                            APMBName = periodicMpcComet.Groups[1].Value;
+                        }
+
+                        Match interstellarMpcComet = Regex.Match(APMBName, @"^(\d+I)/");
+                        if (interstellarMpcComet.Success)
+                        {
+                            APMBName = interstellarMpcComet.Groups[1].Value;
+                        }
+
+                        APMBName = "DES=" + APMBName + ";CAP";
                         break;
                     case "JPLNumbered":
                         // JPL Starting with a number e.g. 550875 2012 TE312 or 1 Ceres
                         int spaceIndex = APMBName.IndexOf(' ');
                         if (spaceIndex > 0)
-                            APMBName = APMBName.Substring(0, spaceIndex) + "%3B";
+                            APMBName = APMBName.Substring(0, spaceIndex) + ";";
                         break;
                     case "JPLComet":
                         // JPL Comet names e.g. 67P/Churyumov-Gerasimenko
@@ -2878,6 +2911,11 @@ namespace EAACtrl
                             int iBracketStart = APMBName.IndexOf('(');
                             int iBracketEnd = APMBName.IndexOf(')');
                             APMBName = APMBName.Substring(iBracketStart+1,iBracketEnd-iBracketStart-1);
+                        }
+                        Match periodicJplComet = Regex.Match(APMBName, @"^(\d+P)/");
+                        if (periodicJplComet.Success)
+                        {
+                            APMBName = periodicJplComet.Groups[1].Value;
                         }
                         break;
                 }
