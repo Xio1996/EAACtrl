@@ -2853,7 +2853,6 @@ namespace EAACtrl
                     case "MPCNEA":
                     case "MPCPHA":
                     case "MPCUnusual":
-                    case "User":
                         if (iFirstCharacter == 40) // '(' character
                         {
                             // MPC Numbered Asteroid Name, e.g. (1) Ceres
@@ -2867,6 +2866,7 @@ namespace EAACtrl
                         }
                         break;
                     case "MPCComet":
+                    case "User":
                         // MPC Comet names e.g. 67P/Churyumov-Gerasimenko
                         // If C/2025 N1 (ATLAS) then remove the brackets and contents to get C/2025 N1
                         if (APMBName.EndsWith(")"))
