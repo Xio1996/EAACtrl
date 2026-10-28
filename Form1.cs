@@ -1435,9 +1435,14 @@ namespace EAACtrl
                         string ephDistLD = (ephDistAU * 149597870.7/384399).ToString() + " LD"; // Lunar Distance
 
                         string ephID = $"{SelectedObject.ID} @ {ephDateTime.ToString("HH:mm:ss")} UTC";
-                        ephID = ephID.Replace(" ", "\\u00A0");
-                        Stellarium.SyncStellariumToJPLObject(ephID, ephRA, ephDec, ephDateTime.ToString("dd/MM/yyyy HH:mm:ss") + " UTC", ephVMag.ToString(), Math.Round(ephDistAU,3).ToString() + " AU", ephDistKM, ephDistLTHMS, ephDistDeltaKmsText);
+                        //ephID = ephID.Replace(" ", "\\u00A0");
+                        Stellarium.SyncStellariumToJPLObject(ephID.Replace(" ", "\\u00A0"), ephRA, ephDec, ephDateTime.ToString("dd/MM/yyyy HH:mm:ss") + " UTC", ephVMag.ToString(), Math.Round(ephDistAU,3).ToString() + " AU", ephDistKM, ephDistLTHMS, ephDistDeltaKmsText);
                         Speak("Selected");
+
+                        // Create DSA from results
+                        // IDs|Names|Type|RA(decimal hours)|Dec(degrees)|VMag|RMax(arcmin)|RMin(arcmin)|PosAngle
+                        string sDSA = ephID + "|" + ephDistAU.ToString("N2") + "au, " + ephDistDeltaKmsText + "|Minor (JPL Horizons)|" + ephRA + "|" + ephDec + "|" + ephVMag.ToString("N2") + "|||";
+                        Clipboard.SetText(sDSA);
                     }
                     else
                     {
