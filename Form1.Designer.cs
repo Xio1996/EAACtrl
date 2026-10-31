@@ -351,7 +351,10 @@
             this.cbCaptureProfile.Items.AddRange(new object[] {
             "Profile 1",
             "Profile 2",
-            "Profile 3"});
+            "Profile 3",
+            "Profile 4",
+            "Profile 5",
+            "Profile 6"});
             this.cbCaptureProfile.Location = new System.Drawing.Point(115, 36);
             this.cbCaptureProfile.Name = "cbCaptureProfile";
             this.cbCaptureProfile.Size = new System.Drawing.Size(104, 25);

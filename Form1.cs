@@ -961,18 +961,8 @@ namespace EAACtrl
             
             StopObserveClock();
 
-            switch (cbCaptureProfile.SelectedIndex)
-            {
-                case 0:
-                    sProfile = "CaptureMode1";
-                    break; 
-                case 1:
-                    sProfile = "CaptureMode2";
-                    break; 
-                case 2:
-                    sProfile = "CaptureMode3";
-                    break;
-            }
+            sProfile = "CaptureMode" + (cbCaptureProfile.SelectedIndex+1).ToString();
+
             SharpCapCmd("Capture|" + sProfile);
             
             StartObserveClock();
