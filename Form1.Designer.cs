@@ -65,7 +65,6 @@
             this.btnAsteroidsFOV = new System.Windows.Forms.Button();
             this.btnObsClkStop = new System.Windows.Forms.Button();
             this.tpTelescope = new System.Windows.Forms.TabPage();
-            this.btnAlignAZ = new System.Windows.Forms.Button();
             this.txtUpdateRate = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -197,6 +196,10 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
+            this.txtOffsetAlt = new System.Windows.Forms.TextBox();
+            this.txtOffsetAz = new System.Windows.Forms.TextBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -685,7 +688,11 @@
             // 
             // tpTelescope
             // 
-            this.tpTelescope.Controls.Add(this.btnAlignAZ);
+            this.tpTelescope.Controls.Add(this.label25);
+            this.tpTelescope.Controls.Add(this.label24);
+            this.tpTelescope.Controls.Add(this.txtOffsetAz);
+            this.tpTelescope.Controls.Add(this.txtOffsetAlt);
+            this.tpTelescope.Controls.Add(this.btnScope2Centre);
             this.tpTelescope.Controls.Add(this.txtUpdateRate);
             this.tpTelescope.Controls.Add(this.label16);
             this.tpTelescope.Controls.Add(this.groupBox5);
@@ -702,16 +709,6 @@
             this.tpTelescope.TabIndex = 4;
             this.tpTelescope.Text = "Telescope";
             this.tpTelescope.UseVisualStyleBackColor = true;
-            // 
-            // btnAlignAZ
-            // 
-            this.btnAlignAZ.Location = new System.Drawing.Point(237, 221);
-            this.btnAlignAZ.Name = "btnAlignAZ";
-            this.btnAlignAZ.Size = new System.Drawing.Size(128, 27);
-            this.btnAlignAZ.TabIndex = 56;
-            this.btnAlignAZ.Text = "Align (SyncScan)";
-            this.btnAlignAZ.UseVisualStyleBackColor = true;
-            this.btnAlignAZ.Click += new System.EventHandler(this.btnAlignAZ_Click);
             // 
             // txtUpdateRate
             // 
@@ -734,29 +731,28 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.btnScope2Centre);
             this.groupBox5.Controls.Add(this.btnStelSlew);
             this.groupBox5.Controls.Add(this.btnStelSync);
-            this.groupBox5.Location = new System.Drawing.Point(7, 184);
+            this.groupBox5.Location = new System.Drawing.Point(7, 216);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(224, 90);
+            this.groupBox5.Size = new System.Drawing.Size(225, 55);
             this.groupBox5.TabIndex = 53;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Stellarium (Selected Object)";
             // 
             // btnScope2Centre
             // 
-            this.btnScope2Centre.Location = new System.Drawing.Point(7, 58);
+            this.btnScope2Centre.Location = new System.Drawing.Point(7, 183);
             this.btnScope2Centre.Name = "btnScope2Centre";
-            this.btnScope2Centre.Size = new System.Drawing.Size(113, 27);
+            this.btnScope2Centre.Size = new System.Drawing.Size(94, 27);
             this.btnScope2Centre.TabIndex = 53;
-            this.btnScope2Centre.Text = "Scope 2 Centre";
+            this.btnScope2Centre.Text = "Offset Alt/Az";
             this.btnScope2Centre.UseVisualStyleBackColor = true;
             this.btnScope2Centre.Click += new System.EventHandler(this.btnScope2Centre_Click);
             // 
             // btnStelSlew
             // 
-            this.btnStelSlew.Location = new System.Drawing.Point(6, 27);
+            this.btnStelSlew.Location = new System.Drawing.Point(6, 21);
             this.btnStelSlew.Name = "btnStelSlew";
             this.btnStelSlew.Size = new System.Drawing.Size(102, 27);
             this.btnStelSlew.TabIndex = 51;
@@ -766,7 +762,7 @@
             // 
             // btnStelSync
             // 
-            this.btnStelSync.Location = new System.Drawing.Point(114, 27);
+            this.btnStelSync.Location = new System.Drawing.Point(114, 21);
             this.btnStelSync.Name = "btnStelSync";
             this.btnStelSync.Size = new System.Drawing.Size(102, 27);
             this.btnStelSync.TabIndex = 52;
@@ -776,7 +772,7 @@
             // 
             // btnStabilise
             // 
-            this.btnStabilise.Location = new System.Drawing.Point(237, 188);
+            this.btnStabilise.Location = new System.Drawing.Point(235, 234);
             this.btnStabilise.Name = "btnStabilise";
             this.btnStabilise.Size = new System.Drawing.Size(128, 27);
             this.btnStabilise.TabIndex = 47;
@@ -2270,6 +2266,40 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
+            // txtOffsetAlt
+            // 
+            this.txtOffsetAlt.Location = new System.Drawing.Point(134, 184);
+            this.txtOffsetAlt.Name = "txtOffsetAlt";
+            this.txtOffsetAlt.Size = new System.Drawing.Size(60, 25);
+            this.txtOffsetAlt.TabIndex = 56;
+            this.txtOffsetAlt.Text = "0";
+            // 
+            // txtOffsetAz
+            // 
+            this.txtOffsetAz.Location = new System.Drawing.Point(229, 184);
+            this.txtOffsetAz.Name = "txtOffsetAz";
+            this.txtOffsetAz.Size = new System.Drawing.Size(60, 25);
+            this.txtOffsetAz.TabIndex = 57;
+            this.txtOffsetAz.Text = "0";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(107, 188);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(25, 17);
+            this.label24.TabIndex = 58;
+            this.label24.Text = "Alt";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(200, 188);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(23, 17);
+            this.label25.TabIndex = 59;
+            this.label25.Text = "Az";
+            // 
             // frmEAACP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -2482,7 +2512,6 @@
         private System.Windows.Forms.Button btnStelSync;
         private System.Windows.Forms.TextBox txtUpdateRate;
         private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Button btnAlignAZ;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.TextBox txtTextTop;
         private System.Windows.Forms.Label label17;
@@ -2508,6 +2537,10 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.CheckBox chkDualSetup;
         private System.Windows.Forms.Button btnMQTTExit;
+        private System.Windows.Forms.TextBox txtOffsetAz;
+        private System.Windows.Forms.TextBox txtOffsetAlt;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label24;
     }
 }
 

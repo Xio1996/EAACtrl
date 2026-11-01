@@ -390,6 +390,8 @@ namespace EAACtrl
             txtTextLeft.Text = Properties.Settings.Default.TextX.ToString();
             txtTextTop.Text = Properties.Settings.Default.TextY.ToString();
             cbTelescope.SelectedIndex = Properties.Settings.Default.SharpCapTelescope;
+            txtOffsetAlt.Text = Properties.Settings.Default.OffsetAlt.ToString();
+            txtOffsetAz.Text = Properties.Settings.Default.OffsetAz.ToString();
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -592,6 +594,8 @@ namespace EAACtrl
             Properties.Settings.Default.TextX = int.Parse(txtTextLeft.Text);
             Properties.Settings.Default.TextY = int.Parse(txtTextTop.Text);
             Properties.Settings.Default.SharpCapTelescope = cbTelescope.SelectedIndex;
+            Properties.Settings.Default.OffsetAlt = double.Parse(txtOffsetAlt.Text);
+            Properties.Settings.Default.OffsetAz = double.Parse(txtOffsetAz.Text);
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -2408,7 +2412,7 @@ namespace EAACtrl
                 }
                 else if (EAATelescope.Tracking)
                 {
-                    lblTeleStatus.Text = "Tracking";
+                    lblTeleStatus.Text = "Tracking " + EAATelescope.TrackingRate;
                     // Stellarium 
                     if (tabPlanetarium.SelectedIndex == 0)
                     {
@@ -2424,6 +2428,10 @@ namespace EAACtrl
 
                         StellCount++;
                     }
+                }
+                else
+                {
+                    lblTeleStatus.Text = "Tracking OFF";
                 }
             }
         }
@@ -3201,25 +3209,96 @@ namespace EAACtrl
             }
         }
 
-        // Slew the telescope to the current azimuth minus a fixed offset, keeping the altitude the same.
-        // A dirty hack to get the 2nd scopes to point to the same object as the main scope. 
+        // Slew the telescope to the current altitude and azimuth plus/minus a fixed offset.
+        // A dirty hack to get the 2nd scope to centre on the same object as the main scope.
         private void btnScope2Centre_Click(object sender, EventArgs e)
         {
+            if (!EAATelescope.Connected)
+            {
+                Speak("Telescope not connected");
+                return;
+            }
+
+            if (!double.TryParse(txtOffsetAlt.Text, out double offsetAlt))
+            {
+                MessageBox.Show("Invalid offset altitude value. Please enter a valid number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!double.TryParse(txtOffsetAz.Text, out double offsetAz))
+            {
+                MessageBox.Show("Invalid offset azimuth value. Please enter a valid number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string currentTrackingRate = EAATelescope.TrackingRate;
+
             double Alt = EAATelescope.Altitude;
+
             if (Alt != 999.0)
             {
+                double newAlt = Alt - offsetAlt;
+
                 double Az = EAATelescope.Azimuth;
                 if (Az != 999.0)
                 {
                     // Subtract a fixed offset from the current azimuth and wrap into [0,360)
                     // Change offsetDeg to the desired value (degrees)
-                    double offsetDeg = 0.2;
-                    double newAz = (Az - offsetDeg + 360.0) % 360.0;
+                    double newAz = (Az - offsetAz + 360.0) % 360.0;
 
-                    if (!EAATelescope.SlewAzAlt(newAz, Alt))
+                    // Reflect positions above the zenith into the valid altitude range.
+                    if (newAlt > 90.0)
+                    {
+                        newAlt = 180.0 - newAlt;
+                        newAz = (newAz + 180.0) % 360.0;
+                    }
+
+                    // Do not request a position below the horizon.
+                    newAlt = Math.Max(0.0, newAlt);
+
+                    // Calculate the angular distance between the current and new Alt/Az positions.
+                    double alt1 = Alt * Math.PI / 180.0;
+                    double alt2 = newAlt * Math.PI / 180.0;
+                    double azDifference = (newAz - Az) * Math.PI / 180.0;
+                    double cosineDistance = Math.Sin(alt1) * Math.Sin(alt2) +
+                                            Math.Cos(alt1) * Math.Cos(alt2) * Math.Cos(azDifference);
+                    cosineDistance = Math.Max(-1.0, Math.Min(1.0, cosineDistance));
+                    double angularDistance = Math.Acos(cosineDistance) * 180.0 / Math.PI;
+
+                    if (angularDistance > 1.0)
+                    {
+                        DialogResult result = MessageBox.Show(
+                            $"The new telescope position is {angularDistance:F2} degrees from the current position.\r\n\r\n" +
+                            $"Current: Alt {Alt:F2}, Az {Az:F2}\r\n" +
+                            $"New: Alt {newAlt:F2}, Az {newAz:F2}\r\n\r\n" +
+                            "Do you want to continue?",
+                            "Confirm telescope move",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+
+                        if (result != DialogResult.Yes)
+                        {
+                            return;
+                        }
+                    }
+
+                    if (!EAATelescope.SlewAzAlt(newAz, newAlt))
                     {
                         Speak("Failed to slew telescope");
                     }
+                    else
+                    {
+                        Speak("Slewing telescope");
+                        while (EAATelescope.Slewing)
+                        {
+                            DisplayTelescopeInformation();
+                            System.Threading.Thread.Sleep(500);
+                        }
+                    }
+
+                    // Tracking is turned off when the scope is slewed, so turn it back on after the slew.
+                    EAATelescope.TrackingRate = currentTrackingRate;
+                    EAATelescope.Tracking = true;
                 }
             }
         }

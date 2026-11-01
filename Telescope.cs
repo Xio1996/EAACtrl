@@ -382,7 +382,6 @@ namespace EAACtrl
             return bResult;
         }
 
-
         public string TrackingRate
         {
             get
@@ -405,6 +404,24 @@ namespace EAACtrl
                     }
                 }
                 return Rate;
+            }
+            set 
+            {
+                if (Telescope != null && Telescope.Connected)
+                {
+                    switch (TrackingRate)
+                    {
+                        case "Sidereal":
+                            Telescope.TrackingRate = DriveRates.driveSidereal;
+                            break;
+                        case "Lunar":
+                            Telescope.TrackingRate = DriveRates.driveLunar;
+                            break;
+                        case "Solar":
+                            Telescope.TrackingRate = DriveRates.driveSolar;
+                            break;
+                    }
+                }
             }
         }
 
