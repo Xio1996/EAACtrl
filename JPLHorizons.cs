@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace EAACtrl
 {
@@ -226,6 +228,92 @@ namespace EAACtrl
             }
 
             return result;
+        }
+
+        public string QueryJPLHorizons(string id, double lon, double lat, double altKm, string timeStr)
+        {
+            string result = "";
+
+            string sWebServiceURL = $"https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&APPARENT='REFRACTED'&CSV_FORMAT='YES'&QUANTITIES='1,8,9,12,13'" +
+                                $"&COMMAND='{id}'" +
+                                $"&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='{lon},{lat},{altKm}'" +
+                                $"&TLIST='{timeStr}'";
+
+            // Encode spaces and single quotes for URI safety
+            sWebServiceURL = sWebServiceURL.Replace("'", "%27").Replace(" ", "%20");
+
+            try
+            {
+                result = GetRequest(sWebServiceURL);
+
+                sMsg = $"JPL:QueryJPLHorizons ID={id} Lon={lon} Lat={lat} Alt={altKm} Time={timeStr}, {sMsg}\r\n";
+            }
+            catch (Exception)
+            {
+                sMsg = $"JPL:QueryJPLHorizons ERR, {sMsg} \r\n";
+                result = "exception";
+            }
+
+            return result;
+        }
+
+        public void ProcessMoonData(string moon, string period, string diameter, string horizonData, int dsaFormatIndex, ref string dsaData, out string[] parts)
+        {
+            parts = new string[0];
+            int startIndex = horizonData.IndexOf("$$SOE");
+            int endIndex = horizonData.IndexOf("$$EOE");
+
+
+            if (startIndex == -1 || endIndex == -1) return;
+
+            string dataLine = horizonData.Substring(startIndex + 5, endIndex - (startIndex + 5)).Trim();
+            parts = dataLine.Split(',');
+
+            for (int j = 0; j < parts.Length; j++)
+            {
+                parts[j] = parts[j].Trim();
+            }
+
+            if (parts.Length < 11) return;
+
+            string dateTime = parts[0];
+            string ra = parts[3];
+            string dec = parts[4];
+            string apMag = parts[7];
+            string separation = parts[9];
+            string visCode = parts[10];
+            string visibility = Visibility(visCode.Length > 0 ? visCode[visCode.Length - 1].ToString() : "");
+            string apparentDiameter = parts[11];
+
+            string shortId = moon.Contains("-") ? moon.Substring(moon.IndexOf("-") + 2) : moon;
+
+            string summary = $"{moon} | RA: {ra} | Dec: {dec} | Mag: {apMag} | Sep: {separation} arcsec' | Vis: {visibility}\r\n";
+            
+            // SharpCap DSA Format generation
+            if (dsaFormatIndex == 1) // Full with separation and diameter
+            {
+                dsaData += $"{shortId}|Sep: {separation}'|Dia: {diameter} km, Period: {period}|{ra}|{dec}|{apMag}|||\r\n";
+            }
+            else if (dsaFormatIndex == 0) // Minimal
+            {
+                dsaData += $"{shortId}|||{ra}|{dec}||||\r\n";
+            }
+        }
+
+        private string Visibility(string code)
+        {
+            switch (code)
+            {
+                case "t": return "Transiting primary body disk";
+                case "p": return "Partial umbral eclipse";
+                case "u": return "Total umbral eclipse";
+                case "-": return "Target is the primary body";
+                case "O": return "Occulted by primary body disk";
+                case "P": return "Occulted partial umbral eclipse";
+                case "U": return "Occulted total umbral eclipse";
+                case "*": return "Free and clear";
+                default: return "Unknown";
+            }
         }
     }
 }

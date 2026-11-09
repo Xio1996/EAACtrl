@@ -65,10 +65,16 @@
             this.btnAsteroidsFOV = new System.Windows.Forms.Button();
             this.btnObsClkStop = new System.Windows.Forms.Button();
             this.tpTelescope = new System.Windows.Forms.TabPage();
+            this.btnOffsetDest = new System.Windows.Forms.Button();
+            this.btnOffsetOrigin = new System.Windows.Forms.Button();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.txtOffsetAz = new System.Windows.Forms.TextBox();
+            this.txtOffsetAlt = new System.Windows.Forms.TextBox();
+            this.btnScope2Centre = new System.Windows.Forms.Button();
             this.txtUpdateRate = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.btnScope2Centre = new System.Windows.Forms.Button();
             this.btnStelSlew = new System.Windows.Forms.Button();
             this.btnStelSync = new System.Windows.Forms.Button();
             this.btnStabilise = new System.Windows.Forms.Button();
@@ -196,10 +202,13 @@
             this.btnAPtoFront = new System.Windows.Forms.Button();
             this.btnSwitchPlanatariumToFront = new System.Windows.Forms.Button();
             this.cbSyncDateTime = new System.Windows.Forms.CheckBox();
-            this.txtOffsetAlt = new System.Windows.Forms.TextBox();
-            this.txtOffsetAz = new System.Windows.Forms.TextBox();
-            this.label24 = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
+            this.tpLocation = new System.Windows.Forms.TabPage();
+            this.label26 = new System.Windows.Forms.Label();
+            this.txtLattiude = new System.Windows.Forms.TextBox();
+            this.txtLongitude = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.txtAltitude = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
             this.tcExtra.SuspendLayout();
             this.tpTools.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -219,6 +228,7 @@
             this.tabpTheSky.SuspendLayout();
             this.tabSkyChart.SuspendLayout();
             this.tabpKStars.SuspendLayout();
+            this.tpLocation.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnTarget
@@ -371,6 +381,7 @@
             this.tcExtra.Controls.Add(this.tpConfig);
             this.tcExtra.Controls.Add(this.tpDev);
             this.tcExtra.Controls.Add(this.tpSharpCap);
+            this.tcExtra.Controls.Add(this.tpLocation);
             this.tcExtra.Font = new System.Drawing.Font("Segoe UI Variable Text Semibold", 9.75F, System.Drawing.FontStyle.Bold);
             this.tcExtra.Location = new System.Drawing.Point(234, 6);
             this.tcExtra.Name = "tcExtra";
@@ -688,6 +699,8 @@
             // 
             // tpTelescope
             // 
+            this.tpTelescope.Controls.Add(this.btnOffsetDest);
+            this.tpTelescope.Controls.Add(this.btnOffsetOrigin);
             this.tpTelescope.Controls.Add(this.label25);
             this.tpTelescope.Controls.Add(this.label24);
             this.tpTelescope.Controls.Add(this.txtOffsetAz);
@@ -709,6 +722,70 @@
             this.tpTelescope.TabIndex = 4;
             this.tpTelescope.Text = "Telescope";
             this.tpTelescope.UseVisualStyleBackColor = true;
+            // 
+            // btnOffsetDest
+            // 
+            this.btnOffsetDest.Location = new System.Drawing.Point(302, 182);
+            this.btnOffsetDest.Name = "btnOffsetDest";
+            this.btnOffsetDest.Size = new System.Drawing.Size(40, 27);
+            this.btnOffsetDest.TabIndex = 61;
+            this.btnOffsetDest.Text = "Des";
+            this.btnOffsetDest.UseVisualStyleBackColor = true;
+            this.btnOffsetDest.Click += new System.EventHandler(this.btnOffsetDest_Click);
+            // 
+            // btnOffsetOrigin
+            // 
+            this.btnOffsetOrigin.Location = new System.Drawing.Point(256, 183);
+            this.btnOffsetOrigin.Name = "btnOffsetOrigin";
+            this.btnOffsetOrigin.Size = new System.Drawing.Size(40, 27);
+            this.btnOffsetOrigin.TabIndex = 60;
+            this.btnOffsetOrigin.Text = "Ori";
+            this.btnOffsetOrigin.UseVisualStyleBackColor = true;
+            this.btnOffsetOrigin.Click += new System.EventHandler(this.btnOffsetOrigin_Click);
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(173, 188);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(23, 17);
+            this.label25.TabIndex = 59;
+            this.label25.Text = "Az";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(103, 188);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(25, 17);
+            this.label24.TabIndex = 58;
+            this.label24.Text = "Alt";
+            // 
+            // txtOffsetAz
+            // 
+            this.txtOffsetAz.Location = new System.Drawing.Point(202, 184);
+            this.txtOffsetAz.Name = "txtOffsetAz";
+            this.txtOffsetAz.Size = new System.Drawing.Size(40, 25);
+            this.txtOffsetAz.TabIndex = 57;
+            this.txtOffsetAz.Text = "0";
+            // 
+            // txtOffsetAlt
+            // 
+            this.txtOffsetAlt.Location = new System.Drawing.Point(130, 184);
+            this.txtOffsetAlt.Name = "txtOffsetAlt";
+            this.txtOffsetAlt.Size = new System.Drawing.Size(40, 25);
+            this.txtOffsetAlt.TabIndex = 56;
+            this.txtOffsetAlt.Text = "0";
+            // 
+            // btnScope2Centre
+            // 
+            this.btnScope2Centre.Location = new System.Drawing.Point(7, 183);
+            this.btnScope2Centre.Name = "btnScope2Centre";
+            this.btnScope2Centre.Size = new System.Drawing.Size(94, 27);
+            this.btnScope2Centre.TabIndex = 53;
+            this.btnScope2Centre.Text = "Offset Alt/Az";
+            this.btnScope2Centre.UseVisualStyleBackColor = true;
+            this.btnScope2Centre.Click += new System.EventHandler(this.btnScope2Centre_Click);
             // 
             // txtUpdateRate
             // 
@@ -739,16 +816,6 @@
             this.groupBox5.TabIndex = 53;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Stellarium (Selected Object)";
-            // 
-            // btnScope2Centre
-            // 
-            this.btnScope2Centre.Location = new System.Drawing.Point(7, 183);
-            this.btnScope2Centre.Name = "btnScope2Centre";
-            this.btnScope2Centre.Size = new System.Drawing.Size(94, 27);
-            this.btnScope2Centre.TabIndex = 53;
-            this.btnScope2Centre.Text = "Offset Alt/Az";
-            this.btnScope2Centre.UseVisualStyleBackColor = true;
-            this.btnScope2Centre.Click += new System.EventHandler(this.btnScope2Centre_Click);
             // 
             // btnStelSlew
             // 
@@ -2266,39 +2333,68 @@
             this.toolTip1.SetToolTip(this.cbSyncDateTime, "Sync planetarium to AP date/time");
             this.cbSyncDateTime.UseVisualStyleBackColor = true;
             // 
-            // txtOffsetAlt
+            // tpLocation
             // 
-            this.txtOffsetAlt.Location = new System.Drawing.Point(134, 184);
-            this.txtOffsetAlt.Name = "txtOffsetAlt";
-            this.txtOffsetAlt.Size = new System.Drawing.Size(60, 25);
-            this.txtOffsetAlt.TabIndex = 56;
-            this.txtOffsetAlt.Text = "0";
+            this.tpLocation.Controls.Add(this.txtAltitude);
+            this.tpLocation.Controls.Add(this.label28);
+            this.tpLocation.Controls.Add(this.txtLongitude);
+            this.tpLocation.Controls.Add(this.label27);
+            this.tpLocation.Controls.Add(this.txtLattiude);
+            this.tpLocation.Controls.Add(this.label26);
+            this.tpLocation.Location = new System.Drawing.Point(4, 26);
+            this.tpLocation.Name = "tpLocation";
+            this.tpLocation.Size = new System.Drawing.Size(368, 305);
+            this.tpLocation.TabIndex = 6;
+            this.tpLocation.Text = "Location";
+            this.tpLocation.UseVisualStyleBackColor = true;
             // 
-            // txtOffsetAz
+            // label26
             // 
-            this.txtOffsetAz.Location = new System.Drawing.Point(229, 184);
-            this.txtOffsetAz.Name = "txtOffsetAz";
-            this.txtOffsetAz.Size = new System.Drawing.Size(60, 25);
-            this.txtOffsetAz.TabIndex = 57;
-            this.txtOffsetAz.Text = "0";
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(13, 16);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(115, 17);
+            this.label26.TabIndex = 0;
+            this.label26.Text = "Latitude (+N deg)";
             // 
-            // label24
+            // txtLattiude
             // 
-            this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(107, 188);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(25, 17);
-            this.label24.TabIndex = 58;
-            this.label24.Text = "Alt";
+            this.txtLattiude.Location = new System.Drawing.Point(150, 8);
+            this.txtLattiude.Name = "txtLattiude";
+            this.txtLattiude.Size = new System.Drawing.Size(100, 25);
+            this.txtLattiude.TabIndex = 1;
             // 
-            // label25
+            // txtLongitude
             // 
-            this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(200, 188);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(23, 17);
-            this.label25.TabIndex = 59;
-            this.label25.Text = "Az";
+            this.txtLongitude.Location = new System.Drawing.Point(150, 51);
+            this.txtLongitude.Name = "txtLongitude";
+            this.txtLongitude.Size = new System.Drawing.Size(100, 25);
+            this.txtLongitude.TabIndex = 3;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(13, 59);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(124, 17);
+            this.label27.TabIndex = 2;
+            this.label27.Text = "Longitude (+E deg)";
+            // 
+            // txtAltitude
+            // 
+            this.txtAltitude.Location = new System.Drawing.Point(151, 93);
+            this.txtAltitude.Name = "txtAltitude";
+            this.txtAltitude.Size = new System.Drawing.Size(100, 25);
+            this.txtAltitude.TabIndex = 5;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(14, 101);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(80, 17);
+            this.label28.TabIndex = 4;
+            this.label28.Text = "Altitude (m)";
             // 
             // frmEAACP
             // 
@@ -2365,6 +2461,8 @@
             this.tabpTheSky.ResumeLayout(false);
             this.tabSkyChart.ResumeLayout(false);
             this.tabpKStars.ResumeLayout(false);
+            this.tpLocation.ResumeLayout(false);
+            this.tpLocation.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2541,6 +2639,15 @@
         private System.Windows.Forms.TextBox txtOffsetAlt;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Button btnOffsetDest;
+        private System.Windows.Forms.Button btnOffsetOrigin;
+        private System.Windows.Forms.TabPage tpLocation;
+        private System.Windows.Forms.TextBox txtLongitude;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TextBox txtLattiude;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.TextBox txtAltitude;
+        private System.Windows.Forms.Label label28;
     }
 }
 

@@ -691,6 +691,23 @@ namespace EAACtrl
             DrawObjects(sOut);
         }
 
+        public void DrawObject(string objName, string RA, string Dec, bool markersOnly)
+        {
+            // Implementation for drawing cluster objects
+            string sOut = "obj = [";
+            string objectLabel = "";
+       
+            if (!markersOnly)
+                objectLabel = objName;
+
+            sOut += "[\"" + objectLabel + "\",\"" + RA + "\",\"" + Dec + "\"],";
+
+            // Remove the trailing comma
+            sOut = sOut.Substring(0, sOut.Length - 1) + "];";
+
+            DrawObjects(sOut);
+        }
+
         public DataTable UniqueCataloguesInSearchResults(DataTable searchResults)
         {
             var uniqueCatalogues = searchResults.AsEnumerable()
@@ -724,7 +741,7 @@ namespace EAACtrl
                 string labelSidePos = Properties.Settings.Default.StLabelPosition, labelDistance = Properties.Settings.Default.StLabelDistance.ToString();
 
                 //string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"E\",12);}";
-                string sCode = "\r\nMarkerMgr.deleteAllMarkers();LabelMgr.deleteAllLabels();\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"" + labelSidePos + "\"," + labelDistance + ");}";
+                string sCode = "\r\nfor (i=0;i<obj.length;i++){MarkerMgr.markerEquatorial(obj[i][1], obj[i][2],true,true,\"" + Properties.Settings.Default.StGraphic + "\",\"" + hexGraphicColor + "\"," + Properties.Settings.Default.StGraphicSize + ",true);LabelMgr.labelEquatorial(obj[i][0],obj[i][1], obj[i][2],true," + Properties.Settings.Default.StFontSize + ",\"" + hexFontColor + "\",\"" + labelSidePos + "\"," + labelDistance + ");}";
 
                 File.WriteAllText(ScriptFolder + "\\drawobjects.ssc", varObjects + sCode);
 

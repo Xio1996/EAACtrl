@@ -108,6 +108,64 @@ namespace EAACtrl
 
         private static int TelescopeUpdateRateMs = 500;
 
+        private float OffsetOriginAlt = 0.0f;
+        private float OffsetOriginAz = 0.0f;
+        private float OffsetDestAlt = 0.0f;
+        private float OffsetDestAz = 0.0f;
+
+        private struct AltAzDifference
+        {
+            public double Altitude;
+            public double Azimuth;
+        }
+
+        private AltAzDifference CalculateAltAzDifference(double originAltitude, double originAzimuth,
+                                                         double destinationAltitude, double destinationAzimuth)
+        {
+            // Reflect coordinates across the zenith or horizon so that altitude remains in [0, 90].
+            while (originAltitude > 90.0 || originAltitude < 0.0)
+            {
+                if (originAltitude > 90.0)
+                {
+                    originAltitude = 180.0 - originAltitude;
+                    originAzimuth += 180.0;
+                }
+                else
+                {
+                    originAltitude = -originAltitude;
+                    originAzimuth += 180.0;
+                }
+            }
+
+            while (destinationAltitude > 90.0 || destinationAltitude < 0.0)
+            {
+                if (destinationAltitude > 90.0)
+                {
+                    destinationAltitude = 180.0 - destinationAltitude;
+                    destinationAzimuth += 180.0;
+                }
+                else
+                {
+                    destinationAltitude = -destinationAltitude;
+                    destinationAzimuth += 180.0;
+                }
+            }
+
+            double azimuthDifference = destinationAzimuth - originAzimuth;
+            azimuthDifference = (azimuthDifference + 180.0) % 360.0;
+            if (azimuthDifference < 0.0)
+            {
+                azimuthDifference += 360.0;
+            }
+            azimuthDifference -= 180.0;
+
+            return new AltAzDifference
+            {
+                Altitude = destinationAltitude - originAltitude,
+                Azimuth = azimuthDifference
+            };
+        }
+
         private bool SetSessionState(SessionState state)
         {
             // If live stacking is active then warn this will cancel the current session
@@ -392,6 +450,9 @@ namespace EAACtrl
             cbTelescope.SelectedIndex = Properties.Settings.Default.SharpCapTelescope;
             txtOffsetAlt.Text = Properties.Settings.Default.OffsetAlt.ToString();
             txtOffsetAz.Text = Properties.Settings.Default.OffsetAz.ToString();
+            txtLattiude.Text = Properties.Settings.Default.SiteLat.ToString();
+            txtLongitude.Text = Properties.Settings.Default.SiteLng.ToString();
+            txtAltitude.Text = Properties.Settings.Default.SiteElev.ToString();
 
             if (cbSAMPProfile.SelectedIndex == 0)
             {
@@ -596,6 +657,10 @@ namespace EAACtrl
             Properties.Settings.Default.SharpCapTelescope = cbTelescope.SelectedIndex;
             Properties.Settings.Default.OffsetAlt = double.Parse(txtOffsetAlt.Text);
             Properties.Settings.Default.OffsetAz = double.Parse(txtOffsetAz.Text);
+
+            Properties.Settings.Default.SiteLat = double.Parse(txtLattiude.Text);
+            Properties.Settings.Default.SiteLng = double.Parse(txtLongitude.Text);
+            Properties.Settings.Default.SiteElev = double.Parse(txtAltitude.Text);
             Properties.Settings.Default.Save();
 
             MQTTDisconnect();
@@ -1100,7 +1165,17 @@ namespace EAACtrl
 
         private void btnPlanetaryMoons_Click(object sender, EventArgs e)
         {
-            APExecute(7, 0);
+            // AP needs to perform this function not EAACtrl (EAACtrl will pass selected objects or add/update objects)
+            //APExecute(7, 0);
+
+            using (PlanetaryMoons frmMoons = new PlanetaryMoons())
+            {
+                frmMoons.TopMost = true;
+                if (frmMoons.ShowDialog() == DialogResult.OK)
+                {
+
+                }
+            }
         }
 
         private APCmdObject APGetStatus()
@@ -3308,7 +3383,27 @@ namespace EAACtrl
             SharpCapCmd("Exit");
         }
 
+        private void btnOffsetOrigin_Click(object sender, EventArgs e)
+        {
+            OffsetOriginAlt = (float)EAATelescope.Altitude;
+            OffsetOriginAz = (float)EAATelescope.Azimuth;
+        }
 
+        private void btnOffsetDest_Click(object sender, EventArgs e)
+        {
+            OffsetDestAlt = (float)EAATelescope.Altitude;
+            OffsetDestAz = (float)EAATelescope.Azimuth;
+
+            AltAzDifference difference = CalculateAltAzDifference(
+                OffsetOriginAlt,
+                OffsetOriginAz,
+                OffsetDestAlt,
+                OffsetDestAz);
+
+            txtOffsetAlt.Text = difference.Altitude.ToString("F2");
+            txtOffsetAz.Text = difference.Azimuth.ToString("F2");
+
+        }
     }
 
     // New AP classes

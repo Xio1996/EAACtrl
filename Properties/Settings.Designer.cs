@@ -1004,5 +1004,17 @@ namespace EAACtrl.Properties {
                 this["OffsetAz"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int moonsDSAFormat {
+            get {
+                return ((int)(this["moonsDSAFormat"]));
+            }
+            set {
+                this["moonsDSAFormat"] = value;
+            }
+        }
     }
 }
