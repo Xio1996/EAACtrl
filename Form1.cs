@@ -32,6 +32,8 @@ namespace EAACtrl
         private static System.Timers.Timer aTimer;
 
         System.Windows.Forms.Timer myTimer = new System.Windows.Forms.Timer();
+
+        private string Version = "3.3";
         private int iSortCount = 0;
 
         private int iCmdCount = 0;
@@ -599,6 +601,8 @@ namespace EAACtrl
 
         private void frmEAACP_Load(object sender, EventArgs e)
         {
+            this.Text = "EAACtrl " + Version;
+
             this.Width = 250;
             if (bOverlayVisible)
             {
@@ -981,8 +985,8 @@ namespace EAACtrl
             // Update the UI
             TargetName = APHelper.TargetDisplay(SelectedObject);
             SetOverlayText(TargetName);
-            this.Text = "EAACtrl 3.2 - " + TargetName;
-            
+            this.Text = "EAACtrl " + Version + " - " + TargetName;
+
             if (cbSyncPlanetarium.Checked)
             {
                 SyncPlanetarium();  // Sync the selected planetarium app.

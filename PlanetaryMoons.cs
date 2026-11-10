@@ -52,6 +52,7 @@ namespace EAACtrl
             dtMoons.Rows.Add(false, "Jupiter - Ganymede", "503", "5,268", "7.1d", "Discovered by Galileo Galilei, 7th January 1610.");
             dtMoons.Rows.Add(false, "Jupiter - Callisto", "504", "4,820", "16.6d", "Discovered by Galileo Galilei, 7th January 1610.");
             dtMoons.Rows.Add(false, "Jupiter - Amalthea", "505", "167", "11h 57m", "Discovered by E.E. Barnard, 9th September 1892.");
+            dtMoons.Rows.Add(false, "Jupiter - Himalia", "506", "170", "249d", "Discovered by C.D. Perrine, 4th December 1904.");
             dtMoons.Rows.Add(false, "Saturn - Titan", "606", "5, 149", "16d", "Discovered by Christiaan Huygens, March 25th 1655.");
             dtMoons.Rows.Add(false, "Saturn - Rhea", "605", "1,527", "4.5d", "Discovered by G.D. Cassini, December 23rd 1672.");
             dtMoons.Rows.Add(false, "Saturn - Iapetus", "608", "1,470", "79d", "Discovered by G.D. Cassini, October 25th 1671.");
@@ -60,6 +61,9 @@ namespace EAACtrl
             dtMoons.Rows.Add(false, "Saturn - Tethys", "603", "1,062", "1.9d", "Discovered by G.D. Cassini, March 11th 1684.");
             dtMoons.Rows.Add(false, "Saturn - Enceladus", "602", "504", "33h 36m", "Discovered by William Herschell, August 28th 1789.");
             dtMoons.Rows.Add(false, "Saturn - Mimas", "601", "396", "23h 36m", "Discovered by William Herschell, September 17th 1789.");
+            dtMoons.Rows.Add(false, "Saturn - Phoebe", "609", "213", "549.41d", "Discovered by W.H Pickering, August 16th 1898.");
+            dtMoons.Rows.Add(false, "Saturn - Janus", "610", "178.4", "16h 40m", "Discovered by A. Dollfus, 15th December 1966.");
+            dtMoons.Rows.Add(false, "Saturn - Epimetheus", "611", "116.4", "0.7d", "Discovered by J. Fountain & S. Larson, 1977.");
             dtMoons.Rows.Add(false, "Uranus - Ariel", "701", "1,160", "2.52d", "Discovered by William Lassell, October 24th 1851.");
             dtMoons.Rows.Add(false, "Uranus - Umbriel", "702", "1,169", "4.14d", "Discovered by William Lassell, October 24th 1851.");
             dtMoons.Rows.Add(false, "Uranus - Titania", "703", "1,576", "8.73d", "Discovered by William Lassell, October 24th 1851.");
@@ -188,6 +192,13 @@ namespace EAACtrl
             return $"{parts[0]}d{parts[1].PadLeft(2, '0')}m{parts[2]}s";
         }
 
+        private void StartStopTime(out string startTime, out string stopTime)
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            startTime = utcNow.ToString("yyyy-MM-dd HH:mm");
+            stopTime = utcNow.AddMinutes(1).ToString("yyyy-MM-dd HH:mm");
+        }
+
         private void btnSharpCapDSA_Click(object sender, EventArgs e)
         {
             List<string> selectedJPLIDs = new List<string>();
@@ -200,8 +211,11 @@ namespace EAACtrl
                     string jplId = row.Cells["JPL ID"].Value.ToString();
                     string jplName = row.Cells["Name"].Value.ToString();
                     selectedJPLIDs.Add(jplId);
-                    
-                    string result = jplHorizons.QueryJPLHorizons(jplId, Longitude, Latitude, Altitude / 1000.0, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm"));
+
+                    StartStopTime(out string startTime, out string stopTime);
+
+
+                    string result = jplHorizons.QueryJPLHorizons(jplId, Longitude, Latitude, Altitude / 1000.0, startTime, stopTime, "1m");
                     if (result == "exception")
                     {
                         MessageBox.Show($"Error querying JPL Horizons for moon with JPL ID: {jplId}. Please check your internet connection and try again.", "JPL Horizons Query Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -249,8 +263,9 @@ namespace EAACtrl
                     string jplId = row.Cells["JPL ID"].Value.ToString();
                     string jplName = row.Cells["Name"].Value.ToString();
                     selectedJPLIDs.Add(jplId);
-                    //"2024-01-01 00:00"
-                    string result = jplHorizons.QueryJPLHorizons(jplId, Longitude, Latitude, Altitude / 1000.0, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm"));
+                    
+                    StartStopTime(out string startTime, out string stopTime);
+                    string result = jplHorizons.QueryJPLHorizons(jplId, Longitude, Latitude, Altitude / 1000.0, startTime, stopTime, "1m");
                     if (result == "exception")
                     {
                         MessageBox.Show($"Error querying JPL Horizons for moon with JPL ID: {jplId}. Please check your internet connection and try again.", "JPL Horizons Query Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -259,7 +274,11 @@ namespace EAACtrl
 
                     string[] parts;
 
-                    jplHorizons.ProcessMoonData(jplName, row.Cells["Period"].Value.ToString(), row.Cells["Diameter"].Value.ToString(), result, cbDSAFormat.SelectedIndex, ref dsaData, out parts);
+                    if (!jplHorizons.ProcessMoonData(jplName, row.Cells["Period"].Value.ToString(), row.Cells["Diameter"].Value.ToString(), result, cbDSAFormat.SelectedIndex, ref dsaData, out parts))
+                    {
+                        MessageBox.Show($"Error processing moon data for {jplName}.", "Moon Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
                     Stellarium.DrawObject(jplName, ToHms(parts[3]), ToDms(parts[4]), false);
                 }

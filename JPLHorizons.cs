@@ -230,14 +230,14 @@ namespace EAACtrl
             return result;
         }
 
-        public string QueryJPLHorizons(string id, double lon, double lat, double altKm, string timeStr)
+        public string QueryJPLHorizons(string id, double lon, double lat, double altKm, string startTime, string stopTime, string stepSize)
         {
             string result = "";
 
             string sWebServiceURL = $"https://ssd.jpl.nasa.gov/api/horizons.api?format=text&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&APPARENT='REFRACTED'&CSV_FORMAT='YES'&QUANTITIES='1,8,9,12,13'" +
                                 $"&COMMAND='{id}'" +
                                 $"&CENTER='coord'&COORD_TYPE='GEODETIC'&SITE_COORD='{lon},{lat},{altKm}'" +
-                                $"&TLIST='{timeStr}'";
+                                $"&START_TIME='{startTime}'&STOP_TIME='{stopTime}'&STEP_SIZE='{stepSize}'";
 
             // Encode spaces and single quotes for URI safety
             sWebServiceURL = sWebServiceURL.Replace("'", "%27").Replace(" ", "%20");
@@ -246,7 +246,7 @@ namespace EAACtrl
             {
                 result = GetRequest(sWebServiceURL);
 
-                sMsg = $"JPL:QueryJPLHorizons ID={id} Lon={lon} Lat={lat} Alt={altKm} Time={timeStr}, {sMsg}\r\n";
+                //sMsg = $"JPL:QueryJPLHorizons ID={id} Lon={lon} Lat={lat} Alt={altKm} Time={timeStr}, {sMsg}\r\n";
             }
             catch (Exception)
             {
@@ -257,14 +257,18 @@ namespace EAACtrl
             return result;
         }
 
-        public void ProcessMoonData(string moon, string period, string diameter, string horizonData, int dsaFormatIndex, ref string dsaData, out string[] parts)
+        public bool ProcessMoonData(string moon, string period, string diameter, string horizonData, int dsaFormatIndex, ref string dsaData, out string[] parts)
         {
             parts = new string[0];
             int startIndex = horizonData.IndexOf("$$SOE");
             int endIndex = horizonData.IndexOf("$$EOE");
 
 
-            if (startIndex == -1 || endIndex == -1) return;
+            if (startIndex == -1 || endIndex == -1)
+            {
+                sMsg = $"JPL: ProcessMoonData - Data section not found for {moon}.\r\n";
+                return false;
+            }
 
             string dataLine = horizonData.Substring(startIndex + 5, endIndex - (startIndex + 5)).Trim();
             parts = dataLine.Split(',');
@@ -274,7 +278,11 @@ namespace EAACtrl
                 parts[j] = parts[j].Trim();
             }
 
-            if (parts.Length < 11) return;
+            if (parts.Length < 11)
+            {
+                sMsg = $"JPL: ProcessMoonData - Insufficient data for {moon}. Expected at least 11 parts, got {parts.Length}.\r\n";
+                return false;
+            }
 
             string dateTime = parts[0];
             string ra = parts[3];
@@ -298,6 +306,8 @@ namespace EAACtrl
             {
                 dsaData += $"{shortId}|||{ra}|{dec}||||\r\n";
             }
+
+            return true;
         }
 
         private string Visibility(string code)
