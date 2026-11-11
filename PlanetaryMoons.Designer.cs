@@ -37,6 +37,9 @@
             this.btnClear = new System.Windows.Forms.Button();
             this.btnStellariumPlot = new System.Windows.Forms.Button();
             this.btnStellariumClear = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.chkTimeStamp = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMoons)).BeginInit();
             this.SuspendLayout();
             // 
@@ -51,7 +54,7 @@
             // btnAddToAP
             // 
             this.btnAddToAP.Enabled = false;
-            this.btnAddToAP.Location = new System.Drawing.Point(478, 386);
+            this.btnAddToAP.Location = new System.Drawing.Point(525, 384);
             this.btnAddToAP.Name = "btnAddToAP";
             this.btnAddToAP.Size = new System.Drawing.Size(147, 23);
             this.btnAddToAP.TabIndex = 1;
@@ -65,7 +68,7 @@
             this.cbDSAFormat.Items.AddRange(new object[] {
             "Minimal Information",
             "Full Information"});
-            this.cbDSAFormat.Location = new System.Drawing.Point(42, 387);
+            this.cbDSAFormat.Location = new System.Drawing.Point(292, 384);
             this.cbDSAFormat.Name = "cbDSAFormat";
             this.cbDSAFormat.Size = new System.Drawing.Size(121, 21);
             this.cbDSAFormat.TabIndex = 2;
@@ -74,16 +77,16 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 391);
+            this.label1.Location = new System.Drawing.Point(218, 387);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(29, 13);
+            this.label1.Size = new System.Drawing.Size(64, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "DSA";
+            this.label1.Text = "DSA Format";
             // 
             // btnClose
             // 
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(710, 386);
+            this.btnClose.Location = new System.Drawing.Point(710, 419);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 4;
@@ -92,7 +95,7 @@
             // 
             // btnSharpCapDSA
             // 
-            this.btnSharpCapDSA.Location = new System.Drawing.Point(168, 386);
+            this.btnSharpCapDSA.Location = new System.Drawing.Point(418, 383);
             this.btnSharpCapDSA.Name = "btnSharpCapDSA";
             this.btnSharpCapDSA.Size = new System.Drawing.Size(101, 23);
             this.btnSharpCapDSA.TabIndex = 5;
@@ -102,7 +105,7 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(630, 386);
+            this.btnClear.Location = new System.Drawing.Point(630, 419);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(75, 23);
             this.btnClear.TabIndex = 6;
@@ -112,7 +115,7 @@
             // 
             // btnStellariumPlot
             // 
-            this.btnStellariumPlot.Location = new System.Drawing.Point(274, 386);
+            this.btnStellariumPlot.Location = new System.Drawing.Point(12, 419);
             this.btnStellariumPlot.Name = "btnStellariumPlot";
             this.btnStellariumPlot.Size = new System.Drawing.Size(97, 23);
             this.btnStellariumPlot.TabIndex = 7;
@@ -122,7 +125,7 @@
             // 
             // btnStellariumClear
             // 
-            this.btnStellariumClear.Location = new System.Drawing.Point(376, 386);
+            this.btnStellariumClear.Location = new System.Drawing.Point(206, 418);
             this.btnStellariumClear.Name = "btnStellariumClear";
             this.btnStellariumClear.Size = new System.Drawing.Size(97, 23);
             this.btnStellariumClear.TabIndex = 8;
@@ -130,11 +133,47 @@
             this.btnStellariumClear.UseVisualStyleBackColor = true;
             this.btnStellariumClear.Click += new System.EventHandler(this.btnStellariumClear_Click);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Current Time (PC)",
+            "Stellarium Time"});
+            this.comboBox1.Location = new System.Drawing.Point(81, 384);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 9;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(8, 387);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(67, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Time Source";
+            // 
+            // chkTimeStamp
+            // 
+            this.chkTimeStamp.AutoSize = true;
+            this.chkTimeStamp.Checked = true;
+            this.chkTimeStamp.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkTimeStamp.Location = new System.Drawing.Point(120, 422);
+            this.chkTimeStamp.Name = "chkTimeStamp";
+            this.chkTimeStamp.Size = new System.Drawing.Size(80, 17);
+            this.chkTimeStamp.TabIndex = 11;
+            this.chkTimeStamp.Text = "Time stamp";
+            this.chkTimeStamp.UseVisualStyleBackColor = true;
+            // 
             // PlanetaryMoons
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 418);
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.chkTimeStamp);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.btnStellariumClear);
             this.Controls.Add(this.btnStellariumPlot);
             this.Controls.Add(this.btnClear);
@@ -168,5 +207,8 @@
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Button btnStellariumPlot;
         private System.Windows.Forms.Button btnStellariumClear;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkTimeStamp;
     }
 }

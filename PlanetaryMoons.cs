@@ -68,6 +68,7 @@ namespace EAACtrl
             dtMoons.Rows.Add(false, "Uranus - Umbriel", "702", "1,169", "4.14d", "Discovered by William Lassell, October 24th 1851.");
             dtMoons.Rows.Add(false, "Uranus - Titania", "703", "1,576", "8.73d", "Discovered by William Lassell, October 24th 1851.");
             dtMoons.Rows.Add(false, "Uranus - Oberon", "704", "1,523", "13.46d", "Discovered by William Lassell, October 24th 1851.");
+            dtMoons.Rows.Add(false, "Uranus - Miranda", "705", "471", "33h 55m", "Discovered by G.P. Kuiper, February 16th 1948.");
             dtMoons.Rows.Add(false, "Neptune - Triton", "801", "2,706", "5.88d", "Discovered by William Lassell, October 10th 1846.");
             dtMoons.Rows.Add(false, "Neptune - Nereid", "802", "340", "360d", "Discovered by Gerard Kuiper, May 1st 1949.");
             dgvMoons.DataSource = dtMoons;
@@ -280,7 +281,7 @@ namespace EAACtrl
                         return;
                     }
 
-                    Stellarium.DrawObject(jplName, ToHms(parts[3]), ToDms(parts[4]), false);
+                    Stellarium.DrawObject(jplName + " @ " + startTime, ToHms(parts[3]), ToDms(parts[4]), false);
                 }
             }
 
